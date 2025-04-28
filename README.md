@@ -178,12 +178,11 @@ This project uses GitHub Actions for continuous integration and deployment:
 2. On push to `develop`:
    - Docker image is built and tagged as `develop`
    - Image is pushed to DockerHub
-   - Deployment to staging environment is triggered
 
 3. On push to `main`:
    - Docker image is built and tagged with version/branch
    - Image is pushed to DockerHub
-   - Deployment to production environment is triggered
+   - Deployment to production environment is triggered automatically
 
 ### Setup CI/CD
 
@@ -192,14 +191,11 @@ To configure CI/CD for your repository:
 1. Add the following secrets to your GitHub repository:
    - `DOCKERHUB_USERNAME`: Your DockerHub username
    - `DOCKERHUB_TOKEN`: Your DockerHub access token
-   - `STAGING_HOST`: Staging server hostname/IP
-   - `STAGING_USERNAME`: SSH username for staging server
-   - `STAGING_SSH_KEY`: SSH private key for staging server
    - `PRODUCTION_HOST`: Production server hostname/IP
    - `PRODUCTION_USERNAME`: SSH username for production server
    - `PRODUCTION_SSH_KEY`: SSH private key for production server
 
-2. Ensure Docker and Docker Compose are installed on your staging and production servers.
+2. Ensure Docker and Docker Compose are installed on your production server.
 
 3. Update the repository URL in `yourusername/sentineliq` to your actual DockerHub repository.
 

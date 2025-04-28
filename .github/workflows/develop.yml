@@ -71,7 +71,7 @@ jobs:
         file: ./coverage.xml
         fail_ci_if_error: false
 
-  deploy-staging:
+  build-image:
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
@@ -105,17 +105,4 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=registry,ref=yourusername/sentineliq:buildcache
-        cache-to: type=registry,ref=yourusername/sentineliq:buildcache,mode=max
-    
-    - name: Deploy to staging server
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.STAGING_HOST }}
-        username: ${{ secrets.STAGING_USERNAME }}
-        key: ${{ secrets.STAGING_SSH_KEY }}
-        script: |
-          cd /path/to/staging
-          git pull
-          docker-compose -f docker-compose.staging.yml pull
-          docker-compose -f docker-compose.staging.yml up -d --build
-          docker system prune -af 
+        cache-to: type=registry,ref=yourusername/sentineliq:buildcache,mode=max 
