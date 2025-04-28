@@ -1,0 +1,87 @@
+# CI/CD Documentation for SentinelIQ
+
+Este documento descreve o processo de Integração Contínua (CI) e Entrega Contínua (CD) configurado para o projeto SentinelIQ.
+
+## Visão Geral
+
+O pipeline de CI/CD do SentinelIQ utiliza o GitHub Actions para automatizar os processos de teste, construção e implantação da aplicação. O pipeline é configurado para:
+
+1. Executar testes e verificações de qualidade de código
+2. Construir e publicar imagens Docker
+3. Implantar automaticamente em ambientes de produção
+
+## Estrutura do Pipeline
+
+O pipeline está definido no arquivo `.github/workflows/ci-cd.yml` e consiste em três jobs principais:
+
+### 1. Job de Teste (`test`)
+
+Este job é executado em todas as branches e pull requests, e realiza:
+
+- Configuração de serviços necessários (PostgreSQL e Redis)
+- Instalação de dependências via Poetry
+- Execução de análise estática de código (linting)
+- Execução de testes automatizados
+- Geração e upload de relatórios de cobertura de código
+
+### 2. Job de Build e Push (`build-and-push`)
+
+Este job é executado apenas quando há um push para as branches `main` ou `develop`:
+
+- Configura o Docker Buildx para construção eficiente
+- Realiza login no DockerHub usando credenciais seguras
+- Extrai metadados para etiquetas apropriadas
+- Constrói e publica as imagens Docker com cache otimizado
+
+### 3. Job de Implantação (`deploy`)
+
+Este job é executado apenas na branch `main` após a publicação bem-sucedida da imagem:
+
+- Conecta-se ao servidor de produção via SSH
+- Atualiza o código fonte
+- Implanta a aplicação usando Docker Compose
+- Limpa recursos não utilizados
+
+## Configuração necessária
+
+Para configurar corretamente o pipeline de CI/CD, você precisa definir os seguintes segredos no repositório GitHub:
+
+1. Credenciais do DockerHub:
+   - `DOCKERHUB_USERNAME`: Seu nome de usuário no DockerHub
+   - `DOCKERHUB_TOKEN`: Token de acesso ao DockerHub
+
+2. Credenciais do servidor de produção:
+   - `PRODUCTION_HOST`: Endereço IP ou hostname do servidor
+   - `PRODUCTION_USERNAME`: Nome de usuário para SSH
+   - `PRODUCTION_SSH_KEY`: Chave SSH privada para acesso ao servidor
+
+## Script de Implantação Manual
+
+Além do pipeline automatizado, um script de implantação manual está disponível em `scripts/deploy.sh`. Este script pode ser usado para implantações manuais no servidor de produção e realiza as seguintes etapas:
+
+1. Verifica se está sendo executado do diretório raiz do projeto
+2. Puxa as últimas alterações do repositório Git
+3. Verifica se o arquivo `.env` existe
+4. Constrói e inicia os containers Docker
+5. Aplica migrações de banco de dados
+6. Coleta arquivos estáticos
+7. Limpa recursos Docker não utilizados
+
+## Fluxo de Trabalho Recomendado
+
+Para manter um fluxo de trabalho eficiente com este pipeline de CI/CD:
+
+1. Desenvolva em branches de feature
+2. Crie Pull Requests para a branch `develop`
+3. Teste e valide na branch `develop`
+4. Promova alterações da branch `develop` para `main` via Pull Request
+5. O deploy em produção ocorrerá automaticamente após merge na `main`
+
+## Solução de Problemas
+
+Se você encontrar problemas durante o processo de CI/CD:
+
+1. Verifique os logs de execução no GitHub Actions
+2. Confirme se todos os segredos estão configurados corretamente
+3. Verifique a conectividade com o servidor de produção
+4. Revise as configurações do Docker e Docker Compose 
