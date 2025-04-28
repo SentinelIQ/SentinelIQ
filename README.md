@@ -131,4 +131,46 @@ Para ambientes de produção, siga estas recomendações:
 
 ## Licença
 
-Este projeto está licenciado sob [inserir licença]. 
+Este projeto está licenciado sob [inserir licença].
+
+## Development Workflow
+
+### Git Flow
+
+This project follows Git Flow for branch management:
+
+- `main`: Production code
+- `develop`: Development branch for integration
+- `feature/*`: New features
+- `release/*`: Release preparation
+- `hotfix/*`: Production hotfixes
+
+### Conventional Commits
+
+We use Conventional Commits for consistent commit messages:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Types:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation only changes
+- `style`: Changes that don't affect the code's meaning
+- `refactor`: Code change that neither fixes a bug nor adds a feature
+- `test`: Adding missing tests or correcting existing tests
+- `chore`: Changes to the build process or auxiliary tools
+
+### Release Process
+
+1. Create a release branch from `develop`: `git flow release start vX.Y.Z`
+2. Make final adjustments
+3. Generate changelog: `poetry run cz bump --changelog`
+4. Finish release: `git flow release finish vX.Y.Z`
+
+For detailed instructions, use `poetry run cz --help` or `poetry run cz bump --help`. 
