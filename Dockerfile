@@ -31,11 +31,17 @@ COPY . /app/
 RUN poetry config virtualenvs.create false && \
     poetry install --no-interaction --no-ansi --without dev --no-root
 
-# Collect static files
-RUN python manage.py collectstatic --noinput || true
+# Preparar a aplicação
+RUN mkdir -p /app/staticfiles /app/media && \
+    python manage.py collectstatic --noinput || true && \
+    chmod -R 755 /app/staticfiles /app/media
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/ || exit 1
 
 # Expose port
 EXPOSE 8000
 
 # Start Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "sentineliq.wsgi"] 
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "120", "--workers", "3", "sentineliq.wsgi"] 
