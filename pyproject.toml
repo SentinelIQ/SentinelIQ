@@ -34,6 +34,7 @@ pytest-django = "^4.11.1"
 black = "^25.1.0"
 isort = "^6.0.1"
 flake8 = "^7.2.0"
+commitizen = "^4.6.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -71,4 +72,14 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::django.utils.deprecation.RemovedInDjango61Warning"
 ]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+tag_format = "v$version"
+version_files = [
+    "pyproject.toml:version"
+]
+update_changelog_on_bump = true
+changelog_file = "CHANGELOG.md"
 
