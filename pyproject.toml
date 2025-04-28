@@ -7,19 +7,22 @@ authors = [
 ]
 readme = "README.md"
 requires-python = "^3.13"
-dependencies = [
-    "django (>=5.2,<6.0)",
-    "django-environ (>=0.12.0,<0.13.0)",
-    "psycopg2-binary (>=2.9.10,<3.0.0)",
-    "redis (>=5.2.1,<6.0.0)",
-    "gunicorn (>=23.0.0,<24.0.0)",
-    "pytest-cov (>=6.1.1,<7.0.0)"
-]
 
+[tool.poetry]
+name = "sentineliq"
+version = "0.1.0"
+description = "SentinelIQ - Aplicação Django moderna e escalável"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
 
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.poetry.dependencies]
+python = "^3.13"
+django = "^5.2"
+django-environ = "^0.12.0"
+psycopg2-binary = "^2.9.10"
+redis = "^5.2.1"
+gunicorn = "^23.0.0"
+pytest-cov = "^6.1.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
@@ -27,6 +30,10 @@ pytest-django = "^4.11.1"
 black = "^25.1.0"
 isort = "^6.0.1"
 flake8 = "^7.2.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 100
