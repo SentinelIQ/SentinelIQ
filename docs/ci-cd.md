@@ -7,7 +7,7 @@ Este documento descreve o processo de Integração Contínua (CI) e Entrega Cont
 O pipeline de CI/CD do SentinelIQ utiliza o GitHub Actions para automatizar os processos de teste, construção e implantação da aplicação. O pipeline é configurado para:
 
 1. Executar testes e verificações de qualidade de código em todas as branches
-2. Construir e publicar imagens Docker para branches principais
+2. Construir e publicar imagens Docker para branches principais no GitHub Container Registry
 3. Implantar automaticamente apenas em ambiente de produção
 
 ## Estrutura do Pipeline
@@ -31,9 +31,9 @@ Este job é executado em todas as branches e pull requests, e realiza:
 Este job é executado apenas quando há um push para a branch `develop`:
 
 - Configura o Docker Buildx para construção eficiente
-- Realiza login no DockerHub usando credenciais seguras
+- Realiza login no GitHub Container Registry usando o token GITHUB_TOKEN
 - Extrai metadados para etiquetas apropriadas
-- Constrói e publica as imagens Docker com cache otimizado
+- Constrói e publica as imagens Docker no GHCR com cache otimizado
 
 Observe que o ambiente de desenvolvimento não realiza deploy automático, apenas testes e build de imagem.
 
@@ -54,9 +54,9 @@ Este job é executado apenas na branch `main` após a publicação bem-sucedida 
 
 Para configurar corretamente o pipeline de CI/CD, você precisa definir os seguintes segredos no repositório GitHub:
 
-1. Credenciais do DockerHub:
-   - `DOCKERHUB_USERNAME`: Seu nome de usuário no DockerHub
-   - `DOCKERHUB_TOKEN`: Token de acesso ao DockerHub
+1. Permissões no workflow:
+   - As permissões `packages: write` já estão configuradas para permitir o push para o GitHub Container Registry
+   - O token `GITHUB_TOKEN` é gerado automaticamente pelo GitHub e usado para autenticação
 
 2. Credenciais do servidor de produção:
    - `PRODUCTION_HOST`: Endereço IP ou hostname do servidor
@@ -86,11 +86,18 @@ Para manter um fluxo de trabalho eficiente com este pipeline de CI/CD:
 5. Promova alterações da branch `develop` para `main` via Pull Request
 6. O deploy em produção ocorrerá automaticamente após merge na `main`
 
+## Acesso às Imagens no GitHub Container Registry
+
+As imagens Docker estão disponíveis em:
+- `ghcr.io/sentineliq/sentineliq:develop` - Branch de desenvolvimento
+- `ghcr.io/sentineliq/sentineliq:main` - Branch principal (produção)
+- `ghcr.io/sentineliq/sentineliq:sha-xxxxxx` - Versões específicas por commit
+
 ## Solução de Problemas
 
 Se você encontrar problemas durante o processo de CI/CD:
 
 1. Verifique os logs de execução no GitHub Actions
-2. Confirme se todos os segredos estão configurados corretamente
+2. Confirme se todas as permissões estão configuradas corretamente
 3. Verifique a conectividade com o servidor de produção
 4. Revise as configurações do Docker e Docker Compose
