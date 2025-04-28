@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SentinelIQ{% endblock %}</title>
+    {% load static %}
+    <!-- Carbon Design System styles -->
+    <link rel="stylesheet" href="https://unpkg.com/carbon-components/css/carbon-components.min.css">
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bx--body">
+    <header class="bx--header" data-header>
+        <a href="{% url 'core:home' %}" class="bx--header__name">
+            <span class="bx--header__name--prefix">Sentinel</span>IQ
+        </a>
+        <nav class="bx--header__nav">
+            <ul class="bx--header__menu-bar">
+                <li>
+                    <a href="{% url 'core:home' %}" class="bx--header__menu-item">
+                        <span class="bx--text-truncate--end">Início</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin:index' %}" class="bx--header__menu-item">
+                        <span class="bx--text-truncate--end">Admin</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="bx--content">
+        <div class="bx--grid">
+            <div class="bx--row">
+                <div class="bx--col-lg-16">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bx--footer">
+        <div class="bx--grid">
+            <div class="bx--row">
+                <div class="bx--col">
+                    <p>&copy; {% now "Y" %} SentinelIQ. Todos os direitos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Carbon Design System scripts -->
+    <script src="https://unpkg.com/carbon-components/scripts/carbon-components.min.js"></script>
+    <!-- Custom scripts -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

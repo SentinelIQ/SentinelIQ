@@ -1,0 +1,64 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    command: poetry run gunicorn --bind 0.0.0.0:8000 sentineliq.wsgi
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - ${ENV_FILE:-.env}
+    depends_on:
+      - db
+      - redis
+    networks:
+      - sentineliq_network
+
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=sentineliq
+    ports:
+      - "5432:5432"
+    networks:
+      - sentineliq_network
+
+  redis:
+    image: redis:7
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - sentineliq_network
+
+  nginx:
+    image: nginx:1.25
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/home/app/staticfiles
+      - media_volume:/home/app/media
+    depends_on:
+      - web
+    networks:
+      - sentineliq_network
+
+networks:
+  sentineliq_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume: 

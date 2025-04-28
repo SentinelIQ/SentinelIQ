@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Início - SentinelIQ{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h1>Bem-vindo ao SentinelIQ</h1>
+    <p>Uma aplicação Django moderna, escalável e segura implementada com o Carbon Design System da IBM.</p>
+    
+    <div class="bx--row" style="margin-top: 2rem;">
+        <div class="bx--col">
+            <button class="bx--btn bx--btn--primary" data-modal-target="tour-modal">
+                Iniciar Tour
+            </button>
+            <a href="{% url 'admin:index' %}" class="bx--btn bx--btn--tertiary">
+                Acessar Admin
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="bx--row">
+    <div class="bx--col">
+        <h2>Recursos</h2>
+        <p class="bx--type-body-long-01" style="margin-bottom: 1rem;">
+            Esta aplicação foi construída com tecnologias modernas e seguindo as melhores práticas.
+        </p>
+    </div>
+</div>
+
+<div class="features-grid">
+    <div class="feature-card">
+        <svg class="bx--icon bx--icon--32" width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M16,4c6.6,0,12,5.4,12,12s-5.4,12-12,12S4,22.6,4,16S9.4,4,16,4 M16,2C8.3,2,2,8.3,2,16s6.3,14,14,14s14-6.3,14-14S23.7,2,16,2z"></path>
+            <path d="M16,10c3.3,0,6,2.7,6,6s-2.7,6-6,6s-6-2.7-6-6S12.7,10,16,10 M16,8c-4.4,0-8,3.6-8,8s3.6,8,8,8s8-3.6,8-8S20.4,8,16,8z"></path>
+            <path d="M16,14c1.1,0,2,0.9,2,2s-0.9,2-2,2s-2-0.9-2-2S14.9,14,16,14 M16,12c-2.2,0-4,1.8-4,4s1.8,4,4,4s4-1.8,4-4S18.2,12,16,12z"></path>
+        </svg>
+        <h3>Django Moderno</h3>
+        <p>Utilizando Django 5.2 com as melhores práticas atuais.</p>
+    </div>
+    <div class="feature-card">
+        <svg class="bx--icon bx--icon--32" width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M28,12H18v2h10v14H4V14h10v-2H4c-1.1,0-2,0.9-2,2v14c0,1.1,0.9,2,2,2h24c1.1,0,2-0.9,2-2V14C30,12.9,29.1,12,28,12z"></path>
+            <path d="M16,18c0.6,0,1-0.4,1-1V5c0-0.6-0.4-1-1-1s-1,0.4-1,1v12C15,17.6,15.4,18,16,18z"></path>
+            <path d="M16,18c0.3,0,0.5-0.1,0.7-0.3l6-6c0.4-0.4,0.4-1,0-1.4s-1-0.4-1.4,0L16,15.6l-5.3-5.3c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l6,6C15.5,17.9,15.7,18,16,18z"></path>
+        </svg>
+        <h3>Escalável</h3>
+        <p>Arquitetura preparada para escalar com Docker, PostgreSQL e Redis.</p>
+    </div>
+    <div class="feature-card">
+        <svg class="bx--icon bx--icon--32" width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M16,2C8.3,2,2,8.3,2,16c0,7.7,6.3,14,14,14c7.7,0,14-6.3,14-14C30,8.3,23.7,2,16,2z M16,28C9.4,28,4,22.6,4,16C4,9.4,9.4,4,16,4c6.6,0,12,5.4,12,12C28,22.6,22.6,28,16,28z"></path>
+            <path d="M16,10c-3.3,0-6,2.7-6,6c0,3.3,2.7,6,6,6c3.3,0,6-2.7,6-6C22,12.7,19.3,10,16,10z M16,20c-2.2,0-4-1.8-4-4c0-2.2,1.8-4,4-4c2.2,0,4,1.8,4,4C20,18.2,18.2,20,16,20z"></path>
+        </svg>
+        <h3>Seguro</h3>
+        <p>Implementando as melhores práticas de segurança do Django.</p>
+    </div>
+    <div class="feature-card">
+        <svg class="bx--icon bx--icon--32" width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M26,12l-1.41,1.41L30.17,19H14V11h-2v8H4c-1.1,0-2,0.9-2,2v6h2v-6h28v6h2v-7c0-0.34-0.08-0.67-0.25-0.94L26,12z"></path>
+            <path d="M5.41,8L4,9.41l5.17,5.17L12,12L5.41,8z"></path>
+        </svg>
+        <h3>Carbon Design System</h3>
+        <p>Interface de usuário moderna e consistente utilizando o IBM Carbon Design System.</p>
+    </div>
+</div>
+
+<!-- Carbon Modal Component -->
+<div data-modal id="tour-modal" class="bx--modal" role="dialog" aria-modal="true" aria-labelledby="modal-tour-heading" aria-describedby="modal-tour-body" tabindex="-1">
+    <div class="bx--modal-container">
+        <div class="bx--modal-header">
+            <p class="bx--modal-header__heading" id="modal-tour-heading">Tour pelo SentinelIQ</p>
+            <button class="bx--modal-close" type="button" data-modal-close aria-label="Fechar">
+                <svg class="bx--modal-close__icon" width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 4.7l-.7-.7L8 7.3 4.7 4l-.7.7L7.3 8 4 11.3l.7.7L8 8.7l3.3 3.3.7-.7L8.7 8z"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="bx--modal-content" id="modal-tour-body">
+            <p>Bem-vindo ao SentinelIQ! Este é um projeto Django moderno que implementa:</p>
+            <ul class="bx--list--unordered">
+                <li class="bx--list__item">Django 5.2 com práticas modernas de desenvolvimento</li>
+                <li class="bx--list__item">Carbon Design System para interface de usuário consistente</li>
+                <li class="bx--list__item">Docker e Docker Compose para containerização</li>
+                <li class="bx--list__item">PostgreSQL para banco de dados em produção</li>
+                <li class="bx--list__item">Redis para cache e filas de tarefas</li>
+                <li class="bx--list__item">Poetry para gerenciamento de dependências</li>
+            </ul>
+            <p>Este projeto segue as melhores práticas para desenvolvimento Django, incluindo:</p>
+            <ul class="bx--list--unordered">
+                <li class="bx--list__item">Configuração com variáveis de ambiente</li>
+                <li class="bx--list__item">Testes automatizados</li>
+                <li class="bx--list__item">Estrutura de projeto modular</li>
+            </ul>
+        </div>
+        <div class="bx--modal-footer">
+            <button class="bx--btn bx--btn--secondary" type="button" data-modal-close>Fechar</button>
+            <button class="bx--btn bx--btn--primary" type="button" data-modal-close>Entendi</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize Carbon modal when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize all modals on the page
+        document.querySelectorAll('[data-modal]').forEach(modal => {
+            if (typeof CarbonComponents !== 'undefined') {
+                CarbonComponents.Modal.create(modal);
+            }
+        });
+    });
+</script>
+{% endblock %} 
