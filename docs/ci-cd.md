@@ -93,6 +93,8 @@ As imagens Docker estão disponíveis em:
 - `ghcr.io/sentineliq/sentineliq:main` - Branch principal (produção)
 - `ghcr.io/sentineliq/sentineliq:sha-xxxxxx` - Versões específicas por commit
 
+Observação: Os nomes de repositório no GitHub Container Registry são sempre em letras minúsculas, conforme exigido pelo Docker.
+
 ## Solução de Problemas
 
 Se você encontrar problemas durante o processo de CI/CD:
