@@ -70,7 +70,7 @@ jobs:
         file: ./coverage.xml
         fail_ci_if_error: false
 
-  build-image:
+  build-and-push:
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
@@ -91,10 +91,10 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set lowercase repository name
+    - name: Set fixed lowercase repository name
       run: |
-        echo "REPO_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-        echo "REPO_NAME=$(echo ${{ github.event.repository.name }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        echo "REPO_OWNER=sentineliq" >> $GITHUB_ENV
+        echo "REPO_NAME=sentineliq" >> $GITHUB_ENV
 
     - name: Extract metadata
       id: meta
@@ -103,7 +103,7 @@ jobs:
         images: ghcr.io/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}
         tags: |
           type=ref,event=branch
-          develop
+          type=sha,format=short
 
     - name: Build and push
       uses: docker/build-push-action@v4
@@ -112,5 +112,5 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=registry,ref=ghcr.io/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}:buildcache
-        cache-to: type=registry,ref=ghcr.io/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}:buildcache,mode=max
+        cache-from: type=registry,ref=ghcr.io/sentineliq/sentineliq:buildcache
+        cache-to: type=registry,ref=ghcr.io/sentineliq/sentineliq:buildcache,mode=max
