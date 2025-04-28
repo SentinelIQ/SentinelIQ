@@ -1,7 +1,6 @@
 import os
 
 from celery import Celery
-from django.conf import settings
 
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sentineliq.settings")
@@ -21,4 +20,4 @@ app.autodiscover_tasks()
 def debug_task(self):
     """Task to verify that Celery is working."""
     print(f"Request: {self.request!r}")
-    return "Celery is working!" 
+    return "Celery is working!"

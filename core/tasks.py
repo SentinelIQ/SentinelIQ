@@ -28,9 +28,9 @@ def process_data(data):
 def long_running_task(duration=10):
     """Exemplo de tarefa de longa duração."""
     import time
-    
+
     logger.info(f"Iniciando tarefa de longa duração ({duration} segundos)")
     # Simulando processamento demorado
     time.sleep(duration)
     logger.info("Tarefa de longa duração concluída")
-    return f"Tarefa concluída após {duration} segundos" 
+    return f"Tarefa concluída após {duration} segundos"
