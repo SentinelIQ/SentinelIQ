@@ -55,17 +55,12 @@ SentinelIQ é um projeto Django usando práticas modernas de desenvolvimento.
    cd sentineliq
    ```
 
-2. Configure o arquivo .env para Docker:
+2. Configure o arquivo .env:
    ```bash
-   cp .env.docker .env
+   cp .env.template .env
    ```
    
-   Ou se preferir usar o arquivo de exemplo:
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Note que o arquivo já está configurado para usar os serviços do Docker:
+   O arquivo .env já está configurado para usar os serviços do Docker:
    ```
    DATABASE_URL=postgres://postgres:postgres@db:5432/sentineliq
    REDIS_URL=redis://redis:6379/0
