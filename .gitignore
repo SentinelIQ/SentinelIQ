@@ -50,4 +50,4 @@ htmlcov/
 .pytest_cache/
 
 # System
-.DS_Store 
+.DS_Store

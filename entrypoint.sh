@@ -30,4 +30,4 @@ fi
 
 # Caso contrário, executar o comando passado para o container
 echo "Executando comando: $@"
-exec "$@" 
+exec "$@"

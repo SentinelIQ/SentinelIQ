@@ -13,17 +13,11 @@ class HomePageView(TemplateView):
 def trigger_task(request):
     """View para disparar uma tarefa do Celery e retornar o ID da tarefa."""
     task = sample_task.delay()
-    return JsonResponse({
-        "message": "Tarefa iniciada com sucesso",
-        "task_id": task.id
-    })
+    return JsonResponse({"message": "Tarefa iniciada com sucesso", "task_id": task.id})
 
 
 def process_data_view(request):
     """View para processar dados através do Celery."""
     data = request.GET.get("data", "Dados padrão")
     task = process_data.delay(data)
-    return JsonResponse({
-        "message": f"Processamento de '{data}' iniciado",
-        "task_id": task.id
-    })
+    return JsonResponse({"message": f"Processamento de '{data}' iniciado", "task_id": task.id})

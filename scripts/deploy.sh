@@ -43,4 +43,4 @@ echo "🧹 Cleaning up unused Docker resources..."
 docker system prune -f
 
 echo "✅ Deployment completed successfully!"
-echo "🔗 Your application should be available at http://your-server-ip" 
+echo "🔗 Your application should be available at http://your-server-ip"

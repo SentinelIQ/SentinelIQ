@@ -93,4 +93,4 @@ Se você encontrar problemas durante o processo de CI/CD:
 1. Verifique os logs de execução no GitHub Actions
 2. Confirme se todos os segredos estão configurados corretamente
 3. Verifique a conectividade com o servidor de produção
-4. Revise as configurações do Docker e Docker Compose 
+4. Revise as configurações do Docker e Docker Compose

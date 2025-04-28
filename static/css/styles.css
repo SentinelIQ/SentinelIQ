@@ -107,7 +107,7 @@ button:hover {
     nav {
         flex-direction: column;
     }
-    
+
     nav ul {
         margin-top: 1rem;
     }
@@ -185,8 +185,8 @@ button:hover {
     .features-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .welcome-section h1 {
         font-size: 2rem;
     }
-} 
+}

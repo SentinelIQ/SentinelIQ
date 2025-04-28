@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('SentinelIQ application initialized with Carbon Design System');
-    
+
     // Initialize Carbon components if needed
     if (typeof CarbonComponents !== 'undefined') {
         // Example: Initialize a specific component if needed
@@ -11,9 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
         //     CarbonComponents.Dropdown.create(dropdown);
         // }
     }
-    
+
     // Add any custom JavaScript functionality here
-    
+
     // Example of handling Carbon modal
     const modalButtons = document.querySelectorAll('[data-modal-target]');
     modalButtons.forEach(button => {
@@ -25,4 +25,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-}); 
+});

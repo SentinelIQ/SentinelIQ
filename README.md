@@ -59,7 +59,7 @@ SentinelIQ é um projeto Django usando práticas modernas de desenvolvimento.
    ```bash
    cp .env.template .env
    ```
-   
+
    O arquivo .env já está configurado para usar os serviços do Docker:
    ```
    DATABASE_URL=postgres://postgres:postgres@db:5432/sentineliq
@@ -219,4 +219,4 @@ cp .env.template .env
 3. Generate changelog: `poetry run cz bump --changelog`
 4. Finish release: `git flow release finish vX.Y.Z`
 
-For detailed instructions, use `poetry run cz --help` or `poetry run cz bump --help`. 
+For detailed instructions, use `poetry run cz --help` or `poetry run cz bump --help`.
