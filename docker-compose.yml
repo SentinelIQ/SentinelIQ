@@ -15,6 +15,7 @@ services:
     depends_on:
       - db
       - redis
+      - rabbitmq
     networks:
       - sentineliq_network
 
@@ -53,6 +54,48 @@ services:
     networks:
       - sentineliq_network
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
+    ports:
+      - "5672:5672"  # AMQP protocol
+      - "15672:15672"  # Management interface
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - sentineliq_network
+
+  celery_worker:
+    build: .
+    command: celery -A sentineliq worker --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - redis
+      - db
+    networks:
+      - sentineliq_network
+
+  celery_beat:
+    build: .
+    command: celery -A sentineliq beat --scheduler django_celery_beat.schedulers:DatabaseScheduler --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - redis
+      - db
+    networks:
+      - sentineliq_network
+
 networks:
   sentineliq_network:
     driver: bridge
@@ -61,4 +104,5 @@ volumes:
   postgres_data:
   redis_data:
   static_volume:
-  media_volume: 
+  media_volume:
+  rabbitmq_data: 

@@ -27,6 +27,9 @@ WORKDIR /app
 # Copy the entire project first
 COPY . /app/
 
+# Instalar o pacote whitenoise explicitamente
+RUN pip install whitenoise
+
 # Install dependencies
 RUN poetry config virtualenvs.create false && \
     poetry install --no-interaction --no-ansi --without dev --no-root
@@ -43,5 +46,9 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Expose port
 EXPOSE 8000
 
-# Start Gunicorn
+# Script de inicialização - permite escolher entre diferentes comandos
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "120", "--workers", "3", "sentineliq.wsgi"] 

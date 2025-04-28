@@ -28,6 +28,11 @@ env = environ.Env(
     SESSION_COOKIE_SECURE=(bool, False),
     CSRF_COOKIE_SECURE=(bool, False),
     SECURE_HSTS_SECONDS=(int, 0),
+    CELERY_BROKER_URL=(str, "amqp://guest:guest@rabbitmq:5672//"),
+    CELERY_RESULT_BACKEND=(str, "redis://redis:6379/0"),
+    CELERY_ACCEPT_CONTENT=(list, ["json"]),
+    CELERY_TASK_SERIALIZER=(str, "json"),
+    CELERY_RESULT_SERIALIZER=(str, "json"),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -55,6 +60,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Local apps
     "core.apps.CoreConfig",
+    # Third party apps
+    "django_celery_beat",
+    "django_celery_results",
 ]
 
 MIDDLEWARE = [
@@ -170,3 +178,14 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
     X_FRAME_OPTIONS = "DENY"
+
+# Celery settings
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="amqp://guest:guest@rabbitmq:5672//")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://redis:6379/0")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+
+# Celery Beat settings
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
