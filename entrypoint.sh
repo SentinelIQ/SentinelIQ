@@ -4,12 +4,15 @@ set -e
 
 # Aguardar a inicialização do PostgreSQL e RabbitMQ
 echo "Aguardando a inicialização dos serviços..."
-sleep 5
+sleep 10
+
+# Aplicar migrações sempre antes de iniciar qualquer serviço
+echo "Aplicando migrações do Django automaticamente..."
+python manage.py migrate --no-input
 
 # Verificar se é necessário aplicar migrações
 if [[ "$1" == "migrate" ]]; then
-  echo "Aplicando migrações..."
-  python manage.py migrate
+  echo "Migrações já aplicadas, saindo..."
   exit 0
 fi
 

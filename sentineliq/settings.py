@@ -33,6 +33,7 @@ env = environ.Env(
     CELERY_ACCEPT_CONTENT=(list, ["json"]),
     CELERY_TASK_SERIALIZER=(str, "json"),
     CELERY_RESULT_SERIALIZER=(str, "json"),
+    POSTGRES_CONN_MAX_AGE=(int, 60),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -102,6 +103,14 @@ WSGI_APPLICATION = "sentineliq.wsgi.application"
 
 DATABASES = {
     "default": env.db(),
+}
+
+# Configuração adicional para PostgreSQL
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("POSTGRES_CONN_MAX_AGE", default=60)
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+DATABASES["default"]["OPTIONS"] = {
+    "connect_timeout": 10,
+    "options": "-c statement_timeout=10000",
 }
 
 # Cache configuration
