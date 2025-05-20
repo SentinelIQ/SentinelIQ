@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}SentinelIQ - Sistema de Gerenciamento de Alertas{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 mb-4">Bem-vindo ao SentinelIQ</h1>
+        <p class="lead mb-5">
+            Sistema de gerenciamento de alertas e organizações para monitoramento de segurança.
+        </p>
+        
+        <div class="d-grid gap-2 col-6 mx-auto">
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-sign-in-alt"></i> Entrar no Sistema
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Monitoramento de Alertas</h5>
+                <p class="card-text">
+                    Acompanhe alertas de segurança em tempo real e gerencie incidentes de forma eficiente.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <i class="fas fa-building fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Gestão de Organizações</h5>
+                <p class="card-text">
+                    Gerencie múltiplas organizações com controle de acesso e permissões personalizadas.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Controle de Usuários</h5>
+                <p class="card-text">
+                    Defina funções e responsabilidades para cada usuário dentro de sua organização.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

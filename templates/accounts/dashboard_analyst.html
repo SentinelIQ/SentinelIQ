@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard - Analista{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="mb-3">
+            <i class="fas fa-tachometer-alt"></i> Dashboard do Analista
+        </h2>
+        <p class="lead">Bem-vindo, {{ user.get_full_name|default:user.username }}!</p>
+        <div class="alert alert-info">
+            <i class="fas fa-building"></i> Organização: <strong>{{ user.organization.name }}</strong>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Alertas Atribuídos a Você</h5>
+                    <a href="{% url 'alert_list' %}" class="btn btn-sm btn-light">Ver Todos</a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Severidade</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if assigned_alerts %}
+                                {% for alert in assigned_alerts %}
+                                    <tr>
+                                        <td>{{ alert.title }}</td>
+                                        <td>
+                                            {% if alert.severity == 'critical' %}
+                                                <span class="badge bg-danger">Crítico</span>
+                                            {% elif alert.severity == 'high' %}
+                                                <span class="badge bg-warning">Alto</span>
+                                            {% elif alert.severity == 'medium' %}
+                                                <span class="badge bg-info">Médio</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Baixo</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if alert.status == 'new' %}
+                                                <span class="badge bg-danger">Novo</span>
+                                            {% elif alert.status == 'acknowledged' %}
+                                                <span class="badge bg-warning">Reconhecido</span>
+                                            {% elif alert.status == 'in_progress' %}
+                                                <span class="badge bg-info">Em Progresso</span>
+                                            {% elif alert.status == 'resolved' %}
+                                                <span class="badge bg-success">Resolvido</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Fechado</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ alert.created_at|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            <a href="{% url 'alert_detail' alert.id %}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'alert_update' alert.id %}" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-3">
+                                        <p class="mb-0 text-muted">Nenhum alerta atribuído a você no momento.</p>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Ações Rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <a href="{% url 'alert_list' %}" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Buscar Alertas
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="{% url 'alert_list' %}?status=new" class="btn btn-danger w-100">
+                            <i class="fas fa-bell"></i> Alertas Novos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

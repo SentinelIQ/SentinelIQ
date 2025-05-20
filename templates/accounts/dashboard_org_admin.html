@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard - Admin da Organização{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="mb-3">
+            <i class="fas fa-tachometer-alt"></i> Dashboard do Admin da Organização
+        </h2>
+        <p class="lead">Bem-vindo, {{ user.get_full_name|default:user.username }}!</p>
+        <div class="alert alert-info">
+            <i class="fas fa-building"></i> Organização: <strong>{{ user.organization.name }}</strong>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Total de Alertas</h5>
+                        <h2 class="mb-0">{{ alerts_count }}</h2>
+                    </div>
+                    <i class="fas fa-bell fa-3x"></i>
+                </div>
+                <a href="{% url 'alert_list' %}" class="text-dark">Ver todos <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Total de Usuários</h5>
+                        <h2 class="mb-0">{{ users_count }}</h2>
+                    </div>
+                    <i class="fas fa-users fa-3x"></i>
+                </div>
+                <a href="{% url 'user_list' %}" class="text-white">Ver todos <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Ações Rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <a href="{% url 'alert_create' %}" class="btn btn-warning w-100">
+                            <i class="fas fa-plus-circle"></i> Novo Alerta
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="{% url 'user_create' %}" class="btn btn-info w-100">
+                            <i class="fas fa-user-plus"></i> Novo Usuário
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="{% url 'alert_list' %}" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Gerenciar Alertas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

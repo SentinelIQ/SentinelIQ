@@ -1,0 +1,75 @@
+/* Custom styles for SentinelIQ */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+footer {
+    margin-top: auto;
+}
+
+/* Card styles */
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+}
+
+/* Button styles */
+.btn {
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+}
+
+/* Table styles */
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+/* Alert severity badges */
+.badge.bg-danger {
+    font-weight: 500;
+}
+
+.badge.bg-warning {
+    font-weight: 500;
+    color: #212529;
+}
+
+.badge.bg-info {
+    font-weight: 500;
+}
+
+.badge.bg-success {
+    font-weight: 500;
+}
+
+/* Login page */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+}
+
+/* Dashboard cards */
+.card .fa-3x {
+    opacity: 0.8;
+} 
