@@ -114,9 +114,52 @@
                 </div>
                 
                 <div class="mb-4">
-                    <h5 class="border-bottom pb-2"><i class="fas fa-align-left me-2"></i> Descrição</h5>
-                    <div class="p-3 bg-light rounded">
-                        <p class="mb-0">{{ observable.description|default:"Nenhuma descrição fornecida."|linebreaks }}</p>
+                    <h5 class="mb-3 border-bottom pb-2">Informações Gerais</h5>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <p><strong>Valor:</strong> <code>{{ observable.value }}</code></p>
+                            <p><strong>Tipo:</strong> {{ observable.get_type_display }}</p>
+                            <p>
+                                <strong>Confiança:</strong>
+                                <span class="badge {% if observable.confidence == 'high' %}bg-danger{% elif observable.confidence == 'medium' %}bg-warning text-dark{% else %}bg-info{% endif %}">
+                                    {{ observable.get_confidence_display }}
+                                </span>
+                            </p>
+                            <p>
+                                <strong>Malicioso:</strong>
+                                {% if observable.is_malicious %}
+                                    <span class="badge bg-danger">Sim</span>
+                                {% else %}
+                                    <span class="badge bg-success">Não</span>
+                                {% endif %}
+                            </p>
+                            <p>
+                                <strong>PAP:</strong>
+                                <span class="badge {% if observable.pap == 'red' %}bg-danger{% elif observable.pap == 'amber' %}bg-warning text-dark{% elif observable.pap == 'green' %}bg-success{% elif observable.pap == 'white' %}bg-light text-dark border{% else %}bg-secondary{% endif %}">
+                                    {{ observable.get_pap_display }}
+                                </span>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {% if observable.pap == 'red' %}
+                                        Não deve ser compartilhado além do incidente ou ameaça.
+                                    {% elif observable.pap == 'amber' %}
+                                        Compartilhamento limitado a organizações específicas.
+                                    {% elif observable.pap == 'green' %}
+                                        Pode ser compartilhado amplamente na comunidade.
+                                    {% elif observable.pap == 'white' %}
+                                        Compartilhamento irrestrito, informação pública.
+                                    {% else %}
+                                        Nível de compartilhamento não definido.
+                                    {% endif %}
+                                </small>
+                            </p>
+                        </div>
+                        <div class="col-lg-6">
+                            <p><strong>Descrição:</strong> {{ observable.description|default:"Nenhuma descrição fornecida." }}</p>
+                            <p><strong>Criado em:</strong> {{ observable.created_at|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Atualizado em:</strong> {{ observable.updated_at|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Organização:</strong> {{ observable.organization.name }}</p>
+                        </div>
                     </div>
                 </div>
                 

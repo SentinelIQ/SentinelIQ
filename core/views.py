@@ -473,7 +473,9 @@ def add_alert_observable(request, alert_id):
             form = ObservableForm(request.POST)
             if form.is_valid():
                 try:
-                    observable = form.save()
+                    observable = form.save(commit=False)
+                    observable.organization = request.user.organization
+                    observable.save()
                     alert.observables.add(observable)
                     alert.log_observable_added(request.user, observable)
                     messages.success(request, 'Observable criado e adicionado ao alerta com sucesso!')
@@ -548,7 +550,9 @@ def add_case_observable(request, case_id):
             form = ObservableForm(request.POST)
             if form.is_valid():
                 try:
-                    observable = form.save()
+                    observable = form.save(commit=False)
+                    observable.organization = request.user.organization
+                    observable.save()
                     case.observables.add(observable)
                     case.log_observable_added(request.user, observable)
                     messages.success(request, 'Observable criado e adicionado ao caso com sucesso!')

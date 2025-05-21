@@ -89,6 +89,12 @@
                                         {{ form.confidence }}
                                     </div>
                                     
+                                    <div class="mb-3">
+                                        <label for="{{ form.pap.id_for_label }}" class="form-label">PAP Level</label>
+                                        {{ form.pap }}
+                                        <div class="form-text">Permissible Actions Protocol: Define como este indicador pode ser compartilhado.</div>
+                                    </div>
+                                    
                                     <div class="form-check mb-3">
                                         {{ form.is_malicious }}
                                         <label class="form-check-label" for="{{ form.is_malicious.id_for_label }}">
@@ -120,6 +126,7 @@
                                             <th>Valor</th>
                                             <th>Malicioso</th>
                                             <th>Confiança</th>
+                                            <th>PAP</th>
                                             <th class="text-center">Ações</th>
                                         </tr>
                                     </thead>
@@ -146,6 +153,19 @@
                                                         <span class="badge bg-info text-dark">Média</span>
                                                     {% else %}
                                                         <span class="badge bg-warning text-dark">Baixa</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if observable.pap == 'red' %}
+                                                        <span class="badge bg-danger">RED</span>
+                                                    {% elif observable.pap == 'amber' %}
+                                                        <span class="badge bg-warning text-dark">AMBER</span>
+                                                    {% elif observable.pap == 'green' %}
+                                                        <span class="badge bg-success">GREEN</span>
+                                                    {% elif observable.pap == 'white' %}
+                                                        <span class="badge bg-light text-dark">WHITE</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">UNKNOWN</span>
                                                     {% endif %}
                                                 </td>
                                                 <td class="text-center">

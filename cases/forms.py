@@ -1,6 +1,6 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from .models import Case, CaseComment, CaseAttachment, CaseEvent
+from .models import Case, CaseComment, CaseAttachment, CaseEvent, Task
 
 
 class CaseForm(forms.ModelForm):
@@ -143,4 +143,34 @@ class CaseEventForm(forms.ModelForm):
         instance.event_type = CaseEvent.CUSTOM
         if commit:
             instance.save()
-        return instance 
+        return instance
+
+
+class TaskForm(forms.ModelForm):
+    """Form for creating and updating tasks"""
+    
+    class Meta:
+        model = Task
+        fields = [
+            'title', 'description', 'assigned_to', 'due_date', 
+            'priority', 'is_completed'
+        ]
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'assigned_to': forms.Select(attrs={'class': 'form-select'}),
+            'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'priority': forms.Select(attrs={'class': 'form-select'}),
+            'is_completed': forms.CheckboxInput(attrs={'class': 'form-check-input'})
+        }
+    
+    def __init__(self, *args, organization=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Filter users by organization if provided
+        if organization:
+            from accounts.models import User
+            self.fields['assigned_to'].queryset = User.objects.filter(
+                organization=organization,
+                is_active=True
+            ) 

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Campos Personalizados para Alertas{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-cogs text-primary me-2"></i> Campos Personalizados para Alertas</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alert_list' %}">Alertas</a></li>
+                <li class="breadcrumb-item active">Campos Personalizados</li>
+            </ol>
+        </nav>
+    </div>
+    <div>
+        <a href="{% url 'alert_custom_field_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-1"></i> Novo Campo Personalizado
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i> Lista de Campos Personalizados</h5>
+    </div>
+    <div class="card-body">
+        {% if custom_fields %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ordem</th>
+                            <th>Nome</th>
+                            <th>Rótulo</th>
+                            <th>Tipo</th>
+                            <th>Obrigatório</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for field in custom_fields %}
+                            <tr>
+                                <td>{{ field.order }}</td>
+                                <td>{{ field.name }}</td>
+                                <td>{{ field.label }}</td>
+                                <td>{{ field.get_field_type_display }}</td>
+                                <td>
+                                    {% if field.required %}
+                                        <span class="badge bg-success"><i class="fas fa-check"></i> Sim</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary"><i class="fas fa-times"></i> Não</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'alert_custom_field_update' field.id %}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'alert_custom_field_delete' field.id %}" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Não há campos personalizados definidos para alertas ainda.
+            </div>
+            <p>Campos personalizados permitem coletar informações adicionais em alertas, como:</p>
+            <ul>
+                <li>Origem do alerta (email, sistema de detecção, analista, etc.)</li>
+                <li>Sistemas afetados</li>
+                <li>Número de referência do incidente</li>
+                <li>Métodos de detecção</li>
+                <li>Links para evidências externas</li>
+                <li>Informações adicionais sobre o atacante ou vetor de ataque</li>
+            </ul>
+            <a href="{% url 'alert_custom_field_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-1"></i> Criar Primeiro Campo Personalizado
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

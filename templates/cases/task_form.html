@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if task %}
+        Editar Tarefa - {{ task.title }}
+    {% else %}
+        Nova Tarefa - {{ case.title }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1">
+            {% if task %}
+                <i class="fas fa-edit text-primary me-2"></i> Editar Tarefa
+            {% else %}
+                <i class="fas fa-plus-circle text-success me-2"></i> Nova Tarefa
+            {% endif %}
+        </h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'case_list' %}">Casos</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'case_detail' case.id %}">{{ case.title }}</a></li>
+                <li class="breadcrumb-item active">
+                    {% if task %}Editar Tarefa{% else %}Nova Tarefa{% endif %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+    <div>
+        <a href="{% url 'case_detail' case.id %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Voltar ao Caso
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+            {% if task %}
+                <i class="fas fa-edit me-2"></i> Editar Tarefa
+            {% else %}
+                <i class="fas fa-plus-circle me-2"></i> Nova Tarefa
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="post" id="taskForm">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="id_title" class="form-label">Título <span class="text-danger">*</span></label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="alert alert-danger mt-2">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="id_description" class="form-label">Descrição</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="alert alert-danger mt-2">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="id_assigned_to" class="form-label">Responsável</label>
+                    {{ form.assigned_to }}
+                    {% if form.assigned_to.errors %}
+                        <div class="alert alert-danger mt-2">{{ form.assigned_to.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="id_due_date" class="form-label">Data de Entrega</label>
+                    {{ form.due_date }}
+                    {% if form.due_date.errors %}
+                        <div class="alert alert-danger mt-2">{{ form.due_date.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="id_priority" class="form-label">Prioridade <span class="text-danger">*</span></label>
+                    {{ form.priority }}
+                    {% if form.priority.errors %}
+                        <div class="alert alert-danger mt-2">{{ form.priority.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 d-flex align-items-center">
+                    <div class="form-check mt-4">
+                        {{ form.is_completed }}
+                        <label for="id_is_completed" class="form-check-label">Concluída</label>
+                        {% if form.is_completed.errors %}
+                            <div class="alert alert-danger mt-2">{{ form.is_completed.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{% url 'case_detail' case.id %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Salvar Tarefa
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const completedCheckbox = document.getElementById('id_is_completed');
+        const dueDateInput = document.getElementById('id_due_date');
+        const prioritySelect = document.getElementById('id_priority');
+        
+        // Highlight priority options
+        const priorityOptions = prioritySelect.querySelectorAll('option');
+        priorityOptions.forEach(option => {
+            if (option.value === 'high') {
+                option.classList.add('text-danger');
+                option.textContent = '🔴 ' + option.textContent;
+            } else if (option.value === 'medium') {
+                option.classList.add('text-warning');
+                option.textContent = '🟡 ' + option.textContent;
+            } else if (option.value === 'low') {
+                option.classList.add('text-success');
+                option.textContent = '🟢 ' + option.textContent;
+            }
+        });
+        
+        // Auto-populate due date if empty
+        if (!dueDateInput.value) {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 3); // 3 days from now
+            
+            const year = tomorrow.getFullYear();
+            const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const day = String(tomorrow.getDate()).padStart(2, '0');
+            
+            dueDateInput.value = `${year}-${month}-${day}`;
+        }
+    });
+</script>
+{% endblock %} 

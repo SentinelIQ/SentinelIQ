@@ -45,10 +45,10 @@ class Tag(models.Model):
 
 
 class Observable(models.Model):
-    """Observable model for IOCs (Indicators of Compromise)"""
+    """Model for observables or indicators of compromise (IOCs)"""
     
-    # Type choices for observables
-    IP_ADDRESS = 'ip_address'
+    # Observable types
+    IP = 'ip'
     DOMAIN = 'domain'
     URL = 'url'
     EMAIL = 'email'
@@ -56,15 +56,15 @@ class Observable(models.Model):
     HASH_SHA1 = 'hash_sha1'
     HASH_SHA256 = 'hash_sha256'
     FILENAME = 'filename'
-    REGISTRY_KEY = 'registry_key'
+    FILEPATH = 'filepath'
+    REGISTRY = 'registry'
     USER_AGENT = 'user_agent'
-    PROCESS_NAME = 'process_name'
-    MUTEX = 'mutex'
+    PROCESS = 'process'
     CVE = 'cve'
     OTHER = 'other'
     
     TYPE_CHOICES = [
-        (IP_ADDRESS, _('IP Address')),
+        (IP, _('IP Address')),
         (DOMAIN, _('Domain')),
         (URL, _('URL')),
         (EMAIL, _('Email')),
@@ -72,15 +72,15 @@ class Observable(models.Model):
         (HASH_SHA1, _('SHA1 Hash')),
         (HASH_SHA256, _('SHA256 Hash')),
         (FILENAME, _('Filename')),
-        (REGISTRY_KEY, _('Registry Key')),
+        (FILEPATH, _('Filepath')),
+        (REGISTRY, _('Registry')),
         (USER_AGENT, _('User Agent')),
-        (PROCESS_NAME, _('Process Name')),
-        (MUTEX, _('Mutex')),
+        (PROCESS, _('Process')),
         (CVE, _('CVE')),
         (OTHER, _('Other')),
     ]
     
-    # Confidence levels for observables
+    # Confidence levels
     LOW = 'low'
     MEDIUM = 'medium'
     HIGH = 'high'
@@ -91,23 +91,45 @@ class Observable(models.Model):
         (HIGH, _('High')),
     ]
     
+    # PAP (Permissible Actions Protocol) levels
+    PAP_UNKNOWN = 'unknown'
+    PAP_WHITE = 'white'
+    PAP_GREEN = 'green'
+    PAP_AMBER = 'amber'
+    PAP_RED = 'red'
+    
+    PAP_CHOICES = [
+        (PAP_UNKNOWN, _('Unknown (PAP:UNKNOWN)')),
+        (PAP_WHITE, _('White (PAP:WHITE)')),
+        (PAP_GREEN, _('Green (PAP:GREEN)')),
+        (PAP_AMBER, _('Amber (PAP:AMBER)')),
+        (PAP_RED, _('Red (PAP:RED)')),
+    ]
+    
     value = models.CharField(_('Value'), max_length=255)
-    type = models.CharField(
-        _('Type'),
-        max_length=20,
-        choices=TYPE_CHOICES,
-        default=OTHER,
-    )
-    description = models.TextField(_('Description'), blank=True)
+    type = models.CharField(_('Type'), max_length=20, choices=TYPE_CHOICES)
     confidence = models.CharField(
-        _('Confidence'),
+        _('Confidence'), 
         max_length=10,
         choices=CONFIDENCE_CHOICES,
-        default=MEDIUM,
+        default=MEDIUM
     )
-    is_malicious = models.BooleanField(_('Is Malicious'), default=False)
-    first_seen = models.DateTimeField(_('First Seen'), auto_now_add=True)
-    last_seen = models.DateTimeField(_('Last Seen'), auto_now=True)
+    is_malicious = models.BooleanField(_('Malicious'), default=False)
+    pap = models.CharField(
+        _('PAP Level'),
+        max_length=10,
+        choices=PAP_CHOICES,
+        default=PAP_UNKNOWN,
+        help_text=_('Permissible Actions Protocol: Defines how this observable can be shared or used.')
+    )
+    description = models.TextField(_('Description'), blank=True)
+    created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
+    organization = models.ForeignKey(
+        'organizations.Organization',
+        on_delete=models.CASCADE,
+        related_name='observables',
+    )
     
     # Relationships to Alert and Case models will be defined on those models
     # using ManyToManyField
@@ -118,5 +140,5 @@ class Observable(models.Model):
     class Meta:
         verbose_name = _('Observable')
         verbose_name_plural = _('Observables')
-        ordering = ['-last_seen']
+        ordering = ['-updated_at']
         unique_together = ['value', 'type']  # Prevent duplicate observables of the same type

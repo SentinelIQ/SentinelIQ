@@ -181,7 +181,7 @@
                         <p class="text-muted mb-1"><i class="fas fa-calendar-alt me-1"></i> Data Limite</p>
                         <p class="mb-0">
                             {% if case.due_date %}
-                                <span class="{% if case.due_date < today %}text-danger fw-bold{% endif %}">
+                                <span {% if case.due_date < today %}class="text-danger fw-bold"{% endif %}>
                                     <i class="fas fa-calendar-day me-1"></i>
                                     {{ case.due_date|date:"d/m/Y" }}
                                 </span>
@@ -459,6 +459,137 @@
                 {% endif %}
             </div>
         </div>
+
+        <!-- Seção de Tarefas -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-tasks me-2"></i> Tarefas</h5>
+                <a href="{% url 'add_case_task' case.id %}" class="btn btn-sm btn-light">
+                    <i class="fas fa-plus-circle me-1"></i> Nova Tarefa
+                </a>
+            </div>
+            <div class="card-body">
+                {% if case.tasks.exists %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%"></th>
+                                    <th style="width: 40%">Título</th>
+                                    <th style="width: 15%">Prioridade</th>
+                                    <th style="width: 15%">Responsável</th>
+                                    <th style="width: 15%">Data de Entrega</th>
+                                    <th style="width: 10%">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in case.tasks.all %}
+                                    <tr class="{% if task.is_completed %}table-success{% elif task.due_date and task.due_date < current_date %}table-danger{% endif %}">
+                                        <td>
+                                            <div class="form-check d-flex justify-content-center">
+                                                <input type="checkbox" class="form-check-input task-toggle" 
+                                                    data-task-id="{{ task.id }}" 
+                                                    data-case-id="{{ case.id }}" 
+                                                    {% if task.is_completed %}checked{% endif %}>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <p class="mb-0 {% if task.is_completed %}text-decoration-line-through{% endif %}">{{ task.title }}</p>
+                                            {% if task.description %}
+                                                <small class="text-muted d-block">{{ task.description|truncatechars:60 }}</small>
+                                            {% endif %}
+                                            {% if task.is_completed and task.completed_by %}
+                                                <small class="text-success d-block">
+                                                    Concluída por {{ task.completed_by.get_full_name }} em {{ task.completed_at|date:"d/m/Y H:i" }}
+                                                </small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if task.priority == 'high' %}bg-danger{% elif task.priority == 'medium' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                                {{ task.get_priority_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if task.assigned_to %}
+                                                {{ task.assigned_to.get_full_name }}
+                                            {% else %}
+                                                <span class="text-muted">Não atribuída</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if task.due_date %}
+                                                <span {% if task.due_date < current_date and not task.is_completed %}class="text-danger fw-bold"{% endif %}>
+                                                    {{ task.due_date|date:"d/m/Y" }}
+                                                </span>
+                                                {% if task.due_date < current_date and not task.is_completed %}
+                                                    <span class="badge bg-danger ms-1">Atrasada</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">Sem data</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <a href="{% url 'update_case_task' case.id task.id %}" class="btn btn-sm btn-warning me-1" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'delete_case_task' case.id task.id %}" class="btn btn-sm btn-danger" title="Excluir">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Resumo de Tarefas -->
+                    <div class="card bg-light mt-3">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 text-center">
+                                    <h6>Total de Tarefas</h6>
+                                    <span class="badge bg-secondary">{{ case.tasks.count }}</span>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <h6>Concluídas</h6>
+                                    <span class="badge bg-success">{{ completed_tasks_count }}</span>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <h6>Pendentes</h6>
+                                    <span class="badge bg-warning text-dark">{{ pending_tasks_count }}</span>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <h6>Atrasadas</h6>
+                                    <span class="badge bg-danger">{{ overdue_tasks_count }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Não há tarefas cadastradas para este caso.
+                    </div>
+                    <p>Tarefas ajudam a organizar o fluxo de trabalho para resolução do caso. Exemplos de tarefas:</p>
+                    <ul>
+                        <li>Coletar evidências adicionais</li>
+                        <li>Realizar análise de logs</li>
+                        <li>Contatar equipes afetadas</li>
+                        <li>Realizar análise forense</li>
+                        <li>Criar relatório de incidente</li>
+                        <li>Implementar medidas de contenção</li>
+                        <li>Verificar indicadores de comprometimento adicionais</li>
+                        <li>Implantar correções recomendadas</li>
+                    </ul>
+                    <div class="text-center">
+                        <a href="{% url 'add_case_task' case.id %}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-1"></i> Adicionar Primeira Tarefa
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
     
     <!-- Sidebar -->
@@ -591,6 +722,166 @@
         var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+    });
+</script>
+
+<!-- JavaScript para toggle de tarefas -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Adicionar evento a todos os checkboxes de tarefas
+        const taskToggles = document.querySelectorAll('.task-toggle');
+        taskToggles.forEach(checkbox => {
+            checkbox.addEventListener('change', function(e) {
+                const taskId = this.dataset.taskId;
+                const caseId = this.dataset.caseId;
+                const isChecked = this.checked;
+                
+                // Atualizar visualmente a linha da tabela
+                const row = this.closest('tr');
+                const taskTitle = row.querySelector('td:nth-child(2) p');
+                
+                if (isChecked) {
+                    row.classList.add('table-success');
+                    row.classList.remove('table-danger');
+                    taskTitle.classList.add('text-decoration-line-through');
+                } else {
+                    row.classList.remove('table-success');
+                    taskTitle.classList.remove('text-decoration-line-through');
+                    
+                    // Verificar se a tarefa está atrasada
+                    const dueDateCell = row.querySelector('td:nth-child(5) span');
+                    if (dueDateCell && dueDateCell.classList.contains('text-danger')) {
+                        row.classList.add('table-danger');
+                    }
+                }
+                
+                // Enviar requisição AJAX para atualizar o status
+                fetch(`/cases/${caseId}/tasks/${taskId}/toggle/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ is_completed: isChecked })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao atualizar tarefa');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Atualizar informações de conclusão
+                        const infoElement = row.querySelector('td:nth-child(2) small.text-success');
+                        
+                        if (isChecked) {
+                            if (!infoElement) {
+                                // Criar elemento se não existir
+                                const newInfo = document.createElement('small');
+                                newInfo.classList.add('text-success', 'd-block');
+                                newInfo.textContent = `Concluída por ${data.completed_by} em ${data.completed_at}`;
+                                row.querySelector('td:nth-child(2)').appendChild(newInfo);
+                            } else {
+                                // Atualizar se já existir
+                                infoElement.textContent = `Concluída por ${data.completed_by} em ${data.completed_at}`;
+                            }
+                        } else if (infoElement) {
+                            // Remover elemento se existir
+                            infoElement.remove();
+                        }
+                        
+                        // Notificar o usuário
+                        showToast(isChecked ? 'Tarefa marcada como concluída!' : 'Tarefa marcada como pendente!', isChecked ? 'success' : 'warning');
+                        
+                        // Atualizar os contadores de resumo (opcional)
+                        updateTaskCounters();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    // Reverter o estado do checkbox em caso de erro
+                    this.checked = !isChecked;
+                    showToast('Erro ao atualizar o status da tarefa.', 'danger');
+                });
+            });
+        });
+        
+        // Função para obter cookie CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Função para atualizar os contadores de resumo
+        function updateTaskCounters() {
+            // Esta função poderia fazer outra chamada AJAX para obter contadores atualizados
+            // ou simplesmente recalcular com base nos elementos da página
+            const totalTasks = document.querySelectorAll('.task-toggle').length;
+            const completedTasks = document.querySelectorAll('.task-toggle:checked').length;
+            const pendingTasks = totalTasks - completedTasks;
+            const lateTasks = document.querySelectorAll('.task-toggle:not(:checked)').length - 
+                              document.querySelectorAll('tr:not(.table-danger) .task-toggle:not(:checked)').length;
+            
+            // Atualizar os badges
+            const counters = document.querySelectorAll('.card.bg-light .badge');
+            if (counters.length >= 4) {
+                counters[0].textContent = totalTasks;
+                counters[1].textContent = completedTasks;
+                counters[2].textContent = pendingTasks;
+                counters[3].textContent = lateTasks;
+            }
+        }
+        
+        // Função para mostrar toast de notificação
+        function showToast(message, type = 'info') {
+            // Verificar se o container de toasts existe
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // Criar elemento toast
+            const toastElement = document.createElement('div');
+            toastElement.className = `toast align-items-center text-white bg-${type} border-0`;
+            toastElement.setAttribute('role', 'alert');
+            toastElement.setAttribute('aria-live', 'assertive');
+            toastElement.setAttribute('aria-atomic', 'true');
+            
+            // Conteúdo do toast
+            toastElement.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+                </div>
+            `;
+            
+            // Adicionar ao container
+            toastContainer.appendChild(toastElement);
+            
+            // Inicializar e mostrar toast
+            const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
+            toast.show();
+            
+            // Remover após esconder
+            toastElement.addEventListener('hidden.bs.toast', function() {
+                toastElement.remove();
+            });
+        }
     });
 </script>
 {% endblock %} 

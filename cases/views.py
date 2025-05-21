@@ -6,12 +6,14 @@ from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.utils import timezone
+from datetime import date
 
 from accounts.views import OrgAdminRequiredMixin
-from .models import Case, CaseComment, CaseAttachment, CaseEvent
-from .forms import CaseForm, CaseCommentForm, CaseAttachmentForm, CaseFilterForm, CaseEventForm
+from .models import Case, CaseComment, CaseAttachment, CaseEvent, Task
+from .forms import CaseForm, CaseCommentForm, CaseAttachmentForm, CaseFilterForm, CaseEventForm, TaskForm
+from core.models import Observable
 
 
 class CaseListView(LoginRequiredMixin, ListView):
@@ -89,22 +91,30 @@ class CaseDetailView(LoginRequiredMixin, DetailView):
     template_name = 'cases/case_detail.html'
     context_object_name = 'case'
     
-    def get_queryset(self):
-        """Ensure users can only see cases from their organization"""
-        user = self.request.user
-        if user.is_superadmin():
-            return Case.objects.all()
-        else:
-            return Case.objects.filter(organization=user.organization)
-    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['comment_form'] = CaseCommentForm()
         context['attachment_form'] = CaseAttachmentForm()
         context['event_form'] = CaseEventForm()
         context['timeline_events'] = self.object.timeline_events.all().select_related('user')
-        context['today'] = timezone.now().date()
+        context['today'] = date.today()
+        context['current_date'] = date.today()
+        
+        # Contagem de tarefas para usar no template
+        context['completed_tasks_count'] = self.object.tasks.filter(is_completed=True).count()
+        context['pending_tasks_count'] = self.object.tasks.filter(is_completed=False).count()
+        context['overdue_tasks_count'] = self.object.tasks.filter(
+            is_completed=False, 
+            due_date__lt=date.today()
+        ).count()
+        
         return context
+    
+    def get_queryset(self):
+        """Filter cases by organization if not superadmin"""
+        if self.request.user.is_superadmin:
+            return Case.objects.all()
+        return Case.objects.filter(organization=self.request.user.organization)
 
 
 class CaseCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateView):
@@ -358,3 +368,133 @@ def add_case_event(request, pk):
             messages.success(request, _('Event added to timeline successfully.'))
     
     return redirect('case_detail', pk=pk)
+
+
+@login_required
+def add_case_task(request, case_id):
+    """Add a new task to a case"""
+    case = get_object_or_404(Case, pk=case_id)
+    
+    # Verificar acesso
+    if not request.user.is_superadmin and case.organization != request.user.organization:
+        messages.error(request, _("You don't have permission to add tasks to this case."))
+        return redirect('case_list')
+    
+    if request.method == 'POST':
+        form = TaskForm(request.POST, organization=request.user.organization)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.case = case
+            # Set current user for timeline events
+            task.set_current_user(request.user)
+            task.save()
+            
+            messages.success(request, _('Task added successfully.'))
+            return redirect('case_detail', pk=case.id)
+    else:
+        form = TaskForm(organization=request.user.organization)
+    
+    context = {
+        'form': form,
+        'case': case,
+    }
+    
+    return render(request, 'cases/task_form.html', context)
+
+
+@login_required
+def update_case_task(request, case_id, task_id):
+    """Update a task in a case"""
+    case = get_object_or_404(Case, pk=case_id)
+    task = get_object_or_404(Task, pk=task_id, case=case)
+    
+    # Verificar acesso
+    if not request.user.is_superadmin and case.organization != request.user.organization:
+        messages.error(request, _("You don't have permission to update tasks in this case."))
+        return redirect('case_list')
+    
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task, organization=request.user.organization)
+        if form.is_valid():
+            # Set current user for timeline events
+            task = form.save(commit=False)
+            task.set_current_user(request.user)
+            
+            # If task is marked as completed, set completed_by
+            if task.is_completed and not Task.objects.get(pk=task.pk).is_completed:
+                task.completed_by = request.user
+            
+            task.save()
+            
+            messages.success(request, _('Task updated successfully.'))
+            return redirect('case_detail', pk=case.id)
+    else:
+        form = TaskForm(instance=task, organization=request.user.organization)
+    
+    context = {
+        'form': form,
+        'case': case,
+        'task': task,
+    }
+    
+    return render(request, 'cases/task_form.html', context)
+
+
+@login_required
+def delete_case_task(request, case_id, task_id):
+    """Delete a task from a case"""
+    case = get_object_or_404(Case, pk=case_id)
+    task = get_object_or_404(Task, pk=task_id, case=case)
+    
+    # Verificar acesso
+    if not request.user.is_superadmin and case.organization != request.user.organization:
+        messages.error(request, _("You don't have permission to delete tasks from this case."))
+        return redirect('case_list')
+    
+    if request.method == 'POST':
+        task.delete()
+        messages.success(request, _('Task deleted successfully.'))
+        return redirect('case_detail', pk=case.id)
+    
+    context = {
+        'case': case,
+        'task': task,
+    }
+    
+    return render(request, 'cases/task_confirm_delete.html', context)
+
+
+@login_required
+def toggle_task_status(request, case_id, task_id):
+    """Toggle a task's completion status via AJAX"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    case = get_object_or_404(Case, pk=case_id)
+    task = get_object_or_404(Task, pk=task_id, case=case)
+    
+    # Verificar acesso
+    if not request.user.is_superadmin and case.organization != request.user.organization:
+        return JsonResponse({'error': 'Permission denied'}, status=403)
+    
+    # Toggle completion status
+    task.is_completed = not task.is_completed
+    
+    # If task is now completed, set completed info
+    if task.is_completed:
+        task.completed_at = timezone.now()
+        task.completed_by = request.user
+    else:
+        task.completed_at = None
+        task.completed_by = None
+    
+    # Set current user for timeline events
+    task.set_current_user(request.user)
+    task.save()
+    
+    return JsonResponse({
+        'success': True,
+        'is_completed': task.is_completed,
+        'completed_at': task.completed_at.strftime('%Y-%m-%d %H:%M') if task.completed_at else None,
+        'completed_by': task.completed_by.get_full_name() if task.completed_by else None
+    })

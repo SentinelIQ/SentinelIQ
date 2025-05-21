@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if object %}Editar{% else %}Novo{% endif %} Campo Personalizado{% endblock %}
+
+{% block extra_css %}
+<style>
+    .field-preview {
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        margin-top: 20px;
+    }
+    
+    .field-type-info {
+        margin-top: 10px;
+        padding: 10px;
+        border-left: 3px solid #007bff;
+        background-color: #f0f7ff;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fieldTypeSelect = document.getElementById('id_field_type');
+        const optionsContainer = document.querySelector('.options-container');
+        
+        function toggleOptionsField() {
+            const fieldType = fieldTypeSelect.value;
+            if (fieldType === 'select') {
+                optionsContainer.style.display = 'block';
+            } else {
+                optionsContainer.style.display = 'none';
+            }
+            
+            updateFieldTypeInfo(fieldType);
+        }
+        
+        function updateFieldTypeInfo(fieldType) {
+            const infoElement = document.getElementById('field-type-info');
+            let infoText = '';
+            
+            switch(fieldType) {
+                case 'text':
+                    infoText = 'Campo de texto para entradas curtas ou longas.';
+                    break;
+                case 'number':
+                    infoText = 'Campo numérico para valores inteiros ou decimais.';
+                    break;
+                case 'date':
+                    infoText = 'Campo de data com seletor de calendário.';
+                    break;
+                case 'boolean':
+                    infoText = 'Campo de checkbox para valores sim/não.';
+                    break;
+                case 'url':
+                    infoText = 'Campo para URLs, com validação.';
+                    break;
+                case 'select':
+                    infoText = 'Campo de seleção com opções pré-definidas. Adicione cada opção em uma linha separada.';
+                    break;
+                default:
+                    infoText = 'Selecione um tipo de campo.';
+            }
+            
+            infoElement.textContent = infoText;
+        }
+        
+        // Set initial state
+        toggleOptionsField();
+        
+        // Add event listener
+        fieldTypeSelect.addEventListener('change', toggleOptionsField);
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1">
+            <i class="fas fa-cog text-primary me-2"></i> 
+            {% if object %}Editar{% else %}Novo{% endif %} Campo Personalizado
+        </h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alert_list' %}">Alertas</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alert_custom_field_list' %}">Campos Personalizados</a></li>
+                <li class="breadcrumb-item active">{% if object %}Editar{% else %}Novo{% endif %} Campo</li>
+            </ol>
+        </nav>
+    </div>
+    <div>
+        <a href="{% url 'alert_custom_field_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit me-2"></i> 
+                    {% if object %}Editar{% else %}Novo{% endif %} Campo Personalizado
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_name" class="form-label">Nome do Campo <span class="text-danger">*</span></label>
+                            {{ form.name }}
+                            <div class="form-text">Nome técnico do campo (sem espaços, minúsculas, underscores)</div>
+                            {% if form.name.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_label" class="form-label">Rótulo do Campo <span class="text-danger">*</span></label>
+                            {{ form.label }}
+                            <div class="form-text">Nome amigável exibido aos usuários</div>
+                            {% if form.label.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.label.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_field_type" class="form-label">Tipo de Campo <span class="text-danger">*</span></label>
+                            {{ form.field_type }}
+                            <div id="field-type-info" class="field-type-info"></div>
+                            {% if form.field_type.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.field_type.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_order" class="form-label">Ordem de Exibição</label>
+                            {{ form.order }}
+                            <div class="form-text">Determina a posição do campo no formulário (menor = primeiro)</div>
+                            {% if form.order.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.order.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label">Descrição</label>
+                        {{ form.description }}
+                        <div class="form-text">Texto de ajuda exibido abaixo do campo</div>
+                        {% if form.description.errors %}
+                            <div class="alert alert-danger mt-2">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_placeholder" class="form-label">Placeholder</label>
+                            {{ form.placeholder }}
+                            <div class="form-text">Texto exibido dentro do campo quando vazio</div>
+                            {% if form.placeholder.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.placeholder.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_default_value" class="form-label">Valor Padrão</label>
+                            {{ form.default_value }}
+                            <div class="form-text">Valor pré-preenchido no campo</div>
+                            {% if form.default_value.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.default_value.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 options-container" style="display: none;">
+                        <label for="id_options" class="form-label">Opções <span class="text-danger">*</span></label>
+                        {{ form.options }}
+                        <div class="form-text">Digite cada opção em uma linha separada</div>
+                        {% if form.options.errors %}
+                            <div class="alert alert-danger mt-2">{{ form.options.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        {{ form.required }}
+                        <label for="id_required" class="form-check-label">Campo Obrigatório</label>
+                        <div class="form-text">Se marcado, o usuário precisará preencher este campo</div>
+                        {% if form.required.errors %}
+                            <div class="alert alert-danger mt-2">{{ form.required.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'alert_custom_field_list' %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Salvar Campo Personalizado
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Informações</h5>
+            </div>
+            <div class="card-body">
+                <p>Campos personalizados permitem que você colete informações adicionais específicas para a sua organização em cada alerta.</p>
+                
+                <h6 class="mt-3 mb-2">Tipos de Campo Disponíveis:</h6>
+                <ul>
+                    <li><strong>Texto</strong>: Para entrada de texto livre</li>
+                    <li><strong>Número</strong>: Para valores numéricos</li>
+                    <li><strong>Data</strong>: Para selecionar datas</li>
+                    <li><strong>Booleano</strong>: Para opções sim/não (checkbox)</li>
+                    <li><strong>URL</strong>: Para links e endereços web</li>
+                    <li><strong>Seleção</strong>: Para escolher entre opções predefinidas</li>
+                </ul>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Importante:</strong> Não é possível alterar o tipo de um campo após a criação se já existirem valores armazenados.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Confirmar Exclusão de Campo{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-trash text-danger me-2"></i> Confirmar Exclusão</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alert_list' %}">Alertas</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alert_custom_field_list' %}">Campos Personalizados</a></li>
+                <li class="breadcrumb-item active">Excluir Campo</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Confirmar Exclusão</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Atenção:</strong> Esta ação não pode ser desfeita!
+        </div>
+        
+        <p class="mb-4">
+            Você está prestes a excluir o campo personalizado <strong>"{{ object.label }}"</strong> ({{ object.get_field_type_display }}).
+            Todos os valores associados a este campo em alertas existentes serão permanentemente excluídos.
+        </p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-end">
+                <a href="{% url 'alert_custom_field_list' %}" class="btn btn-secondary me-2">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash me-1"></i> Confirmar Exclusão
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

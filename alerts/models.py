@@ -12,6 +12,9 @@ class AlertEvent(models.Model):
     TAGS_CHANGED = 'tags_changed'
     OBSERVABLE_ADDED = 'observable_added'
     OBSERVABLE_REMOVED = 'observable_removed'
+    COMMENT_ADDED = 'comment_added'
+    RELATED_ALERT_ADDED = 'related_alert_added'
+    RELATED_ALERT_REMOVED = 'related_alert_removed'
     ESCALATED = 'escalated'
     CUSTOM = 'custom'
     
@@ -25,6 +28,9 @@ class AlertEvent(models.Model):
         (TAGS_CHANGED, _('Tags Changed')),
         (OBSERVABLE_ADDED, _('Observable Added')),
         (OBSERVABLE_REMOVED, _('Observable Removed')),
+        (COMMENT_ADDED, _('Comment Added')),
+        (RELATED_ALERT_ADDED, _('Related Alert Added')),
+        (RELATED_ALERT_REMOVED, _('Related Alert Removed')),
         (ESCALATED, _('Escalated to Case')),
         (CUSTOM, _('Custom Event')),
     ]
@@ -36,8 +42,9 @@ class AlertEvent(models.Model):
     )
     event_type = models.CharField(
         _('Event Type'),
-        max_length=20,
+        max_length=25,
         choices=EVENT_TYPE_CHOICES,
+        default=CREATED
     )
     title = models.CharField(_('Event Title'), max_length=255)
     description = models.TextField(_('Event Description'), blank=True)
@@ -68,6 +75,9 @@ class AlertEvent(models.Model):
             self.TAGS_CHANGED: 'fa-tags text-info',
             self.OBSERVABLE_ADDED: 'fa-eye text-success',
             self.OBSERVABLE_REMOVED: 'fa-eye-slash text-danger',
+            self.COMMENT_ADDED: 'fa-comment-dots text-secondary',
+            self.RELATED_ALERT_ADDED: 'fa-plus-circle text-success',
+            self.RELATED_ALERT_REMOVED: 'fa-minus-circle text-danger',
             self.ESCALATED: 'fa-arrow-up text-success',
             self.CUSTOM: 'fa-star text-warning',
         }
@@ -181,6 +191,13 @@ class Alert(models.Model):
         verbose_name=_('Observables'),
         related_name='alerts',
         blank=True,
+    )
+    related_alerts = models.ManyToManyField(
+        'self',
+        verbose_name=_('Related Alerts'),
+        symmetrical=True,
+        blank=True,
+        help_text=_('Alerts that are related or similar to this one')
     )
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
@@ -308,6 +325,36 @@ class Alert(models.Model):
             metadata={'case_id': case.id}
         )
     
+    def log_comment_added(self, user, comment):
+        """Log when a comment is added to the alert"""
+        return self.add_timeline_event(
+            event_type=AlertEvent.COMMENT_ADDED,
+            title=_('Comment added by {user}').format(user=user.username),
+            description=comment.content[:100] + ('...' if len(comment.content) > 100 else ''),
+            user=user,
+            metadata={'comment_id': comment.id}
+        )
+    
+    def log_related_alert_added(self, user, related_alert):
+        """Log when a related alert is added"""
+        return self.add_timeline_event(
+            event_type=AlertEvent.RELATED_ALERT_ADDED,
+            title=_('Related alert added'),
+            description=f"Alert #{related_alert.id}: {related_alert.title}",
+            user=user,
+            metadata={'related_alert_id': related_alert.id}
+        )
+    
+    def log_related_alert_removed(self, user, related_alert):
+        """Log when a related alert is removed"""
+        return self.add_timeline_event(
+            event_type=AlertEvent.RELATED_ALERT_REMOVED,
+            title=_('Related alert removed'),
+            description=f"Alert #{related_alert.id}: {related_alert.title}",
+            user=user,
+            metadata={'related_alert_id': related_alert.id}
+        )
+    
     def __str__(self):
         return self.title
     
@@ -315,3 +362,110 @@ class Alert(models.Model):
         verbose_name = _('Alert')
         verbose_name_plural = _('Alerts')
         ordering = ['-created_at']
+
+class AlertComment(models.Model):
+    """Comments on alerts"""
+    alert = models.ForeignKey(
+        Alert,
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
+    user = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.CASCADE,
+        related_name='alert_comments',
+    )
+    content = models.TextField(_('Content'))
+    created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
+    
+    def __str__(self):
+        return f'Comment on {self.alert.title} by {self.user.username}'
+    
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        result = super().save(*args, **kwargs)
+        
+        # Log timeline event for new comments
+        if is_new and hasattr(self, 'alert'):
+            self.alert.log_comment_added(self.user, self)
+            
+        return result
+    
+    class Meta:
+        verbose_name = _('Alert Comment')
+        verbose_name_plural = _('Alert Comments')
+        ordering = ['-created_at']
+
+class AlertCustomField(models.Model):
+    """Custom fields for alerts"""
+    TEXT = 'text'
+    NUMBER = 'number'
+    DATE = 'date'
+    BOOLEAN = 'boolean'
+    URL = 'url'
+    SELECT = 'select'
+    
+    FIELD_TYPE_CHOICES = [
+        (TEXT, _('Text')),
+        (NUMBER, _('Number')),
+        (DATE, _('Date')),
+        (BOOLEAN, _('Boolean')),
+        (URL, _('URL')),
+        (SELECT, _('Select')),
+    ]
+    
+    name = models.CharField(_('Field Name'), max_length=100)
+    label = models.CharField(_('Field Label'), max_length=100)
+    field_type = models.CharField(
+        _('Field Type'),
+        max_length=20,
+        choices=FIELD_TYPE_CHOICES,
+        default=TEXT,
+    )
+    required = models.BooleanField(_('Required'), default=False)
+    description = models.TextField(_('Description'), blank=True)
+    placeholder = models.CharField(_('Placeholder'), max_length=200, blank=True)
+    default_value = models.CharField(_('Default Value'), max_length=200, blank=True)
+    options = models.JSONField(
+        _('Options'),
+        blank=True,
+        null=True,
+        help_text=_('Options for select field type (JSON array)')
+    )
+    order = models.PositiveIntegerField(_('Display Order'), default=0)
+    organization = models.ForeignKey(
+        'organizations.Organization',
+        on_delete=models.CASCADE,
+        related_name='alert_custom_fields',
+    )
+    
+    def __str__(self):
+        return f"{self.label} ({self.get_field_type_display()})"
+    
+    class Meta:
+        verbose_name = _('Alert Custom Field')
+        verbose_name_plural = _('Alert Custom Fields')
+        ordering = ['order']
+        unique_together = ['name', 'organization']
+
+class AlertCustomValue(models.Model):
+    """Values for custom fields on alerts"""
+    alert = models.ForeignKey(
+        Alert,
+        on_delete=models.CASCADE,
+        related_name='custom_values',
+    )
+    field = models.ForeignKey(
+        AlertCustomField,
+        on_delete=models.CASCADE,
+        related_name='values',
+    )
+    value = models.TextField(_('Value'), blank=True)
+    
+    def __str__(self):
+        return f"{self.field.label}: {self.value}"
+    
+    class Meta:
+        verbose_name = _('Alert Custom Value')
+        verbose_name_plural = _('Alert Custom Values')
+        unique_together = ['alert', 'field']

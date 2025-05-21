@@ -71,15 +71,20 @@ class TagForm(forms.ModelForm):
 
 
 class ObservableForm(forms.ModelForm):
+    """Form for creating and updating observables"""
+    
     class Meta:
         model = Observable
-        fields = ['value', 'type', 'description', 'confidence', 'is_malicious']
+        fields = (
+            'value', 'type', 'confidence', 'is_malicious', 'pap', 'description'
+        )
         widgets = {
-            'value': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Valor do IOC'}),
+            'value': forms.TextInput(attrs={'class': 'form-control'}),
             'type': forms.Select(attrs={'class': 'form-select'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descrição opcional'}),
             'confidence': forms.Select(attrs={'class': 'form-select'}),
             'is_malicious': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'pap': forms.Select(attrs={'class': 'form-select'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
     
     def clean(self):
@@ -89,7 +94,7 @@ class ObservableForm(forms.ModelForm):
         
         # Add validation logic based on the type of IOC
         if value and ioc_type:
-            if ioc_type == Observable.IP_ADDRESS:
+            if ioc_type == Observable.IP:
                 # Basic IP address validation
                 import re
                 ip_pattern = r'^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$'

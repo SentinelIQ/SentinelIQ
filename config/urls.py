@@ -72,15 +72,7 @@ urlpatterns = [
     path('alerts/<int:pk>/escalate/', escalate_to_case, name='escalate_to_case'),
     
     # Case URLs
-    path('cases/', CaseListView.as_view(), name='case_list'),
-    path('cases/<int:pk>/', CaseDetailView.as_view(), name='case_detail'),
-    path('cases/create/', CaseCreateView.as_view(), name='case_create'),
-    path('cases/<int:pk>/update/', CaseUpdateView.as_view(), name='case_update'),
-    path('cases/<int:pk>/delete/', CaseDeleteView.as_view(), name='case_delete'),
-    path('cases/<int:pk>/comment/', add_case_comment, name='add_case_comment'),
-    path('cases/<int:pk>/attachment/', add_case_attachment, name='add_case_attachment'),
-    path('cases/attachments/<int:pk>/delete/', delete_case_attachment, name='delete_case_attachment'),
-    path('cases/<int:pk>/timeline/event/', add_case_event, name='add_case_event'),
+    path('cases/', include('cases.urls')),
     
     # Include core app URLs
     path('', include('core.urls')),

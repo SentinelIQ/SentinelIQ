@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Confirmar Exclusão de Tarefa{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-trash text-danger me-2"></i> Confirmar Exclusão</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'case_list' %}">Casos</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'case_detail' case.id %}">{{ case.title }}</a></li>
+                <li class="breadcrumb-item active">Excluir Tarefa</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Confirmar Exclusão</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Atenção:</strong> Esta ação não pode ser desfeita!
+        </div>
+        
+        <p class="mb-4">
+            Você está prestes a excluir a tarefa <strong>"{{ task.title }}"</strong> do caso <strong>"{{ case.title }}"</strong>.
+        </p>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">Detalhes da Tarefa</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Título:</strong> {{ task.title }}</p>
+                <p><strong>Prioridade:</strong> {{ task.get_priority_display }}</p>
+                {% if task.assigned_to %}
+                    <p><strong>Responsável:</strong> {{ task.assigned_to.get_full_name }}</p>
+                {% endif %}
+                {% if task.due_date %}
+                    <p><strong>Data de Entrega:</strong> {{ task.due_date }}</p>
+                {% endif %}
+                {% if task.is_completed %}
+                    <p><strong>Status:</strong> <span class="badge bg-success">Concluída</span></p>
+                {% else %}
+                    <p><strong>Status:</strong> <span class="badge bg-warning text-dark">Pendente</span></p>
+                {% endif %}
+                {% if task.description %}
+                    <p><strong>Descrição:</strong> {{ task.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-end">
+                <a href="{% url 'case_detail' case.id %}" class="btn btn-secondary me-2">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash me-1"></i> Confirmar Exclusão
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

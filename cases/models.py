@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 
 class Case(models.Model):
@@ -284,6 +285,55 @@ class Case(models.Model):
             metadata={'observable_id': observable.id}
         )
     
+    def log_task_added(self, user, task):
+        """Log when a task is added to the case"""
+        return self.add_timeline_event(
+            event_type=CaseEvent.TASK_ADDED,
+            title=_('Task added'),
+            description=task.title,
+            user=user,
+            metadata={'task_id': task.id}
+        )
+    
+    def log_task_updated(self, user, task, old_data=None):
+        """Log when a task is updated"""
+        description = f"Task updated: {task.title}"
+        if old_data:
+            changes = []
+            if old_data.get('title') != task.title:
+                changes.append(f"Title changed from '{old_data.get('title')}' to '{task.title}'")
+            if old_data.get('description') != task.description:
+                changes.append("Description was updated")
+            if old_data.get('assigned_to_id') != (task.assigned_to.id if task.assigned_to else None):
+                old_assignee = "Unassigned" if not old_data.get('assigned_to_id') else User.objects.get(id=old_data.get('assigned_to_id')).username
+                new_assignee = "Unassigned" if not task.assigned_to else task.assigned_to.username
+                changes.append(f"Assignee changed from {old_assignee} to {new_assignee}")
+            if old_data.get('due_date') != task.due_date:
+                changes.append(f"Due date changed from {old_data.get('due_date')} to {task.due_date}")
+            if old_data.get('priority') != task.priority:
+                changes.append(f"Priority changed from {old_data.get('priority')} to {task.priority}")
+            
+            if changes:
+                description = ", ".join(changes)
+        
+        return self.add_timeline_event(
+            event_type=CaseEvent.TASK_UPDATED,
+            title=_('Task updated'),
+            description=description,
+            user=user,
+            metadata={'task_id': task.id}
+        )
+    
+    def log_task_completed(self, user, task):
+        """Log when a task is completed"""
+        return self.add_timeline_event(
+            event_type=CaseEvent.TASK_COMPLETED,
+            title=_('Task completed'),
+            description=task.title,
+            user=user,
+            metadata={'task_id': task.id}
+        )
+    
     class Meta:
         verbose_name = _('Case')
         verbose_name_plural = _('Cases')
@@ -375,6 +425,9 @@ class CaseEvent(models.Model):
     TAGS_CHANGED = 'tags_changed'
     OBSERVABLE_ADDED = 'observable_added'
     OBSERVABLE_REMOVED = 'observable_removed'
+    TASK_ADDED = 'task_added'
+    TASK_UPDATED = 'task_updated'
+    TASK_COMPLETED = 'task_completed'
     CUSTOM = 'custom'
     
     EVENT_TYPE_CHOICES = [
@@ -392,6 +445,9 @@ class CaseEvent(models.Model):
         (TAGS_CHANGED, _('Tags Changed')),
         (OBSERVABLE_ADDED, _('Observable Added')),
         (OBSERVABLE_REMOVED, _('Observable Removed')),
+        (TASK_ADDED, _('Task Added')),
+        (TASK_UPDATED, _('Task Updated')),
+        (TASK_COMPLETED, _('Task Completed')),
         (CUSTOM, _('Custom Event')),
     ]
     
@@ -402,7 +458,7 @@ class CaseEvent(models.Model):
     )
     event_type = models.CharField(
         _('Event Type'),
-        max_length=20,
+        max_length=25,
         choices=EVENT_TYPE_CHOICES,
     )
     title = models.CharField(_('Event Title'), max_length=255)
@@ -439,6 +495,9 @@ class CaseEvent(models.Model):
             self.TAGS_CHANGED: 'fa-tags text-info',
             self.OBSERVABLE_ADDED: 'fa-eye text-success',
             self.OBSERVABLE_REMOVED: 'fa-eye-slash text-danger',
+            self.TASK_ADDED: 'fa-tasks text-success',
+            self.TASK_UPDATED: 'fa-edit text-info',
+            self.TASK_COMPLETED: 'fa-check-circle text-success',
             self.CUSTOM: 'fa-star text-warning',
         }
         return icon_map.get(self.event_type, 'fa-circle')
@@ -447,3 +506,102 @@ class CaseEvent(models.Model):
         verbose_name = _('Case Event')
         verbose_name_plural = _('Case Events')
         ordering = ['-created_at']
+
+
+class Task(models.Model):
+    """Tasks associated with cases"""
+    LOW = 'low'
+    MEDIUM = 'medium'
+    HIGH = 'high'
+    
+    PRIORITY_CHOICES = [
+        (LOW, _('Low')),
+        (MEDIUM, _('Medium')),
+        (HIGH, _('High')),
+    ]
+    
+    case = models.ForeignKey(
+        Case,
+        on_delete=models.CASCADE,
+        related_name='tasks',
+    )
+    title = models.CharField(_('Title'), max_length=255)
+    description = models.TextField(_('Description'), blank=True)
+    assigned_to = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        related_name='assigned_tasks',
+        null=True,
+        blank=True,
+    )
+    due_date = models.DateField(_('Due Date'), null=True, blank=True)
+    priority = models.CharField(
+        _('Priority'),
+        max_length=10,
+        choices=PRIORITY_CHOICES,
+        default=MEDIUM,
+    )
+    is_completed = models.BooleanField(_('Completed'), default=False)
+    completed_at = models.DateTimeField(_('Completed at'), null=True, blank=True)
+    completed_by = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        related_name='completed_tasks',
+        null=True,
+        blank=True,
+    )
+    created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
+    
+    def __str__(self):
+        return self.title
+    
+    def save(self, *args, **kwargs):
+        # Check if this is a new task
+        is_new = self.pk is None
+        
+        # Store old data for tracking changes if it's an existing task
+        if not is_new:
+            old_data = {
+                'title': Task.objects.get(pk=self.pk).title,
+                'description': Task.objects.get(pk=self.pk).description,
+                'assigned_to_id': Task.objects.get(pk=self.pk).assigned_to_id,
+                'due_date': Task.objects.get(pk=self.pk).due_date,
+                'priority': Task.objects.get(pk=self.pk).priority,
+                'is_completed': Task.objects.get(pk=self.pk).is_completed,
+            }
+        
+        # Check if task is being marked as completed
+        was_completed = False
+        if not is_new and not Task.objects.get(pk=self.pk).is_completed and self.is_completed:
+            was_completed = True
+            self.completed_at = timezone.now()
+        
+        # Save the task
+        result = super().save(*args, **kwargs)
+        
+        # Add timeline events if there's a case
+        if hasattr(self, 'case'):
+            current_user = getattr(self, '_current_user', None)
+            
+            if is_new and current_user:
+                # Log task creation
+                self.case.log_task_added(current_user, self)
+            elif not is_new and current_user:
+                # Log task update
+                if was_completed:
+                    self.case.log_task_completed(current_user, self)
+                else:
+                    self.case.log_task_updated(current_user, self, old_data)
+        
+        return result
+    
+    # Method to set current user for timeline events
+    def set_current_user(self, user):
+        self._current_user = user
+        return self
+    
+    class Meta:
+        verbose_name = _('Task')
+        verbose_name_plural = _('Tasks')
+        ordering = ['is_completed', 'priority', 'due_date', '-created_at']

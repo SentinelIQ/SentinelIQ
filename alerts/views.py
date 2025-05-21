@@ -6,10 +6,12 @@ from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
+from django.http import JsonResponse
+from django.core.exceptions import PermissionDenied
 
 from accounts.views import OrgAdminRequiredMixin
-from .models import Alert, AlertEvent
-from .forms import AlertForm, AlertFilterForm
+from .models import Alert, AlertEvent, AlertComment, AlertCustomField, AlertCustomValue
+from .forms import AlertForm, AlertFilterForm, AlertCustomFieldForm, DynamicAlertCustomFieldsForm
 from cases.models import Case, CaseEvent
 
 
@@ -106,9 +108,34 @@ class AlertCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateView):
         kwargs['organization'] = self.request.user.organization
         return kwargs
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Add custom fields form
+        if self.request.POST:
+            context['custom_fields_form'] = DynamicAlertCustomFieldsForm(
+                self.request.POST,
+                organization=self.request.user.organization
+            )
+        else:
+            context['custom_fields_form'] = DynamicAlertCustomFieldsForm(
+                organization=self.request.user.organization
+            )
+        
+        return context
+    
     def form_valid(self, form):
         form.instance.organization = self.request.user.organization
         response = super().form_valid(form)
+        
+        # Process custom fields
+        custom_fields_form = DynamicAlertCustomFieldsForm(
+            self.request.POST,
+            organization=self.request.user.organization
+        )
+        
+        if custom_fields_form.is_valid():
+            custom_fields_form.save(self.object)
         
         # Registrar evento de criação
         self.object.add_timeline_event(
@@ -131,6 +158,24 @@ class AlertUpdateView(LoginRequiredMixin, UpdateView):
         kwargs = super().get_form_kwargs()
         kwargs['organization'] = self.request.user.organization
         return kwargs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Add custom fields form
+        if self.request.POST:
+            context['custom_fields_form'] = DynamicAlertCustomFieldsForm(
+                self.request.POST,
+                organization=self.request.user.organization,
+                instance=self.object
+            )
+        else:
+            context['custom_fields_form'] = DynamicAlertCustomFieldsForm(
+                organization=self.request.user.organization,
+                instance=self.object
+            )
+        
+        return context
     
     def form_valid(self, form):
         old_alert = Alert.objects.get(pk=self.object.pk)
@@ -177,6 +222,16 @@ class AlertUpdateView(LoginRequiredMixin, UpdateView):
         
         # Save the form to get M2M fields updated
         response = super().form_valid(form)
+        
+        # Process custom fields
+        custom_fields_form = DynamicAlertCustomFieldsForm(
+            self.request.POST,
+            organization=self.request.user.organization,
+            instance=self.object
+        )
+        
+        if custom_fields_form.is_valid():
+            custom_fields_form.save(self.object)
         
         # Check for tags change
         old_tags = set(old_alert.tags.all())
@@ -275,3 +330,186 @@ def escalate_to_case(request, pk):
     
     # Renderizar confirmação para escalação
     return render(request, 'alerts/alert_escalate.html', {'alert': alert})
+
+
+@login_required
+def add_alert_comment(request, alert_id):
+    """Add a comment to an alert"""
+    alert = get_object_or_404(Alert, pk=alert_id)
+    
+    # Verify user has access to alert
+    if not request.user.is_superadmin() and alert.organization != request.user.organization:
+        messages.error(request, _("You don't have permission to access this alert."))
+        return redirect('alert_list')
+    
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        
+        if content:
+            # Create the comment
+            comment = AlertComment.objects.create(
+                alert=alert,
+                user=request.user,
+                content=content
+            )
+            
+            messages.success(request, _('Comment added successfully.'))
+        else:
+            messages.error(request, _('Comment cannot be empty.'))
+    
+    return redirect('alert_detail', pk=alert_id)
+
+
+@login_required
+def related_alerts(request, alert_id):
+    """View to manage related alerts"""
+    alert = get_object_or_404(Alert, pk=alert_id)
+    
+    # Verificar acesso
+    if not request.user.is_superadmin() and alert.organization != request.user.organization:
+        messages.error(request, _("You don't have permission to access this alert."))
+        return redirect('alert_list')
+    
+    # Obter todos os alertas da mesma organização, excluindo o atual
+    available_alerts = Alert.objects.filter(
+        organization=alert.organization
+    ).exclude(
+        pk=alert.id
+    ).exclude(
+        pk__in=alert.related_alerts.all()
+    ).order_by('-created_at')
+    
+    context = {
+        'alert': alert,
+        'related_alerts': alert.related_alerts.all(),
+        'available_alerts': available_alerts
+    }
+    
+    return render(request, 'alerts/related_alerts.html', context)
+
+
+@login_required
+def add_related_alert(request, alert_id):
+    """Add a related alert"""
+    alert = get_object_or_404(Alert, pk=alert_id)
+    
+    # Verificar acesso
+    if not request.user.is_superadmin() and alert.organization != request.user.organization:
+        messages.error(request, _("You don't have permission to access this alert."))
+        return redirect('alert_list')
+    
+    if request.method == 'POST':
+        related_alert_id = request.POST.get('related_alert_id')
+        
+        if related_alert_id:
+            try:
+                related_alert = Alert.objects.get(pk=related_alert_id)
+                
+                # Verificar se pertencem à mesma organização
+                if related_alert.organization != alert.organization:
+                    messages.error(request, _("The selected alert doesn't belong to the same organization."))
+                    return redirect('related_alerts', alert_id=alert.id)
+                
+                # Adicionar aos relacionamentos (ambos os lados, pois é simétrico)
+                alert.related_alerts.add(related_alert)
+                
+                # Registrar na timeline
+                alert.log_related_alert_added(request.user, related_alert)
+                related_alert.log_related_alert_added(request.user, alert)
+                
+                messages.success(request, _('Related alert added successfully.'))
+            except Alert.DoesNotExist:
+                messages.error(request, _("The selected alert doesn't exist."))
+        else:
+            messages.error(request, _("No alert selected."))
+    
+    return redirect('related_alerts', alert_id=alert.id)
+
+
+@login_required
+def remove_related_alert(request, alert_id, related_id):
+    """Remove a related alert"""
+    alert = get_object_or_404(Alert, pk=alert_id)
+    
+    # Verificar acesso
+    if not request.user.is_superadmin() and alert.organization != request.user.organization:
+        messages.error(request, _("You don't have permission to access this alert."))
+        return redirect('alert_list')
+    
+    try:
+        related_alert = alert.related_alerts.get(pk=related_id)
+        
+        # Remover dos relacionamentos
+        alert.related_alerts.remove(related_alert)
+        
+        # Registrar na timeline
+        alert.log_related_alert_removed(request.user, related_alert)
+        related_alert.log_related_alert_removed(request.user, alert)
+        
+        messages.success(request, _('Related alert removed successfully.'))
+    except Alert.DoesNotExist:
+        messages.error(request, _("The selected alert doesn't exist or is not related."))
+    
+    return redirect('related_alerts', alert_id=alert.id)
+
+
+# Custom Field Management Views
+class AlertCustomFieldListView(LoginRequiredMixin, OrgAdminRequiredMixin, ListView):
+    """List view for alert custom fields"""
+    model = AlertCustomField
+    template_name = 'alerts/custom_field_list.html'
+    context_object_name = 'custom_fields'
+    
+    def get_queryset(self):
+        return AlertCustomField.objects.filter(
+            organization=self.request.user.organization
+        ).order_by('order')
+
+
+class AlertCustomFieldCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateView):
+    """Create view for alert custom fields"""
+    model = AlertCustomField
+    form_class = AlertCustomFieldForm
+    template_name = 'alerts/custom_field_form.html'
+    success_url = reverse_lazy('alert_custom_field_list')
+    
+    def form_valid(self, form):
+        form.instance.organization = self.request.user.organization
+        response = super().form_valid(form)
+        messages.success(self.request, _('Custom field created successfully.'))
+        return response
+
+
+class AlertCustomFieldUpdateView(LoginRequiredMixin, OrgAdminRequiredMixin, UpdateView):
+    """Update view for alert custom fields"""
+    model = AlertCustomField
+    form_class = AlertCustomFieldForm
+    template_name = 'alerts/custom_field_form.html'
+    success_url = reverse_lazy('alert_custom_field_list')
+    
+    def get_queryset(self):
+        return AlertCustomField.objects.filter(
+            organization=self.request.user.organization
+        )
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, _('Custom field updated successfully.'))
+        return response
+
+
+class AlertCustomFieldDeleteView(LoginRequiredMixin, OrgAdminRequiredMixin, DeleteView):
+    """Delete view for alert custom fields"""
+    model = AlertCustomField
+    template_name = 'alerts/custom_field_confirm_delete.html'
+    success_url = reverse_lazy('alert_custom_field_list')
+    
+    def get_queryset(self):
+        return AlertCustomField.objects.filter(
+            organization=self.request.user.organization
+        )
+    
+    def delete(self, request, *args, **kwargs):
+        field = self.get_object()
+        messages.success(request, _(f'Custom field "{field.label}" was deleted successfully.'))
+        return super().delete(request, *args, **kwargs)
