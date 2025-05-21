@@ -281,6 +281,16 @@ def escalate_to_case(request, pk):
         messages.error(request, _("You don't have permission to access this alert."))
         return redirect('alert_list')
     
+    # Get task templates for this threat category and organization
+    task_templates = []
+    if alert.threat_category:
+        from cases.models import TaskTemplate
+        task_templates = TaskTemplate.objects.filter(
+            organization=alert.organization,
+            threat_category=alert.threat_category,
+            is_active=True
+        ).order_by('order')
+    
     # Criar um novo caso a partir do alerta
     if request.method == 'POST':
         # Mapear severidade do alerta para prioridade do caso
@@ -363,6 +373,102 @@ def escalate_to_case(request, pk):
                 item=group
             )
         
+        # Generate tasks from templates if threat category is set
+        from cases.models import Task
+        from datetime import timedelta, date
+        
+        # Check which task templates to include (from the form checkboxes)
+        selected_templates = request.POST.getlist('task_templates')
+        
+        # Adicionar mensagem de depuração
+        print(f"Alert ID: {alert.id}, Threat Category: {alert.threat_category}, Selected Templates: {selected_templates}")
+        
+        if alert.threat_category:
+            # Get task templates for this threat category
+            from cases.models import TaskTemplate
+            
+            # Se não houver templates selecionados, usar todos os templates disponíveis
+            if not selected_templates:
+                # Fallback: Se nenhum template foi selecionado, seleciona todos os templates ativos da categoria
+                all_templates = TaskTemplate.objects.filter(
+                    organization=alert.organization,
+                    threat_category=alert.threat_category,
+                    is_active=True
+                )
+                
+                # Se existirem templates, crie tarefas para todos eles
+                if all_templates.exists():
+                    selected_templates = list(all_templates.values_list('id', flat=True))
+                    print(f"No templates were selected, falling back to all templates: {selected_templates}")
+            
+            if selected_templates:
+                # Buscar templates e ordenar por ordem
+                task_templates = TaskTemplate.objects.filter(
+                    organization=alert.organization,
+                    threat_category=alert.threat_category,
+                    is_active=True,
+                    id__in=selected_templates
+                ).order_by('order')
+                
+                print(f"Found {task_templates.count()} task templates to create tasks from")
+                
+                # Create a task for each template
+                for template in task_templates:
+                    # Calculate due date if specified
+                    due_date = None
+                    if template.due_days > 0:
+                        due_date = date.today() + timedelta(days=template.due_days)
+                    
+                    try:
+                        # Create the task
+                        task = Task.objects.create(
+                            case=case,
+                            title=template.title,
+                            description=template.description,
+                            priority=template.priority,
+                            due_date=due_date,
+                            assigned_to=alert.assigned_to  # Default to same assignee
+                        )
+                        
+                        # Add to timeline
+                        task._current_user = request.user
+                        task.save()
+                        
+                        # Log as created from template
+                        case.add_timeline_event(
+                            event_type=CaseEvent.TASK_ADDED,
+                            title=_('Task automatically created: {title}').format(title=task.title),
+                            description=_('Created from template for threat category: {category}').format(
+                                category=alert.threat_category.get_name_display()
+                            ),
+                            user=request.user,
+                            metadata={'task_id': task.id, 'template_id': template.id}
+                        )
+                        
+                        # Adicionar uma mensagem de sucesso para cada tarefa criada
+                        print(f"Successfully created task: {task.title} from template {template.id}")
+                        
+                    except Exception as e:
+                        # Capturar e registrar quaisquer erros na criação de tarefas
+                        print(f"Error creating task from template {template.id}: {str(e)}")
+                        # Adicionar uma mensagem de erro, mas continuar tentando criar outras tarefas
+                        messages.error(
+                            request, 
+                            _('Error creating task from template: {error}').format(error=str(e))
+                        )
+            else:
+                print("No task templates were found or selected")
+                messages.warning(
+                    request, 
+                    _('No task templates were selected. You can add tasks manually to the case.')
+                )
+        else:
+            print("No threat category is set for this alert")
+            messages.warning(
+                request, 
+                _('No threat category is set for this alert. You can add tasks manually to the case.')
+            )
+        
         # Atualizar o status do alerta para "in_progress"
         if alert.status == Alert.NEW or alert.status == Alert.ACKNOWLEDGED:
             alert.status = Alert.IN_PROGRESS
@@ -405,7 +511,8 @@ def escalate_to_case(request, pk):
     return render(request, 'alerts/alert_escalate.html', {
         'alert': alert,
         'suggested_title': suggested_title,
-        'suggested_description': suggested_description
+        'suggested_description': suggested_description,
+        'task_templates': task_templates
     })
 
 

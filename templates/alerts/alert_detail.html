@@ -310,6 +310,19 @@
                                     </td>
                                 </tr>
                                 <tr>
+                                    <th class="bg-light">Categoria de Ameaça</th>
+                                    <td>
+                                        {% if alert.threat_category %}
+                                            <span class="badge bg-dark">
+                                                <i class="fas fa-{{ alert.threat_category.icon_class }} me-1"></i>
+                                                {{ alert.threat_category.get_name_display }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">Não definida</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th class="bg-light">TLP</th>
                                     <td>
                                         <span class="badge {% if alert.tlp == 'red' %}bg-danger{% elif alert.tlp == 'amber' %}bg-warning text-dark{% elif alert.tlp == 'green' %}bg-success{% else %}bg-light text-dark border{% endif %}">

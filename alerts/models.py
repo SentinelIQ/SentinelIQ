@@ -232,6 +232,16 @@ class Alert(models.Model):
         blank=True,
         help_text=_('Grupos de elementos MITRE ATT&CK (táticas, técnicas, subtécnicas) relacionados'),
     )
+    # Threat category for task generation
+    threat_category = models.ForeignKey(
+        'cases.ThreatCategory',
+        verbose_name=_('Threat Category'),
+        on_delete=models.SET_NULL,
+        related_name='alerts',
+        null=True,
+        blank=True,
+        help_text=_('Type of threat for automated task generation'),
+    )
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
     

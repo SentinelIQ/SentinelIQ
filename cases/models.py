@@ -202,22 +202,22 @@ class Case(models.Model):
     
     def log_due_date_change(self, user, old_date, new_date):
         """Log a due date change event"""
+        old_display = old_date.strftime('%Y-%m-%d') if old_date else _('None')
+        new_display = new_date.strftime('%Y-%m-%d') if new_date else _('None')
+        
         return self.add_timeline_event(
             event_type=CaseEvent.DUE_DATE_CHANGED,
-            title=_('Due date changed from {old} to {new}').format(
-                old=old_date.strftime('%Y-%m-%d') if old_date else _('Not set'),
-                new=new_date.strftime('%Y-%m-%d') if new_date else _('Not set')
-            ),
+            title=_('Due date changed from {old} to {new}').format(old=old_display, new=new_display),
             user=user,
-            old_value=old_date.strftime('%Y-%m-%d') if old_date else None,
-            new_value=new_date.strftime('%Y-%m-%d') if new_date else None
+            old_value=str(old_date) if old_date else None,
+            new_value=str(new_date) if new_date else None
         )
     
     def log_comment_added(self, user, comment):
         """Log a comment added event"""
         return self.add_timeline_event(
             event_type=CaseEvent.COMMENT_ADDED,
-            title=_('Comment added by {user}').format(user=user.username),
+            title=_('Comment added'),
             description=comment.content[:100] + ('...' if len(comment.content) > 100 else ''),
             user=user,
             metadata={'comment_id': comment.id}
@@ -227,8 +227,7 @@ class Case(models.Model):
         """Log an attachment added event"""
         return self.add_timeline_event(
             event_type=CaseEvent.ATTACHMENT_ADDED,
-            title=_('Attachment added by {user}').format(user=user.username),
-            description=attachment.filename,
+            title=_('Attachment added: {filename}').format(filename=attachment.filename),
             user=user,
             metadata={'attachment_id': attachment.id}
         )
@@ -237,7 +236,7 @@ class Case(models.Model):
         """Log an alert linked event"""
         return self.add_timeline_event(
             event_type=CaseEvent.ALERT_LINKED,
-            title=_('Alert linked: {alert}').format(alert=alert.title),
+            title=_('Alert linked: {title}').format(title=alert.title),
             user=user,
             metadata={'alert_id': alert.id}
         )
@@ -246,7 +245,7 @@ class Case(models.Model):
         """Log an alert unlinked event"""
         return self.add_timeline_event(
             event_type=CaseEvent.ALERT_UNLINKED,
-            title=_('Alert unlinked: {alert}').format(alert=alert.title),
+            title=_('Alert unlinked: {title}').format(title=alert.title),
             user=user,
             metadata={'alert_id': alert.id}
         )
@@ -278,118 +277,172 @@ class Case(models.Model):
         )
     
     def log_tags_change(self, user, old_tags, new_tags):
-        """Log tag changes to timeline"""
-        # Create tag names for display
-        old_tags_names = ', '.join([tag.name for tag in old_tags]) if old_tags else _('None')
-        new_tags_names = ', '.join([tag.name for tag in new_tags]) if new_tags else _('None')
+        """Log a tags change event"""
+        if hasattr(old_tags, 'all'):
+            old_tags = list(old_tags.all())
+        if hasattr(new_tags, 'all'):
+            new_tags = list(new_tags.all())
         
-        description = _('Changed from: {0} to: {1}').format(old_tags_names, new_tags_names)
+        old_names = [tag.name for tag in old_tags] if isinstance(old_tags, (list, set)) else []
+        new_names = [tag.name for tag in new_tags] if isinstance(new_tags, (list, set)) else new_tags
+        
+        added = [name for name in new_names if name not in old_names]
+        removed = [name for name in old_names if name not in new_names]
+        
+        description = ""
+        if added:
+            description += _('Added: {}').format(', '.join(added))
+        if removed:
+            description += _(' Removed: {}').format(', '.join(removed)) if description else _('Removed: {}').format(', '.join(removed))
         
         return self.add_timeline_event(
             event_type=CaseEvent.TAGS_CHANGED,
-            title=_('Tags changed'),
+            title=_('Tags updated'),
             description=description,
             user=user
         )
     
     def log_observable_added(self, user, observable):
-        """Log when an observable is added to the case"""
+        """Log an observable added event"""
         return self.add_timeline_event(
             event_type=CaseEvent.OBSERVABLE_ADDED,
-            title=_('Observable added'),
-            description=f"{observable.get_type_display()}: {observable.value}",
+            title=_('Observable added: {value}').format(value=observable.value),
+            description=_('Type: {type}').format(type=observable.get_type_display()),
             user=user,
             metadata={'observable_id': observable.id}
         )
     
     def log_observable_removed(self, user, observable):
-        """Log when an observable is removed from the case"""
+        """Log an observable removed event"""
         return self.add_timeline_event(
             event_type=CaseEvent.OBSERVABLE_REMOVED,
-            title=_('Observable removed: {observable}').format(observable=observable),
+            title=_('Observable removed: {value}').format(value=observable.value),
+            description=_('Type: {type}').format(type=observable.get_type_display()),
             user=user,
             metadata={'observable_id': observable.id}
         )
     
     def log_task_added(self, user, task):
-        """Log when a task is added to the case"""
+        """Log a task added event"""
         return self.add_timeline_event(
             event_type=CaseEvent.TASK_ADDED,
-            title=_('Task added'),
-            description=task.title,
+            title=_('Task added: {title}').format(title=task.title),
             user=user,
             metadata={'task_id': task.id}
         )
     
     def log_task_updated(self, user, task, old_data=None):
-        """Log when a task is updated"""
-        description = f"Task updated: {task.title}"
+        """Log a task updated event"""
+        changes = []
+        
         if old_data:
-            changes = []
             if old_data.get('title') != task.title:
-                changes.append(f"Title changed from '{old_data.get('title')}' to '{task.title}'")
-            if old_data.get('description') != task.description:
-                changes.append("Description was updated")
-            if old_data.get('assigned_to_id') != (task.assigned_to.id if task.assigned_to else None):
-                old_assignee = "Unassigned" if not old_data.get('assigned_to_id') else User.objects.get(id=old_data.get('assigned_to_id')).username
-                new_assignee = "Unassigned" if not task.assigned_to else task.assigned_to.username
-                changes.append(f"Assignee changed from {old_assignee} to {new_assignee}")
-            if old_data.get('due_date') != task.due_date:
-                changes.append(f"Due date changed from {old_data.get('due_date')} to {task.due_date}")
-            if old_data.get('priority') != task.priority:
-                changes.append(f"Priority changed from {old_data.get('priority')} to {task.priority}")
+                changes.append(_('Title changed'))
             
-            if changes:
-                description = ", ".join(changes)
+            if old_data.get('description') != task.description:
+                changes.append(_('Description changed'))
+            
+            if old_data.get('assigned_to_id') != task.assigned_to_id:
+                old_assignee = 'Unassigned'
+                new_assignee = 'Unassigned'
+                
+                if old_data.get('assigned_to_id'):
+                    from accounts.models import User
+                    try:
+                        old_user = User.objects.get(pk=old_data.get('assigned_to_id'))
+                        old_assignee = old_user.username
+                    except User.DoesNotExist:
+                        pass
+                
+                if task.assigned_to:
+                    new_assignee = task.assigned_to.username
+                
+                changes.append(_('Assignee changed from {old} to {new}').format(old=old_assignee, new=new_assignee))
+            
+            if old_data.get('due_date') != task.due_date:
+                old_date = old_data.get('due_date')
+                new_date = task.due_date
+                
+                old_display = old_date.strftime('%Y-%m-%d') if old_date else 'None'
+                new_display = new_date.strftime('%Y-%m-%d') if new_date else 'None'
+                
+                changes.append(_('Due date changed from {old} to {new}').format(old=old_display, new=new_display))
+            
+            if old_data.get('priority') != task.priority:
+                changes.append(_('Priority changed from {old} to {new}').format(
+                    old=dict(Task.PRIORITY_CHOICES).get(old_data.get('priority'), old_data.get('priority')),
+                    new=dict(Task.PRIORITY_CHOICES).get(task.priority, task.priority)
+                ))
+        
+        description = '\n'.join(changes) if changes else _('Task details updated')
         
         return self.add_timeline_event(
             event_type=CaseEvent.TASK_UPDATED,
-            title=_('Task updated'),
+            title=_('Task updated: {title}').format(title=task.title),
             description=description,
             user=user,
             metadata={'task_id': task.id}
         )
     
     def log_task_completed(self, user, task):
-        """Log when a task is completed"""
+        """Log a task completed event"""
         return self.add_timeline_event(
             event_type=CaseEvent.TASK_COMPLETED,
-            title=_('Task completed'),
-            description=task.title,
+            title=_('Task completed: {title}').format(title=task.title),
             user=user,
             metadata={'task_id': task.id}
         )
     
     def log_mitre_attack_added(self, user, item_type, item):
-        """Log a MITRE ATT&CK element added event"""
+        """Log MITRE ATT&CK item added event"""
+        if item_type == 'tactic':
+            title = _('MITRE Tactic added: {name}').format(name=item.name)
+            description = _('ID: {id}').format(id=item.tactic_id)
+        elif item_type == 'technique':
+            title = _('MITRE Technique added: {name}').format(name=item.name)
+            description = _('ID: {id}').format(id=item.technique_id)
+        elif item_type == 'subtechnique':
+            title = _('MITRE Sub-technique added: {name}').format(name=item.name)
+            description = _('ID: {id}').format(id=item.sub_technique_id)
+        elif item_type == 'attack_group':
+            title = _('MITRE ATT&CK Group added: {name}').format(name=item.name)
+            description = _('ID: {id}').format(id=item.id)
+        else:
+            title = _('MITRE ATT&CK item added')
+            description = ''
+        
         return self.add_timeline_event(
             event_type=CaseEvent.MITRE_ATTACK_ADDED,
-            title=_('MITRE ATT&CK {type} added: {item}').format(
-                type=item_type.capitalize(), 
-                item=str(item)
-            ),
+            title=title,
+            description=description,
             user=user,
-            metadata={
-                'mitre_type': item_type,
-                'mitre_id': item.pk,
-                'mitre_name': item.name
-            }
+            metadata={'item_type': item_type, 'item_id': item.id}
         )
     
     def log_mitre_attack_removed(self, user, item_type, item):
-        """Log a MITRE ATT&CK element removed event"""
+        """Log MITRE ATT&CK item removed event"""
+        if item_type == 'tactic':
+            title = _('MITRE Tactic removed: {name}').format(name=item.name)
+            description = _('ID: {id}').format(id=item.tactic_id)
+        elif item_type == 'technique':
+            title = _('MITRE Technique removed: {name}').format(name=item.name)
+            description = _('ID: {id}').format(id=item.technique_id)
+        elif item_type == 'subtechnique':
+            title = _('MITRE Sub-technique removed: {name}').format(name=item.name)
+            description = _('ID: {id}').format(id=item.sub_technique_id)
+        elif item_type == 'attack_group':
+            title = _('MITRE ATT&CK Group removed: {name}').format(name=item.name)
+            description = _('ID: {id}').format(id=item.id)
+        else:
+            title = _('MITRE ATT&CK item removed')
+            description = ''
+        
         return self.add_timeline_event(
             event_type=CaseEvent.MITRE_ATTACK_REMOVED,
-            title=_('MITRE ATT&CK {type} removed: {item}').format(
-                type=item_type.capitalize(), 
-                item=str(item)
-            ),
+            title=title,
+            description=description,
             user=user,
-            metadata={
-                'mitre_type': item_type,
-                'mitre_id': item.pk,
-                'mitre_name': item.name
-            }
+            metadata={'item_type': item_type, 'item_id': item.id}
         )
     
     class Meta:
@@ -414,16 +467,16 @@ class CaseComment(models.Model):
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     
     def __str__(self):
-        return f'Comment on {self.case.title} by {self.user.username}'
+        return f"Comment on {self.case.title} by {self.user.username}"
     
     def save(self, *args, **kwargs):
+        # Register comment in timeline if it's a new comment
         is_new = self.pk is None
         result = super().save(*args, **kwargs)
         
-        # Log timeline event for new comments
         if is_new and hasattr(self, 'case'):
             self.case.log_comment_added(self.user, self)
-            
+        
         return result
     
     class Meta:
@@ -452,13 +505,13 @@ class CaseAttachment(models.Model):
         return self.filename
     
     def save(self, *args, **kwargs):
+        # Register attachment in timeline if it's a new attachment
         is_new = self.pk is None
         result = super().save(*args, **kwargs)
         
-        # Log timeline event for new attachments
         if is_new and hasattr(self, 'case'):
             self.case.log_attachment_added(self.uploaded_by, self)
-            
+        
         return result
     
     class Meta:
@@ -669,3 +722,95 @@ class Task(models.Model):
         verbose_name = _('Task')
         verbose_name_plural = _('Tasks')
         ordering = ['is_completed', 'priority', 'due_date', '-created_at']
+
+
+class ThreatCategory(models.Model):
+    """Categories of threats for automated task generation"""
+    PHISHING = 'phishing'
+    MALWARE = 'malware'
+    RANSOMWARE = 'ransomware'
+    DATA_BREACH = 'data_breach'
+    INSIDER_THREAT = 'insider_threat'
+    DDoS = 'ddos'
+    UNAUTHORIZED_ACCESS = 'unauthorized_access'
+    SOCIAL_ENGINEERING = 'social_engineering'
+    SUPPLY_CHAIN = 'supply_chain'
+    OTHER = 'other'
+    
+    CATEGORY_CHOICES = [
+        (PHISHING, _('Phishing')),
+        (MALWARE, _('Malware')),
+        (RANSOMWARE, _('Ransomware')),
+        (DATA_BREACH, _('Data Breach')),
+        (INSIDER_THREAT, _('Insider Threat')),
+        (DDoS, _('DDoS')),
+        (UNAUTHORIZED_ACCESS, _('Unauthorized Access')),
+        (SOCIAL_ENGINEERING, _('Social Engineering')),
+        (SUPPLY_CHAIN, _('Supply Chain')),
+        (OTHER, _('Other')),
+    ]
+    
+    name = models.CharField(
+        _('Name'),
+        max_length=50,
+        choices=CATEGORY_CHOICES,
+        unique=True
+    )
+    description = models.TextField(_('Description'), blank=True)
+    icon_class = models.CharField(_('Icon Class'), max_length=50, blank=True)
+    created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
+    
+    def __str__(self):
+        return self.get_name_display()
+    
+    class Meta:
+        verbose_name = _('Threat Category')
+        verbose_name_plural = _('Threat Categories')
+        ordering = ['name']
+
+
+class TaskTemplate(models.Model):
+    """Templates for tasks to be created automatically based on threat category"""
+    LOW = 'low'
+    MEDIUM = 'medium'
+    HIGH = 'high'
+    
+    PRIORITY_CHOICES = [
+        (LOW, _('Low')),
+        (MEDIUM, _('Medium')),
+        (HIGH, _('High')),
+    ]
+    
+    title = models.CharField(_('Title'), max_length=255)
+    description = models.TextField(_('Description'), blank=True)
+    priority = models.CharField(
+        _('Priority'),
+        max_length=10,
+        choices=PRIORITY_CHOICES,
+        default=MEDIUM,
+    )
+    threat_category = models.ForeignKey(
+        ThreatCategory, 
+        on_delete=models.CASCADE,
+        related_name='task_templates',
+        verbose_name=_('Threat Category')
+    )
+    organization = models.ForeignKey(
+        'organizations.Organization',
+        on_delete=models.CASCADE,
+        related_name='task_templates',
+    )
+    is_active = models.BooleanField(_('Active'), default=True)
+    order = models.PositiveIntegerField(_('Order'), default=0)
+    due_days = models.PositiveIntegerField(_('Due Days'), default=7, help_text=_('Number of days after case creation to set as due date'))
+    created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
+    
+    def __str__(self):
+        return f"{self.title} ({self.threat_category})"
+    
+    class Meta:
+        verbose_name = _('Task Template')
+        verbose_name_plural = _('Task Templates')
+        ordering = ['threat_category', 'order', 'title']

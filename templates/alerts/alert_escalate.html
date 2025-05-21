@@ -289,6 +289,94 @@
                 </div>
             </div>
             
+            {% if task_templates %}
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0"><i class="fas fa-tasks me-2"></i> Tarefas Automáticas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Baseado na categoria de ameaça <strong>{{ alert.threat_category.get_name_display }}</strong>, as seguintes tarefas podem ser automaticamente adicionadas ao caso. Selecione as que deseja incluir:
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 5%"></th>
+                                    <th style="width: 40%">Tarefa</th>
+                                    <th style="width: 15%">Prioridade</th>
+                                    <th style="width: 25%">Prazo</th>
+                                    <th style="width: 15%">Atribuída a</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for template in task_templates %}
+                                <tr>
+                                    <td class="align-middle">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="task_templates" value="{{ template.id }}" id="task_{{ template.id }}" checked>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <label for="task_{{ template.id }}" class="mb-0 fw-bold">{{ template.title }}</label>
+                                        {% if template.description %}
+                                        <p class="text-muted small mb-0">{{ template.description|truncatechars:100 }}</p>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if template.priority == 'high' %}bg-danger{% elif template.priority == 'medium' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                                            {% if template.priority == 'high' %}Alta{% elif template.priority == 'medium' %}Média{% else %}Baixa{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if template.due_days > 0 %}
+                                        {{ template.due_days }} dias após criação
+                                        {% else %}
+                                        <span class="text-muted">Sem prazo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if alert.assigned_to %}
+                                        {{ alert.assigned_to.get_full_name|default:alert.assigned_to.username }}
+                                        {% else %}
+                                        <span class="text-muted">Não atribuído</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% elif alert.threat_category %}
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-tasks me-2"></i> Tarefas Automáticas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Este alerta está categorizado como <strong>{{ alert.threat_category.get_name_display }}</strong>, mas não existem modelos de tarefas definidos para esta categoria na sua organização.
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-tasks me-2"></i> Tarefas Automáticas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Nenhuma categoria de ameaça está definida para este alerta. Para gerar tarefas automaticamente, defina uma categoria de ameaça editando o alerta.
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
             <div class="d-flex justify-content-end">
                 <a href="{% url 'alert_detail' alert.id %}" class="btn btn-secondary me-2">
                     <i class="fas fa-times me-1"></i> Cancelar
