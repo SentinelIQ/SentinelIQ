@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'alerts',
     'core',
     'cases',
+    'vision',
 ]
 
 MIDDLEWARE = [

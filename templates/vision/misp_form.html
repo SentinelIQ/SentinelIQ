@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        {% trans "Edit MISP Instance" %} - {{ form.instance.name }}
+    {% else %}
+        {% trans "Add MISP Instance" %}
+    {% endif %} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'vision:feed_list' %}">{% trans "Feeds" %}</a></li>
+                    <li class="breadcrumb-item active">
+                        {% if form.instance.pk %}
+                            {% trans "Edit MISP Instance" %}
+                        {% else %}
+                            {% trans "Add MISP Instance" %}
+                        {% endif %}
+                    </li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0">
+                {% if form.instance.pk %}
+                    <i class="fas fa-edit me-2"></i> {% trans "Edit MISP Instance" %}: {{ form.instance.name }}
+                {% else %}
+                    <i class="fas fa-plus-circle me-2"></i> {% trans "Add MISP Instance" %}
+                {% endif %}
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <!-- Notification area for connection test results -->
+            <div id="connectionTestResults" class="alert alert-dismissible fade" role="alert" style="display: none;">
+                <span id="connectionTestMessage"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <i class="fas fa-plug me-1"></i> {% trans "MISP Configuration" %}
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate id="mispForm">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <h5><i class="fas fa-exclamation-triangle me-2"></i> {% trans "There were errors in your form" %}</h5>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <p>{{ field.label }}: {{ error }}</p>
+                                {% endfor %}
+                            {% endfor %}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h5>{% trans "Basic Information" %}</h5>
+                                <hr>
+                                <div class="mb-3">
+                                    <label for="{{ form.name.id_for_label }}" class="form-label">{% trans "Name" %} *</label>
+                                    {{ form.name }}
+                                    <div class="form-text">{% trans "A meaningful name for this MISP instance." %}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">{% trans "Description" %}</label>
+                                    {{ form.description }}
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        {{ form.is_public }}
+                                        <label class="form-check-label" for="{{ form.is_public.id_for_label }}">
+                                            {% trans "Public Feed" %}
+                                        </label>
+                                    </div>
+                                    <div class="form-text">{% trans "If enabled, all organizations will have access to this feed." %}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5>{% trans "Connection Settings" %} </h5>
+                                <hr>
+                                <div class="mb-3">
+                                    <label for="{{ form.url.id_for_label }}" class="form-label">{% trans "MISP URL" %} *</label>
+                                    {{ form.url }}
+                                    <div class="form-text">{% trans "The URL of the MISP instance (e.g. https://misp.example.org)." %}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="{{ form.api_key.id_for_label }}" class="form-label">{% trans "API Key" %} *</label>
+                                    {{ form.api_key }}
+                                    <div class="form-text">{{ form.api_key.help_text }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        {{ form.verify_ssl }}
+                                        <label class="form-check-label" for="{{ form.verify_ssl.id_for_label }}">
+                                            {% trans "Verify SSL Certificate" %}
+                                        </label>
+                                    </div>
+                                    <div class="form-text">{% trans "Disable this if you have self-signed certificates." %}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <button type="button" id="testConnection" class="btn btn-info">
+                                        <i class="fas fa-network-wired me-1"></i> {% trans "Test Connection" %}
+                                    </button>
+                                    <span id="connectionIndicator" class="ms-2" style="display: none;">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <h5>{% trans "Synchronization Settings" %}</h5>
+                                <hr>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        {{ form.import_events }}
+                                        <label class="form-check-label" for="{{ form.import_events.id_for_label }}">
+                                            {% trans "Import Events" %}
+                                        </label>
+                                    </div>
+                                    <div class="form-text">{% trans "Import events from this MISP instance." %}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        {{ form.import_attributes }}
+                                        <label class="form-check-label" for="{{ form.import_attributes.id_for_label }}">
+                                            {% trans "Import Attributes" %}
+                                        </label>
+                                    </div>
+                                    <div class="form-text">{% trans "Import attributes (IOCs) from this MISP instance." %}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        {{ form.import_tags }}
+                                        <label class="form-check-label" for="{{ form.import_tags.id_for_label }}">
+                                            {% trans "Import Tags" %}
+                                        </label>
+                                    </div>
+                                    <div class="form-text">{% trans "Import all tag definitions from the MISP instance." %}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        {{ form.import_galaxies }}
+                                        <label class="form-check-label" for="{{ form.import_galaxies.id_for_label }}">
+                                            {% trans "Import Galaxies/Clusters" %}
+                                        </label>
+                                    </div>
+                                    <div class="form-text">{% trans "Import all galaxy and cluster information from the MISP instance." %}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="{{ form.import_from_days.id_for_label }}" class="form-label">{% trans "Import from last X days" %}</label>
+                                    {{ form.import_from_days }}
+                                    <div class="form-text">{{ form.import_from_days.help_text }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.sync_frequency.id_for_label }}" class="form-label">{% trans "Sync Frequency (minutes)" %}</label>
+                                    {{ form.sync_frequency }}
+                                    <div class="form-text">{{ form.sync_frequency.help_text }}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="{{ form.tags_to_include.id_for_label }}" class="form-label">{% trans "Tags to Include" %}</label>
+                                    {{ form.tags_to_include }}
+                                    <div class="form-text">{% trans "Only import events/attributes with these tags." %}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="{{ form.tags_to_exclude.id_for_label }}" class="form-label">{% trans "Tags to Exclude" %}</label>
+                                    {{ form.tags_to_exclude }}
+                                    <div class="form-text">{% trans "Exclude events/attributes with these tags." %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'vision:feed_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i> {% trans "Cancel" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>
+                                {% if form.instance.pk %}
+                                    {% trans "Update" %}
+                                {% else %}
+                                    {% trans "Create" %}
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Adicionar classes Bootstrap para os campos do formulário
+    document.addEventListener('DOMContentLoaded', function() {
+        // Adicionar classes aos inputs
+        const inputs = document.querySelectorAll('input[type=text], input[type=url], input[type=number], input[type=password], textarea, select');
+        inputs.forEach(function(input) {
+            input.classList.add('form-control');
+        });
+        
+        // Adicionar classes para checkbox/switch
+        const switches = document.querySelectorAll('input[type=checkbox]');
+        switches.forEach(function(checkbox) {
+            checkbox.classList.add('form-check-input');
+        });
+        
+        // Handler para o botão de teste de conexão
+        document.getElementById('testConnection').addEventListener('click', function() {
+            testMispConnection();
+        });
+    });
+    
+    // Função para testar a conexão com o MISP
+    function testMispConnection() {
+        const url = document.querySelector('#{{ form.url.id_for_label }}').value;
+        const apiKey = document.querySelector('#{{ form.api_key.id_for_label }}').value;
+        const verifySSL = document.querySelector('#{{ form.verify_ssl.id_for_label }}').checked;
+        
+        if (!url || !apiKey) {
+            showConnectionResult(false, "{% trans 'URL and API key are required' %}");
+            return;
+        }
+        
+        // Mostrar indicador de carregamento
+        const indicator = document.getElementById('connectionIndicator');
+        indicator.style.display = 'inline-block';
+        
+        // Criar formulário para enviar dados
+        const formData = new FormData();
+        formData.append('url', url);
+        formData.append('api_key', apiKey);
+        formData.append('verify_ssl', verifySSL);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        
+        // Enviar requisição
+        fetch('{% url "vision:test_misp_connection" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            indicator.style.display = 'none';
+            showConnectionResult(data.success, data.message);
+        })
+        .catch(error => {
+            indicator.style.display = 'none';
+            showConnectionResult(false, "{% trans 'Error testing connection' %}: " + error.message);
+        });
+    }
+    
+    // Função para mostrar o resultado do teste de conexão
+    function showConnectionResult(success, message) {
+        const resultsDiv = document.getElementById('connectionTestResults');
+        const messageSpan = document.getElementById('connectionTestMessage');
+        
+        // Configurar a mensagem e o estilo
+        messageSpan.innerText = message;
+        
+        // Remover classes anteriores
+        resultsDiv.classList.remove('alert-success', 'alert-danger');
+        
+        // Adicionar a classe apropriada
+        if (success) {
+            resultsDiv.classList.add('alert-success');
+        } else {
+            resultsDiv.classList.add('alert-danger');
+        }
+        
+        // Mostrar a div
+        resultsDiv.classList.add('show');
+        resultsDiv.style.display = 'block';
+    }
+</script>
+{% endblock %} 

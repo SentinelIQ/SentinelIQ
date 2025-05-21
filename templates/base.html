@@ -82,6 +82,32 @@
                             <i class="fas fa-eye me-1"></i> Observables
                         </a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" 
+                           id="visionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-satellite-dish me-1"></i> Vision
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="visionDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'vision:feed_list' %}">
+                                    <i class="fas fa-rss me-2"></i> Feeds
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'vision:search' %}">
+                                    <i class="fas fa-search me-2"></i> Busca de IOCs
+                                </a>
+                            </li>
+                            {% if user.is_superadmin or user.is_org_admin %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'vision:misp_create' %}">
+                                    <i class="fas fa-plus-circle me-2"></i> Nova Instância MISP
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </li>
                     {% if user.is_superadmin or user.is_org_admin %}
                     <li class="nav-item">
                         <a class="nav-link d-flex align-items-center" href="{% url 'tag_list' %}">
@@ -194,6 +220,11 @@
                         <li class="mb-2">
                             <a href="{% url 'observable_list' %}" class="text-decoration-none text-white-50">
                                 <i class="fas fa-angle-right me-2"></i>Observables
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{% url 'vision:feed_list' %}" class="text-decoration-none text-white-50">
+                                <i class="fas fa-angle-right me-2"></i>Vision
                             </a>
                         </li>
                         <li class="mb-2">

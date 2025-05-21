@@ -59,6 +59,7 @@ urlpatterns = [
     path('alerts/', include('alerts.urls')),
     path('cases/', include('cases.urls')),
     path('', include('core.urls')),
+    path('vision/', include('vision.urls')),
 ]
 
 # Serve static and media files in development

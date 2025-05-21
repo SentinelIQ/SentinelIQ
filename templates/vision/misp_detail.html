@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load vision_extras %}
+
+{% block title %}{{ misp.name }} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'vision:feed_list' %}">{% trans "Feeds" %}</a></li>
+                    <li class="breadcrumb-item active">{{ misp.name }}</li>
+                </ol>
+            </nav>
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">
+                    <i class="fab fa-mandalorian me-2 text-primary"></i> {{ misp.name }}
+                </h1>
+                <div>
+                    <a href="{% url 'vision:misp_sync' misp.id %}" class="btn btn-info me-2">
+                        <i class="fas fa-sync me-1"></i> {% trans "Sync Now" %}
+                    </a>
+                    <a href="{% url 'vision:misp_edit' misp.id %}" class="btn btn-primary me-2">
+                        <i class="fas fa-edit me-1"></i> {% trans "Edit" %}
+                    </a>
+                    <a href="{% url 'vision:misp_delete' misp.id %}" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-1"></i> {% trans "Delete" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-info-circle me-1"></i> {% trans "Instance Information" %}
+                    </div>
+                    <span class="badge {% if misp.status == 'active' %}bg-success{% elif misp.status == 'error' %}bg-danger{% elif misp.status == 'pending' %}bg-warning{% else %}bg-secondary{% endif %}">
+                        {% if misp.status == 'active' %}{% trans "Active" %}{% elif misp.status == 'error' %}{% trans "Error" %}{% elif misp.status == 'pending' %}{% trans "Pending" %}{% else %}{% trans "Inactive" %}{% endif %}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">{% trans "Description" %}</h6>
+                        <p>{{ misp.description|default:"No description provided."|linebreaks }}</p>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">{% trans "Organization" %}</h6>
+                            <p>{{ misp.organization.name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">{% trans "Public" %}</h6>
+                            <p>{% if misp.is_public %}<span class="text-success">{% trans "Yes" %}</span>{% else %}<span class="text-danger">{% trans "No" %}</span>{% endif %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">{% trans "Last Synchronization" %}</h6>
+                            <p>{% if misp.last_sync %}{{ misp.last_sync|date:"d/m/Y H:i" }}{% else %}<em>{% trans "Never" %}</em>{% endif %}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">{% trans "Sync Frequency" %}</h6>
+                            <p>{{ misp.sync_frequency }} {% trans "minutes" %}</p>
+                        </div>
+                    </div>
+                    
+                    <h6 class="text-muted mb-2">{% trans "URL" %}</h6>
+                    <p><a href="{{ misp.url }}" target="_blank" rel="noopener noreferrer">{{ misp.url }} <i class="fas fa-external-link-alt fa-sm"></i></a></p>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <i class="fas fa-cog me-1"></i> {% trans "Sync Settings" %}
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">{% trans "Import Events" %}</h6>
+                            <p>{% if misp.import_events %}<span class="text-success">{% trans "Yes" %}</span>{% else %}<span class="text-danger">{% trans "No" %}</span>{% endif %}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">{% trans "Import Attributes" %}</h6>
+                            <p>{% if misp.import_attributes %}<span class="text-success">{% trans "Yes" %}</span>{% else %}<span class="text-danger">{% trans "No" %}</span>{% endif %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">{% trans "Import from last X days" %}</h6>
+                        <p>
+                            {% if misp.import_from_days == 0 %}
+                                {% trans "All events" %}
+                            {% else %}
+                                {{ misp.import_from_days }} {% trans "days" %}
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">{% trans "Tags to Include" %}</h6>
+                        <p>
+                            {% if misp.tags_to_include %}
+                                {% with tags=misp.tags_to_include|split:"," %}
+                                    {% for tag in tags %}
+                                        <span class="badge bg-primary me-1 mb-1">{{ tag }}</span>
+                                    {% endfor %}
+                                {% endwith %}
+                            {% else %}
+                                <em>{% trans "None" %}</em>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">{% trans "Tags to Exclude" %}</h6>
+                        <p>
+                            {% if misp.tags_to_exclude %}
+                                {% with tags=misp.tags_to_exclude|split:"," %}
+                                    {% for tag in tags %}
+                                        <span class="badge bg-danger me-1 mb-1">{{ tag }}</span>
+                                    {% endfor %}
+                                {% endwith %}
+                            {% else %}
+                                <em>{% trans "None" %}</em>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-7">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <i class="fas fa-list me-1"></i> {% trans "Recently Imported Items" %}
+                </div>
+                <div class="card-body">
+                    {% if recent_items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "Type" %}</th>
+                                        <th>{% trans "Value" %}</th>
+                                        <th>{% trans "Creator" %}</th>
+                                        <th>{% trans "#Attr." %}</th>
+                                        <th>{% trans "Date" %}</th>
+                                        <th>{% trans "TLP" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in recent_items %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ item.get_item_type_display }}</span>
+                                        </td>
+                                        <td>
+                                            <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ item.value }}">
+                                                {{ item.value }}
+                                            </div>
+                                            {% if item.external_url %}
+                                                <a href="{{ item.external_url }}" target="_blank" rel="noopener noreferrer" class="text-muted small">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if item.creator_org %}
+                                                <small>{{ item.creator_org }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if item.attribute_count %}
+                                                <span class="badge bg-info">{{ item.attribute_count }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if item.event_date %}
+                                                <small>{{ item.event_date|date:"d/m/Y" }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ item.tlp|tlp_badge }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-end mt-3">
+                            <a href="{% url 'vision:search' %}?feed={{ misp.id }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-search me-1"></i> {% trans "View All Items" %}
+                            </a>
+                        </p>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-database fa-4x text-muted mb-3"></i>
+                            <h5>{% trans "No items imported yet" %}</h5>
+                            <p class="text-muted">{% trans "Sync this MISP instance to import threat intelligence items." %}</p>
+                            <a href="{% url 'vision:misp_sync' misp.id %}" class="btn btn-primary">
+                                <i class="fas fa-sync me-1"></i> {% trans "Sync Now" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

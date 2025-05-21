@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Threat Intelligence Feeds" %} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">{% trans "Threat Intelligence Feeds" %}</h1>
+        <div>
+            <a href="{% url 'vision:search' %}" class="btn btn-primary me-2">
+                <i class="fas fa-search me-1"></i> {% trans "Search Intelligence" %}
+            </a>
+            <a href="{% url 'vision:misp_create' %}" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i> {% trans "Add MISP Instance" %}
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <i class="fas fa-satellite-dish me-1"></i> {% trans "Available Feeds" %}
+                </div>
+                <div class="card-body">
+                    {% if feeds %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{% trans "Name" %}</th>
+                                        <th>{% trans "Type" %}</th>
+                                        <th>{% trans "Organization" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "Last Sync" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for feed in feeds %}
+                                        <tr>
+                                            <td>
+                                                {% if feed.feed_type == 'misp' %}
+                                                    <a href="{% url 'vision:misp_detail' feed.id %}">{{ feed.name }}</a>
+                                                {% else %}
+                                                    {{ feed.name }}
+                                                {% endif %}
+                                            </td>
+                                            <td><span class="badge bg-info">{{ feed.get_feed_type_display }}</span></td>
+                                            <td>{{ feed.organization.name }}</td>
+                                            <td>
+                                                {% if feed.status == 'active' %}
+                                                    <span class="badge bg-success">{% trans "Active" %}</span>
+                                                {% elif feed.status == 'error' %}
+                                                    <span class="badge bg-danger">{% trans "Error" %}</span>
+                                                {% elif feed.status == 'pending' %}
+                                                    <span class="badge bg-warning">{% trans "Pending" %}</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{% trans "Inactive" %}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if feed.last_sync %}
+                                                    {{ feed.last_sync|date:"d/m/Y H:i" }}
+                                                {% else %}
+                                                    <em>{% trans "Never" %}</em>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    {% if feed.feed_type == 'misp' %}
+                                                        <a href="{% url 'vision:misp_detail' feed.id %}" class="btn btn-sm btn-outline-primary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        <a href="{% url 'vision:misp_edit' feed.id %}" class="btn btn-sm btn-outline-secondary">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <a href="{% url 'vision:misp_sync' feed.id %}" class="btn btn-sm btn-outline-info">
+                                                            <i class="fas fa-sync"></i>
+                                                        </a>
+                                                        <a href="{% url 'vision:misp_delete' feed.id %}" class="btn btn-sm btn-outline-danger">
+                                                            <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-satellite-dish fa-4x text-muted mb-3"></i>
+                            <h4>{% trans "No Threat Intelligence Feeds found" %}</h4>
+                            <p class="text-muted mb-4">{% trans "Start by connecting to a MISP instance or other feed." %}</p>
+                            <div>
+                                <a href="{% url 'vision:misp_create' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i> {% trans "Add MISP Instance" %}
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
