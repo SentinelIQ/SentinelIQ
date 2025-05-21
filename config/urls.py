@@ -24,14 +24,6 @@ from organizations.views import (
     OrganizationListView, OrganizationDetailView, OrganizationCreateView,
     OrganizationUpdateView, OrganizationDeleteView
 )
-from alerts.views import (
-    AlertListView, AlertDetailView, AlertCreateView, AlertUpdateView, AlertDeleteView,
-    escalate_to_case
-)
-from cases.views import (
-    CaseListView, CaseDetailView, CaseCreateView, CaseUpdateView, CaseDeleteView,
-    add_case_comment, add_case_attachment, delete_case_attachment, add_case_event
-)
 from core.views import home, handler404, handler500
 
 # Custom 404 and 500 handlers
@@ -63,18 +55,9 @@ urlpatterns = [
     path('organizations/<int:pk>/update/', OrganizationUpdateView.as_view(), name='organization_update'),
     path('organizations/<int:pk>/delete/', OrganizationDeleteView.as_view(), name='organization_delete'),
     
-    # Alert URLs
-    path('alerts/', AlertListView.as_view(), name='alert_list'),
-    path('alerts/<int:pk>/', AlertDetailView.as_view(), name='alert_detail'),
-    path('alerts/create/', AlertCreateView.as_view(), name='alert_create'),
-    path('alerts/<int:pk>/update/', AlertUpdateView.as_view(), name='alert_update'),
-    path('alerts/<int:pk>/delete/', AlertDeleteView.as_view(), name='alert_delete'),
-    path('alerts/<int:pk>/escalate/', escalate_to_case, name='escalate_to_case'),
-    
-    # Case URLs
+    # Include app URLs
+    path('alerts/', include('alerts.urls')),
     path('cases/', include('cases.urls')),
-    
-    # Include core app URLs
     path('', include('core.urls')),
 ]
 
