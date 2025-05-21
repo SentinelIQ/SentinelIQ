@@ -3,71 +3,226 @@
 
 {% block title %}Dashboard - Super Admin{% endblock %}
 
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-icon {
+        font-size: 3rem;
+        opacity: 0.8;
+    }
+    .dashboard-action {
+        transition: all 0.3s ease;
+    }
+    .dashboard-action:hover {
+        transform: translateY(-3px);
+    }
+    .border-left-primary {
+        border-left: 0.25rem solid var(--primary) !important;
+    }
+    .border-left-success {
+        border-left: 0.25rem solid var(--success) !important;
+    }
+    .border-left-warning {
+        border-left: 0.25rem solid var(--warning) !important;
+    }
+    .border-left-danger {
+        border-left: 0.25rem solid var(--danger) !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-12">
-        <h2 class="mb-3">
-            <i class="fas fa-tachometer-alt"></i> Dashboard do Super Admin
-        </h2>
-        <p class="lead">Bem-vindo, {{ user.get_full_name|default:user.username }}!</p>
+        <div class="d-sm-flex align-items-center justify-content-between mb-2">
+            <h2 class="mb-0">
+                <i class="fas fa-tachometer-alt text-primary me-2"></i> Dashboard do Super Admin
+            </h2>
+            <span class="badge bg-primary p-2">
+                <i class="fas fa-calendar me-1"></i> {% now "d/m/Y" %}
+            </span>
+        </div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+        </nav>
+        <div class="alert alert-info d-flex align-items-center shadow-sm">
+            <i class="fas fa-user-shield fa-lg me-3"></i>
+            <div>
+                <span class="fw-bold">Bem-vindo, {{ user.get_full_name|default:user.username }}!</span>
+                <div class="mt-1">
+                    <span class="badge bg-danger">Super Administrador</span>
+                    <small class="text-muted ms-2">Você tem acesso completo ao sistema.</small>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card bg-primary text-white">
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-primary shadow-sm h-100 py-2 stat-card">
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="card-title">Total de Organizações</h5>
-                        <h2 class="mb-0">{{ organizations_count }}</h2>
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total de Organizações</div>
+                        <div class="h3 mb-0 font-weight-bold">{{ organizations_count }}</div>
+                        <a href="{% url 'organization_list' %}" class="text-decoration-none mt-2 d-block">
+                            <small>Ver todas <i class="fas fa-arrow-right"></i></small>
+                        </a>
                     </div>
-                    <i class="fas fa-building fa-3x"></i>
+                    <div class="col-auto">
+                        <i class="fas fa-building fa-3x text-primary opacity-50"></i>
+                    </div>
                 </div>
-                <a href="{% url 'organization_list' %}" class="text-white">Ver todas <i class="fas fa-arrow-right"></i></a>
             </div>
         </div>
     </div>
     
-    <div class="col-md-6">
-        <div class="card bg-success text-white">
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-success shadow-sm h-100 py-2 stat-card">
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="card-title">Total de Usuários</h5>
-                        <h2 class="mb-0">{{ users_count }}</h2>
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Total de Usuários</div>
+                        <div class="h3 mb-0 font-weight-bold">{{ users_count }}</div>
+                        <a href="{% url 'user_list' %}" class="text-decoration-none mt-2 d-block">
+                            <small>Ver todos <i class="fas fa-arrow-right"></i></small>
+                        </a>
                     </div>
-                    <i class="fas fa-users fa-3x"></i>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-3x text-success opacity-50"></i>
+                    </div>
                 </div>
-                <a href="{% url 'user_list' %}" class="text-white">Ver todos <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-warning shadow-sm h-100 py-2 stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Total de Alertas</div>
+                        <div class="h3 mb-0 font-weight-bold">{{ alerts_count|default:"0" }}</div>
+                        <a href="{% url 'alert_list' %}" class="text-decoration-none mt-2 d-block">
+                            <small>Ver detalhes <i class="fas fa-arrow-right"></i></small>
+                        </a>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-bell fa-3x text-warning opacity-50"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-md-12">
-        <div class="card">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-building me-2"></i> Organizações Recentes</h5>
+                <a href="{% url 'organization_list' %}" class="btn btn-sm btn-light">
+                    <i class="fas fa-list"></i> Ver Todas
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nome</th>
+                                <th>Status</th>
+                                <th>Usuários</th>
+                                <th>Data de Criação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_organizations %}
+                                {% for org in recent_organizations %}
+                                    <tr>
+                                        <td><strong>{{ org.name }}</strong></td>
+                                        <td>
+                                            {% if org.is_active %}
+                                                <span class="badge bg-success">Ativo</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Inativo</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><span class="badge bg-info">{{ org.user_count }}</span></td>
+                                        <td><small>{{ org.created_at|date:"d/m/Y H:i" }}</small></td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'organization_detail' org.id %}" class="btn btn-info" title="Visualizar">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'organization_update' org.id %}" class="btn btn-warning" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-3">
+                                        <p class="text-muted mb-0">Nenhuma organização recente.</p>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm">
             <div class="card-header bg-dark text-white">
-                <h5 class="mb-0">Ações Rápidas</h5>
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i> Ações Rápidas</h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <a href="{% url 'organization_create' %}" class="btn btn-primary w-100">
-                            <i class="fas fa-plus-circle"></i> Nova Organização
-                        </a>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <a href="{% url 'user_create' %}" class="btn btn-success w-100">
-                            <i class="fas fa-user-plus"></i> Novo Usuário
-                        </a>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <a href="{% url 'admin:index' %}" class="btn btn-secondary w-100">
-                            <i class="fas fa-cog"></i> Admin do Sistema
-                        </a>
-                    </div>
+                <div class="d-grid gap-3">
+                    <a href="{% url 'organization_create' %}" class="btn btn-primary p-3 dashboard-action d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="fas fa-plus-circle me-2"></i> Nova Organização
+                        </div>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    
+                    <a href="{% url 'user_create' %}" class="btn btn-success p-3 dashboard-action d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="fas fa-user-plus me-2"></i> Novo Usuário
+                        </div>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    
+                    <a href="{% url 'admin:index' %}" class="btn btn-secondary p-3 dashboard-action d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="fas fa-cog me-2"></i> Admin do Sistema
+                        </div>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    
+                    <a href="{% url 'alert_list' %}" class="btn btn-warning p-3 dashboard-action d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="fas fa-bell me-2"></i> Gerenciar Alertas
+                        </div>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </div>

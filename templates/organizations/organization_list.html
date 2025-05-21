@@ -3,56 +3,166 @@
 
 {% block title %}Lista de Organizações{% endblock %}
 
+{% block extra_css %}
+<style>
+    .filter-card {
+        transition: all 0.3s ease;
+    }
+    .badge {
+        transition: all 0.2s ease;
+    }
+    .badge:hover {
+        transform: scale(1.05);
+    }
+    .table-container {
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+    .org-logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        background-color: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-building"></i> Organizações</h2>
-    <a href="{% url 'organization_create' %}" class="btn btn-primary">
-        <i class="fas fa-plus-circle"></i> Nova Organização
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-building text-primary me-2"></i> Organizações</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item active">Organizações</li>
+            </ol>
+        </nav>
+    </div>
+    <a href="{% url 'organization_create' %}" class="btn btn-primary d-flex align-items-center shadow-sm">
+        <i class="fas fa-plus-circle me-2"></i> Nova Organização
     </a>
 </div>
 
-<div class="card">
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Filtros</h5>
+        <button class="btn btn-sm btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true" aria-controls="filterCollapse">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+    <div class="collapse show" id="filterCollapse">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-toggle-on me-1"></i> Status
+                    </label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos os status</option>
+                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Ativo</option>
+                        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inativo</option>
+                    </select>
+                </div>
+                <div class="col-lg-8 col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-search me-1"></i> Busca
+                    </label>
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Nome ou descrição" value="{{ request.GET.search }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i> Filtrar
+                        </button>
+                        <a href="{% url 'organization_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-sync me-1"></i> Limpar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i> Resultados</h5>
+        <span class="badge bg-primary">{{ organizations|length }} organizações encontradas</span>
+    </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
+        <div class="table-container">
+            <table class="table table-hover mb-0" id="orgsTable">
                 <thead class="table-dark">
                     <tr>
-                        <th>Nome</th>
-                        <th>Slug</th>
-                        <th>Status</th>
-                        <th>Data de Criação</th>
-                        <th>Ações</th>
+                        <th><i class="fas fa-building me-1"></i> Nome</th>
+                        <th><i class="fas fa-link me-1"></i> Slug</th>
+                        <th><i class="fas fa-tag me-1"></i> Status</th>
+                        <th><i class="fas fa-users me-1"></i> Usuários</th>
+                        <th><i class="fas fa-calendar-alt me-1"></i> Data de Criação</th>
+                        <th class="text-center"><i class="fas fa-cogs me-1"></i> Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for organization in organizations %}
-                        <tr>
-                            <td>{{ organization.name }}</td>
-                            <td>{{ organization.slug }}</td>
+                        <tr class="fade-in">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="org-logo">
+                                        {{ organization.name|first|upper }}
+                                    </div>
+                                    <span class="fw-bold">{{ organization.name }}</span>
+                                </div>
+                            </td>
+                            <td><code>{{ organization.slug }}</code></td>
                             <td>
                                 {% if organization.is_active %}
-                                    <span class="badge bg-success">Ativo</span>
+                                    <span class="badge bg-success" data-bs-toggle="tooltip" title="Organização ativa">
+                                        <i class="fas fa-check-circle me-1"></i> Ativo
+                                    </span>
                                 {% else %}
-                                    <span class="badge bg-danger">Inativo</span>
+                                    <span class="badge bg-danger" data-bs-toggle="tooltip" title="Organização inativa">
+                                        <i class="fas fa-times-circle me-1"></i> Inativo
+                                    </span>
                                 {% endif %}
                             </td>
-                            <td>{{ organization.created_at|date:"d/m/Y H:i" }}</td>
                             <td>
-                                <a href="{% url 'organization_detail' organization.id %}" class="btn btn-sm btn-info">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{% url 'organization_update' organization.id %}" class="btn btn-sm btn-warning">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="{% url 'organization_delete' organization.id %}" class="btn btn-sm btn-danger">
-                                    <i class="fas fa-trash"></i>
-                                </a>
+                                <span class="badge bg-info text-dark">
+                                    <i class="fas fa-users me-1"></i> {{ organization.user_count|default:"0" }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="small text-muted">
+                                    <i class="fas fa-clock me-1"></i> {{ organization.created_at|date:"d/m/Y H:i" }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'organization_detail' organization.id %}" class="btn btn-info" data-bs-toggle="tooltip" title="Visualizar">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'organization_update' organization.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'organization_delete' organization.id %}" class="btn btn-danger" data-bs-toggle="tooltip" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center py-3">
-                                <p class="mb-0 text-muted">Nenhuma organização encontrada.</p>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-building-slash fa-3x text-muted mb-3"></i>
+                                    <p class="mb-0 text-muted">Nenhuma organização encontrada.</p>
+                                    <a href="{% url 'organization_list' %}" class="btn btn-sm btn-primary mt-3">
+                                        <i class="fas fa-sync me-1"></i> Limpar filtros
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
@@ -61,4 +171,59 @@
         </div>
     </div>
 </div>
+
+{% if is_paginated %}
+<nav aria-label="Paginação" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Primeira">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Anterior">
+                <i class="fas fa-angle-left"></i>
+            </a>
+        </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">
+                <i class="fas fa-file-alt me-1"></i> Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Próxima">
+                <i class="fas fa-angle-right"></i>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Última">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Destacar linhas com status específico
+        document.querySelectorAll('#orgsTable tbody tr').forEach(function(row) {
+            const statusCell = row.querySelector('td:nth-child(3)');
+            if (statusCell) {
+                const badgeText = statusCell.textContent.trim();
+                if (badgeText.includes('Inativo')) {
+                    row.classList.add('table-danger');
+                }
+            }
+        });
+    });
+</script>
 {% endblock %} 

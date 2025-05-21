@@ -6,29 +6,47 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-12">
-        <h2 class="mb-3">
-            <i class="fas fa-tachometer-alt"></i> Dashboard do Analista
-        </h2>
-        <p class="lead">Bem-vindo, {{ user.get_full_name|default:user.username }}!</p>
-        <div class="alert alert-info">
-            <i class="fas fa-building"></i> Organização: <strong>{{ user.organization.name }}</strong>
+        <div class="d-sm-flex align-items-center justify-content-between mb-2">
+            <h2 class="mb-0">
+                <i class="fas fa-tachometer-alt text-primary me-2"></i> Dashboard do Analista
+            </h2>
+            <span class="badge bg-primary p-2">
+                <i class="fas fa-calendar me-1"></i> {% now "d/m/Y" %}
+            </span>
+        </div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+        </nav>
+        <div class="alert alert-info d-flex align-items-center">
+            <i class="fas fa-user-circle fa-lg me-3"></i>
+            <div>
+                <span class="fw-bold">Bem-vindo, {{ user.get_full_name|default:user.username }}!</span>
+                <div class="mt-1">
+                    <i class="fas fa-building"></i> Organização: <strong>{{ user.organization.name }}</strong>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <div class="row mb-4">
     <div class="col-md-12">
-        <div class="card">
+        <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Alertas Atribuídos a Você</h5>
-                    <a href="{% url 'alert_list' %}" class="btn btn-sm btn-light">Ver Todos</a>
+                    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i> Alertas Atribuídos a Você</h5>
+                    <a href="{% url 'alert_list' %}" class="btn btn-sm btn-light d-flex align-items-center">
+                        <i class="fas fa-list me-1"></i> Ver Todos
+                    </a>
                 </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead>
+                        <thead class="table-light">
                             <tr>
                                 <th>Título</th>
                                 <th>Severidade</th>
@@ -41,14 +59,16 @@
                             {% if assigned_alerts %}
                                 {% for alert in assigned_alerts %}
                                     <tr>
-                                        <td>{{ alert.title }}</td>
+                                        <td>
+                                            <span class="fw-bold">{{ alert.title }}</span>
+                                        </td>
                                         <td>
                                             {% if alert.severity == 'critical' %}
                                                 <span class="badge bg-danger">Crítico</span>
                                             {% elif alert.severity == 'high' %}
-                                                <span class="badge bg-warning">Alto</span>
+                                                <span class="badge bg-warning text-dark">Alto</span>
                                             {% elif alert.severity == 'medium' %}
-                                                <span class="badge bg-info">Médio</span>
+                                                <span class="badge bg-info text-dark">Médio</span>
                                             {% else %}
                                                 <span class="badge bg-success">Baixo</span>
                                             {% endif %}
@@ -57,30 +77,40 @@
                                             {% if alert.status == 'new' %}
                                                 <span class="badge bg-danger">Novo</span>
                                             {% elif alert.status == 'acknowledged' %}
-                                                <span class="badge bg-warning">Reconhecido</span>
+                                                <span class="badge bg-warning text-dark">Reconhecido</span>
                                             {% elif alert.status == 'in_progress' %}
-                                                <span class="badge bg-info">Em Progresso</span>
+                                                <span class="badge bg-info text-dark">Em Progresso</span>
                                             {% elif alert.status == 'resolved' %}
                                                 <span class="badge bg-success">Resolvido</span>
                                             {% else %}
                                                 <span class="badge bg-secondary">Fechado</span>
                                             {% endif %}
                                         </td>
-                                        <td>{{ alert.created_at|date:"d/m/Y H:i" }}</td>
                                         <td>
-                                            <a href="{% url 'alert_detail' alert.id %}" class="btn btn-sm btn-info">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{% url 'alert_update' alert.id %}" class="btn btn-sm btn-warning">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
+                                            <span class="small text-muted">
+                                                <i class="fas fa-clock me-1"></i>
+                                                {{ alert.created_at|date:"d/m/Y H:i" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'alert_detail' alert.id %}" class="btn btn-info" title="Visualizar">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'alert_update' alert.id %}" class="btn btn-warning" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 {% endfor %}
                             {% else %}
                                 <tr>
-                                    <td colspan="5" class="text-center py-3">
-                                        <p class="mb-0 text-muted">Nenhum alerta atribuído a você no momento.</p>
+                                    <td colspan="5" class="text-center py-4">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                                            <p class="mb-0 text-muted">Nenhum alerta atribuído a você no momento.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             {% endif %}
@@ -94,20 +124,46 @@
 
 <div class="row">
     <div class="col-md-12">
-        <div class="card">
+        <div class="card shadow-sm">
             <div class="card-header bg-dark text-white">
-                <h5 class="mb-0">Ações Rápidas</h5>
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i> Ações Rápidas</h5>
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <a href="{% url 'alert_list' %}" class="btn btn-primary w-100">
-                            <i class="fas fa-search"></i> Buscar Alertas
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'alert_list' %}" class="btn btn-primary w-100 p-3 d-flex align-items-center justify-content-between">
+                            <div>
+                                <i class="fas fa-search fa-lg"></i>
+                                <span class="ms-2">Buscar Alertas</span>
+                            </div>
+                            <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <a href="{% url 'alert_list' %}?status=new" class="btn btn-danger w-100">
-                            <i class="fas fa-bell"></i> Alertas Novos
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'alert_list' %}?status=new" class="btn btn-danger w-100 p-3 d-flex align-items-center justify-content-between">
+                            <div>
+                                <i class="fas fa-bell fa-lg"></i>
+                                <span class="ms-2">Alertas Novos</span>
+                            </div>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'alert_list' %}?status=in_progress" class="btn btn-info w-100 p-3 d-flex align-items-center justify-content-between">
+                            <div>
+                                <i class="fas fa-spinner fa-lg"></i>
+                                <span class="ms-2">Em Progresso</span>
+                            </div>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'alert_list' %}?status=resolved" class="btn btn-success w-100 p-3 d-flex align-items-center justify-content-between">
+                            <div>
+                                <i class="fas fa-check-circle fa-lg"></i>
+                                <span class="ms-2">Resolvidos</span>
+                            </div>
+                            <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
                 </div>

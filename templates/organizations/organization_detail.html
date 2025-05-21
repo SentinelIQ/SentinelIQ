@@ -1,122 +1,363 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ organization.name }} - Detalhes da Organização{% endblock %}
+{% block title %}Organização: {{ organization.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .org-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+        color: white;
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .org-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        margin-right: 1.5rem;
+    }
+    .info-card {
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    .info-card:hover {
+        transform: translateY(-5px);
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--dark);
+        font-weight: 600;
+    }
+    .nav-tabs .nav-link.active {
+        border: none;
+        border-bottom: 3px solid var(--primary);
+        color: var(--primary);
+    }
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 0.5rem;
+    }
+    .badge {
+        transition: all 0.2s ease;
+    }
+    .badge:hover {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-building"></i> {{ organization.name }}</h2>
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <a href="{% url 'organization_update' organization.id %}" class="btn btn-warning">
-            <i class="fas fa-edit"></i> Editar
+        <h2 class="mb-1"><i class="fas fa-building text-primary me-2"></i> Detalhes da Organização</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'organization_list' %}">Organizações</a></li>
+                <li class="breadcrumb-item active">{{ organization.name }}</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="d-flex">
+        <a href="{% url 'organization_update' organization.id %}" class="btn btn-warning me-2 d-flex align-items-center">
+            <i class="fas fa-edit me-2"></i> Editar
         </a>
-        <a href="{% url 'organization_delete' organization.id %}" class="btn btn-danger">
-            <i class="fas fa-trash"></i> Excluir
-        </a>
-        <a href="{% url 'organization_list' %}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Voltar
+        <a href="{% url 'organization_delete' organization.id %}" class="btn btn-danger d-flex align-items-center">
+            <i class="fas fa-trash me-2"></i> Excluir
         </a>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informações da Organização</h5>
-            </div>
-            <div class="card-body">
-                <table class="table">
-                    <tr>
-                        <th style="width: 30%">Nome:</th>
-                        <td>{{ organization.name }}</td>
-                    </tr>
-                    <tr>
-                        <th>Slug:</th>
-                        <td>{{ organization.slug }}</td>
-                    </tr>
-                    <tr>
-                        <th>Status:</th>
-                        <td>
-                            {% if organization.is_active %}
-                                <span class="badge bg-success">Ativo</span>
-                            {% else %}
-                                <span class="badge bg-danger">Inativo</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Criado em:</th>
-                        <td>{{ organization.created_at|date:"d/m/Y H:i" }}</td>
-                    </tr>
-                    <tr>
-                        <th>Atualizado em:</th>
-                        <td>{{ organization.updated_at|date:"d/m/Y H:i" }}</td>
-                    </tr>
-                </table>
-            </div>
+<!-- Cabeçalho da Organização -->
+<div class="org-header shadow-sm d-flex align-items-center">
+    <div class="org-avatar">
+        {{ organization.name|first|upper }}
+    </div>
+    <div>
+        <h1 class="mb-2">{{ organization.name }}</h1>
+        <div class="d-flex align-items-center">
+            <span class="badge bg-light text-dark me-3">
+                <i class="fas fa-link me-1"></i> {{ organization.slug }}
+            </span>
+            {% if organization.is_active %}
+                <span class="badge bg-success">
+                    <i class="fas fa-check-circle me-1"></i> Ativo
+                </span>
+            {% else %}
+                <span class="badge bg-danger">
+                    <i class="fas fa-times-circle me-1"></i> Inativo
+                </span>
+            {% endif %}
         </div>
+    </div>
+</div>
 
-        <div class="card mb-4">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="fas fa-align-left"></i> Descrição</h5>
-            </div>
+<!-- Cards de Informações -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow-sm info-card bg-primary text-white">
             <div class="card-body">
-                {% if organization.description %}
-                    <p>{{ organization.description }}</p>
-                {% else %}
-                    <p class="text-muted">Nenhuma descrição fornecida.</p>
-                {% endif %}
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-2 opacity-75">Usuários</h6>
+                        <h2 class="mb-0">{{ users_count|default:"0" }}</h2>
+                    </div>
+                    <i class="fas fa-users fa-3x opacity-50"></i>
+                </div>
             </div>
         </div>
     </div>
-
-    <div class="col-md-6">
-        <div class="card mb-4">
-            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-users"></i> Usuários</h5>
-                <a href="{% url 'user_create' %}" class="btn btn-sm btn-light">
-                    <i class="fas fa-plus"></i> Novo Usuário
-                </a>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow-sm info-card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-2 opacity-75">Alertas</h6>
+                        <h2 class="mb-0">{{ alerts_count|default:"0" }}</h2>
+                    </div>
+                    <i class="fas fa-bell fa-3x opacity-50"></i>
+                </div>
             </div>
-            <div class="card-body p-0">
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow-sm info-card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-2 opacity-75">Admins</h6>
+                        <h2 class="mb-0">{{ admins_count|default:"0" }}</h2>
+                    </div>
+                    <i class="fas fa-user-shield fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow-sm info-card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-2 opacity-75">Data de Criação</h6>
+                        <h5 class="mb-0">{{ organization.created_at|date:"d/m/Y" }}</h5>
+                    </div>
+                    <i class="fas fa-calendar-alt fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Abas de Conteúdo -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white p-0 border-bottom-0">
+        <ul class="nav nav-tabs" id="orgTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-tab-pane" type="button" role="tab" aria-controls="info-tab-pane" aria-selected="true">
+                    <i class="fas fa-info-circle me-1"></i> Informações
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-tab-pane" type="button" role="tab" aria-controls="users-tab-pane" aria-selected="false">
+                    <i class="fas fa-users me-1"></i> Usuários
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="alerts-tab" data-bs-toggle="tab" data-bs-target="#alerts-tab-pane" type="button" role="tab" aria-controls="alerts-tab-pane" aria-selected="false">
+                    <i class="fas fa-bell me-1"></i> Alertas
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+        <div class="tab-content" id="orgTabsContent">
+            <!-- Aba de Informações -->
+            <div class="tab-pane fade show active" id="info-tab-pane" role="tabpanel" aria-labelledby="info-tab" tabindex="0">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h5 class="mb-3"><i class="fas fa-align-left me-2 text-primary"></i> Descrição</h5>
+                        {% if organization.description %}
+                            <div class="border p-4 rounded bg-light mb-4">
+                                {{ organization.description|linebreaks }}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-light">
+                                <i class="fas fa-info-circle me-2"></i> Nenhuma descrição fornecida para esta organização.
+                            </div>
+                        {% endif %}
+                        
+                        <h5 class="mb-3"><i class="fas fa-history me-2 text-primary"></i> Histórico de Atividades</h5>
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex align-items-center">
+                                        <div class="text-primary me-3">
+                                            <i class="fas fa-plus-circle fa-lg"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">Organização criada</div>
+                                            <small class="text-muted">{{ organization.created_at|date:"d/m/Y H:i" }}</small>
+                                        </div>
+                                    </li>
+                                    {% if organization.updated_at and organization.updated_at != organization.created_at %}
+                                    <li class="list-group-item d-flex align-items-center">
+                                        <div class="text-warning me-3">
+                                            <i class="fas fa-edit fa-lg"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">Organização atualizada</div>
+                                            <small class="text-muted">{{ organization.updated_at|date:"d/m/Y H:i" }}</small>
+                                        </div>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card bg-light mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-cog me-2 text-primary"></i> Informações Técnicas</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">ID</th>
+                                            <td><code>{{ organization.id }}</code></td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Slug</th>
+                                            <td><code>{{ organization.slug }}</code></td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Status</th>
+                                            <td>
+                                                {% if organization.is_active %}
+                                                    <span class="badge bg-success">Ativo</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Inativo</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Criada em</th>
+                                            <td>{{ organization.created_at|date:"d/m/Y H:i" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Atualizada em</th>
+                                            <td>{{ organization.updated_at|date:"d/m/Y H:i" }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-link me-2"></i> Ações Rápidas</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'organization_update' organization.id %}" class="btn btn-outline-warning">
+                                        <i class="fas fa-edit me-1"></i> Editar Organização
+                                    </a>
+                                    <a href="{% url 'user_create' %}?organization={{ organization.id }}" class="btn btn-outline-success">
+                                        <i class="fas fa-user-plus me-1"></i> Adicionar Usuário
+                                    </a>
+                                    <a href="{% url 'organization_delete' organization.id %}" class="btn btn-outline-danger">
+                                        <i class="fas fa-trash me-1"></i> Excluir Organização
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aba de Usuários -->
+            <div class="tab-pane fade" id="users-tab-pane" role="tabpanel" aria-labelledby="users-tab" tabindex="0">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0"><i class="fas fa-users text-primary me-2"></i> Usuários da Organização</h5>
+                    <a href="{% url 'user_create' %}?organization={{ organization.id }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-user-plus me-1"></i> Adicionar Usuário
+                    </a>
+                </div>
+                
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover">
                         <thead class="table-light">
                             <tr>
                                 <th>Usuário</th>
                                 <th>Nome</th>
+                                <th>Email</th>
                                 <th>Função</th>
-                                <th>Ações</th>
+                                <th class="text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for user_obj in users %}
+                            {% for user in users %}
                                 <tr>
-                                    <td>{{ user_obj.username }}</td>
-                                    <td>{{ user_obj.get_full_name|default:"-" }}</td>
                                     <td>
-                                        {% if user_obj.role == 'superadmin' %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar">
+                                                {{ user.username|first|upper }}
+                                            </div>
+                                            <span class="fw-bold">{{ user.username }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ user.get_full_name|default:"—" }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        {% if user.role == 'superadmin' %}
                                             <span class="badge bg-danger">Super Admin</span>
-                                        {% elif user_obj.role == 'org_admin' %}
-                                            <span class="badge bg-warning">Admin da Org.</span>
+                                        {% elif user.role == 'org_admin' %}
+                                            <span class="badge bg-warning text-dark">Admin da Org.</span>
                                         {% else %}
-                                            <span class="badge bg-info">Analista</span>
+                                            <span class="badge bg-info text-dark">Analista</span>
                                         {% endif %}
                                     </td>
-                                    <td>
-                                        <a href="{% url 'user_detail' user_obj.id %}" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{% url 'user_update' user_obj.id %}" class="btn btn-sm btn-warning">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'user_detail' user.id %}" class="btn btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'user_update' user.id %}" class="btn btn-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td colspan="4" class="text-center py-3">
-                                        <p class="mb-0 text-muted">Nenhum usuário encontrado.</p>
+                                    <td colspan="5" class="text-center py-4">
+                                        <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">Nenhum usuário encontrado nesta organização.</p>
+                                        <a href="{% url 'user_create' %}?organization={{ organization.id }}" class="btn btn-sm btn-primary mt-2">
+                                            <i class="fas fa-user-plus me-1"></i> Adicionar Usuário
+                                        </a>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -124,67 +365,62 @@
                     </table>
                 </div>
             </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-bell"></i> Alertas Recentes</h5>
-                <a href="{% url 'alert_create' %}" class="btn btn-sm btn-dark">
-                    <i class="fas fa-plus"></i> Novo Alerta
-                </a>
-            </div>
-            <div class="card-body p-0">
+            
+            <!-- Aba de Alertas -->
+            <div class="tab-pane fade" id="alerts-tab-pane" role="tabpanel" aria-labelledby="alerts-tab" tabindex="0">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0"><i class="fas fa-bell text-warning me-2"></i> Alertas da Organização</h5>
+                    <a href="{% url 'alert_list' %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-list me-1"></i> Ver Todos os Alertas
+                    </a>
+                </div>
+                
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover">
                         <thead class="table-light">
                             <tr>
+                                <th>ID</th>
                                 <th>Título</th>
-                                <th>Severidade</th>
                                 <th>Status</th>
-                                <th>Ações</th>
+                                <th>Criado Por</th>
+                                <th>Data de Criação</th>
+                                <th class="text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for alert in alerts %}
                                 <tr>
+                                    <td><code>{{ alert.id }}</code></td>
                                     <td>{{ alert.title }}</td>
                                     <td>
-                                        {% if alert.severity == 'critical' %}
-                                            <span class="badge bg-danger">Crítico</span>
-                                        {% elif alert.severity == 'high' %}
-                                            <span class="badge bg-warning">Alto</span>
-                                        {% elif alert.severity == 'medium' %}
-                                            <span class="badge bg-info">Médio</span>
-                                        {% else %}
-                                            <span class="badge bg-success">Baixo</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if alert.status == 'new' %}
-                                            <span class="badge bg-danger">Novo</span>
-                                        {% elif alert.status == 'acknowledged' %}
-                                            <span class="badge bg-warning">Reconhecido</span>
+                                        {% if alert.status == 'open' %}
+                                            <span class="badge bg-danger">Aberto</span>
                                         {% elif alert.status == 'in_progress' %}
-                                            <span class="badge bg-info">Em Progresso</span>
+                                            <span class="badge bg-warning text-dark">Em Progresso</span>
                                         {% elif alert.status == 'resolved' %}
                                             <span class="badge bg-success">Resolvido</span>
-                                        {% else %}
+                                        {% elif alert.status == 'closed' %}
                                             <span class="badge bg-secondary">Fechado</span>
                                         {% endif %}
                                     </td>
-                                    <td>
-                                        <a href="{% url 'alert_detail' alert.id %}" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{% url 'alert_update' alert.id %}" class="btn btn-sm btn-warning">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
+                                    <td>{{ alert.created_by.username }}</td>
+                                    <td>{{ alert.created_at|date:"d/m/Y H:i" }}</td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'alert_detail' alert.id %}" class="btn btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'alert_update' alert.id %}" class="btn btn-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td colspan="4" class="text-center py-3">
-                                        <p class="mb-0 text-muted">Nenhum alerta encontrado.</p>
+                                    <td colspan="6" class="text-center py-4">
+                                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">Nenhum alerta encontrado para esta organização.</p>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -192,12 +428,23 @@
                     </table>
                 </div>
             </div>
-            <div class="card-footer text-end">
-                <a href="{% url 'alert_list' %}" class="btn btn-sm btn-primary">
-                    <i class="fas fa-list"></i> Ver Todos os Alertas
-                </a>
-            </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ativação das abas via JavaScript
+        const triggerTabList = [].slice.call(document.querySelectorAll('#orgTabs button'))
+        triggerTabList.forEach(function(triggerEl) {
+            const tabTrigger = new bootstrap.Tab(triggerEl)
+            triggerEl.addEventListener('click', function(event) {
+                event.preventDefault()
+                tabTrigger.show()
+            })
+        })
+    });
+</script>
 {% endblock %} 

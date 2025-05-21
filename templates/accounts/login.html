@@ -4,37 +4,44 @@
 {% block title %}Login - SentinelIQ{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-6 col-lg-5">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white text-center py-3">
-                <h4 class="mb-0"><i class="fas fa-shield-alt"></i> SentinelIQ</h4>
+<div class="login-container">
+    <div class="login-card">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <div class="mb-3">
+                    <i class="fas fa-shield-alt fa-3x"></i>
+                </div>
+                <h4 class="mb-0">SentinelIQ</h4>
             </div>
             <div class="card-body p-4">
-                <h5 class="card-title text-center mb-4">Login</h5>
+                <h5 class="card-title text-center mb-4">Acesso ao Sistema</h5>
                 
-                <form method="post">
+                <form method="post" class="needs-validation" novalidate>
                     {% csrf_token %}
                     
-                    <div class="mb-3">
-                        <label for="{{ form.username.id_for_label }}" class="form-label">
-                            <i class="fas fa-user"></i> Nome de usuário
-                        </label>
-                        {{ form.username }}
+                    <div class="mb-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="fas fa-user text-primary"></i>
+                            </span>
+                            {{ form.username }}
+                        </div>
                         {% if form.username.errors %}
-                            <div class="text-danger">
+                            <div class="text-danger small mt-1">
                                 {{ form.username.errors }}
                             </div>
                         {% endif %}
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="{{ form.password.id_for_label }}" class="form-label">
-                            <i class="fas fa-lock"></i> Senha
-                        </label>
-                        {{ form.password }}
+                    <div class="mb-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="fas fa-lock text-primary"></i>
+                            </span>
+                            {{ form.password }}
+                        </div>
                         {% if form.password.errors %}
-                            <div class="text-danger">
+                            <div class="text-danger small mt-1">
                                 {{ form.password.errors }}
                             </div>
                         {% endif %}
@@ -42,10 +49,15 @@
                     
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-sign-in-alt"></i> Entrar
+                            <i class="fas fa-sign-in-alt me-2"></i> Entrar
                         </button>
                     </div>
                 </form>
+            </div>
+            <div class="card-footer bg-light text-center py-3">
+                <div class="small text-muted">
+                    <i class="fas fa-shield-alt me-1"></i> Sistema de Monitoramento de Alertas
+                </div>
             </div>
         </div>
     </div>

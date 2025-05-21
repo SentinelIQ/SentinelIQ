@@ -3,57 +3,182 @@
 
 {% block title %}Lista de Usuários{% endblock %}
 
+{% block extra_css %}
+<style>
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 0.5rem;
+    }
+    .filter-card {
+        transition: all 0.3s ease;
+    }
+    .badge {
+        transition: all 0.2s ease;
+    }
+    .badge:hover {
+        transform: scale(1.05);
+    }
+    .table-container {
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-users"></i> Usuários</h2>
-    <a href="{% url 'user_create' %}" class="btn btn-primary">
-        <i class="fas fa-plus-circle"></i> Novo Usuário
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-users text-primary me-2"></i> Usuários</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item active">Usuários</li>
+            </ol>
+        </nav>
+    </div>
+    <a href="{% url 'user_create' %}" class="btn btn-primary d-flex align-items-center shadow-sm">
+        <i class="fas fa-plus-circle me-2"></i> Novo Usuário
     </a>
 </div>
 
-<div class="card">
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Filtros</h5>
+        <button class="btn btn-sm btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true" aria-controls="filterCollapse">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+    <div class="collapse show" id="filterCollapse">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-users-cog me-1"></i> Função
+                    </label>
+                    <select name="role" class="form-select">
+                        <option value="">Todas as funções</option>
+                        <option value="superadmin" {% if request.GET.role == 'superadmin' %}selected{% endif %}>Super Admin</option>
+                        <option value="org_admin" {% if request.GET.role == 'org_admin' %}selected{% endif %}>Admin de Organização</option>
+                        <option value="analyst" {% if request.GET.role == 'analyst' %}selected{% endif %}>Analista</option>
+                    </select>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label">
+                        <i class="fas fa-building me-1"></i> Organização
+                    </label>
+                    <select name="organization" class="form-select">
+                        <option value="">Todas as organizações</option>
+                        {% for org in organizations %}
+                            <option value="{{ org.id }}" {% if request.GET.organization == org.id|stringformat:"s" %}selected{% endif %}>{{ org.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-4 col-md-12">
+                    <label class="form-label">
+                        <i class="fas fa-search me-1"></i> Busca
+                    </label>
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Nome, email ou username" value="{{ request.GET.search }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i> Filtrar
+                        </button>
+                        <a href="{% url 'user_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-sync me-1"></i> Limpar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i> Resultados</h5>
+        <span class="badge bg-primary">{{ users|length }} usuários encontrados</span>
+    </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
+        <div class="table-container">
+            <table class="table table-hover mb-0" id="usersTable">
                 <thead class="table-dark">
                     <tr>
-                        <th>Nome de Usuário</th>
-                        <th>Nome</th>
-                        <th>Email</th>
-                        <th>Função</th>
-                        <th>Organização</th>
-                        <th>Ações</th>
+                        <th><i class="fas fa-user me-1"></i> Usuário</th>
+                        <th><i class="fas fa-id-card me-1"></i> Nome</th>
+                        <th><i class="fas fa-envelope me-1"></i> Email</th>
+                        <th><i class="fas fa-tag me-1"></i> Função</th>
+                        <th><i class="fas fa-building me-1"></i> Organização</th>
+                        <th class="text-center"><i class="fas fa-cogs me-1"></i> Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user_obj in users %}
-                        <tr>
-                            <td>{{ user_obj.username }}</td>
-                            <td>{{ user_obj.get_full_name|default:"-" }}</td>
-                            <td>{{ user_obj.email }}</td>
+                        <tr class="fade-in">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar">
+                                        {{ user_obj.username|first|upper }}
+                                    </div>
+                                    <span class="fw-bold">{{ user_obj.username }}</span>
+                                </div>
+                            </td>
+                            <td>{{ user_obj.get_full_name|default:"—" }}</td>
+                            <td>
+                                <a href="mailto:{{ user_obj.email }}" class="text-decoration-none">
+                                    <i class="fas fa-envelope me-1 small"></i>
+                                    {{ user_obj.email }}
+                                </a>
+                            </td>
                             <td>
                                 {% if user_obj.role == 'superadmin' %}
-                                    <span class="badge bg-danger">Super Admin</span>
+                                    <span class="badge bg-danger" data-bs-toggle="tooltip" title="Acesso completo ao sistema">
+                                        <i class="fas fa-user-shield me-1"></i> Super Admin
+                                    </span>
                                 {% elif user_obj.role == 'org_admin' %}
-                                    <span class="badge bg-warning">Admin da Org.</span>
+                                    <span class="badge bg-warning text-dark" data-bs-toggle="tooltip" title="Administrador de Organização">
+                                        <i class="fas fa-user-cog me-1"></i> Admin da Org.
+                                    </span>
                                 {% else %}
-                                    <span class="badge bg-info">Analista</span>
+                                    <span class="badge bg-info text-dark" data-bs-toggle="tooltip" title="Acesso limitado ao sistema">
+                                        <i class="fas fa-user me-1"></i> Analista
+                                    </span>
                                 {% endif %}
                             </td>
-                            <td>{{ user_obj.organization.name|default:"-" }}</td>
                             <td>
-                                <a href="{% url 'user_detail' user_obj.id %}" class="btn btn-sm btn-info">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{% url 'user_update' user_obj.id %}" class="btn btn-sm btn-warning">
-                                    <i class="fas fa-edit"></i>
-                                </a>
+                                {% if user_obj.organization %}
+                                    <span class="badge bg-primary">{{ user_obj.organization.name }}</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'user_detail' user_obj.id %}" class="btn btn-info" data-bs-toggle="tooltip" title="Visualizar">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'user_update' user_obj.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center py-3">
-                                <p class="mb-0 text-muted">Nenhum usuário encontrado.</p>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                                    <p class="mb-0 text-muted">Nenhum usuário encontrado.</p>
+                                    <a href="{% url 'user_list' %}" class="btn btn-sm btn-primary mt-3">
+                                        <i class="fas fa-sync me-1"></i> Limpar filtros
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
@@ -62,4 +187,61 @@
         </div>
     </div>
 </div>
+
+{% if is_paginated %}
+<nav aria-label="Paginação" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Primeira">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Anterior">
+                <i class="fas fa-angle-left"></i>
+            </a>
+        </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">
+                <i class="fas fa-file-alt me-1"></i> Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Próxima">
+                <i class="fas fa-angle-right"></i>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Última">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Destacar linhas com função específica
+        document.querySelectorAll('#usersTable tbody tr').forEach(function(row) {
+            const roleCell = row.querySelector('td:nth-child(4)');
+            if (roleCell) {
+                const badgeText = roleCell.textContent.trim();
+                if (badgeText.includes('Super Admin')) {
+                    row.classList.add('table-danger');
+                } else if (badgeText.includes('Admin da Org')) {
+                    row.classList.add('table-warning');
+                }
+            }
+        });
+    });
+</script>
 {% endblock %} 
