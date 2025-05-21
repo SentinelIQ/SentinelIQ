@@ -125,6 +125,7 @@ class Observable(models.Model):
     description = models.TextField(_('Description'), blank=True)
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
+    last_seen = models.DateTimeField(_('Last Seen'), null=True, blank=True)
     organization = models.ForeignKey(
         'organizations.Organization',
         on_delete=models.CASCADE,
@@ -195,3 +196,48 @@ class MitreSubTechnique(models.Model):
         verbose_name = _('MITRE Sub-technique')
         verbose_name_plural = _('MITRE Sub-techniques')
         ordering = ['sub_technique_id']
+
+
+class MitreAttackGroup(models.Model):
+    """
+    Modelo para agrupar elementos MITRE ATT&CK relacionados (táticas, técnicas, subtécnicas)
+    que podem ser associados a casos e alertas como parte de uma cadeia de ataque completa.
+    """
+    name = models.CharField(_('Nome'), max_length=255)
+    description = models.TextField(_('Descrição'), blank=True)
+    created_at = models.DateTimeField(_('Criado em'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Atualizado em'), auto_now=True)
+    organization = models.ForeignKey(
+        'organizations.Organization',
+        on_delete=models.CASCADE,
+        related_name='mitre_attack_groups',
+        verbose_name=_('Organização')
+    )
+    
+    # Relações com elementos MITRE
+    tactics = models.ManyToManyField(
+        MitreTactic, 
+        verbose_name=_('Táticas'),
+        related_name='attack_groups',
+        blank=True
+    )
+    techniques = models.ManyToManyField(
+        MitreTechnique, 
+        verbose_name=_('Técnicas'),
+        related_name='attack_groups',
+        blank=True
+    )
+    subtechniques = models.ManyToManyField(
+        MitreSubTechnique, 
+        verbose_name=_('Sub-técnicas'),
+        related_name='attack_groups',
+        blank=True
+    )
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = _('Grupo MITRE ATT&CK')
+        verbose_name_plural = _('Grupos MITRE ATT&CK')
+        ordering = ['-updated_at']

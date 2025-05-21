@@ -143,8 +143,13 @@
             
             if (tacticId) {
                 // Fetch techniques for this tactic
-                fetch(`/api/tactics/${tacticId}/techniques/`)
-                    .then(response => response.json())
+                fetch(`/api/mitre/tactic/${tacticId}/techniques/`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         data.forEach(technique => {
                             const option = document.createElement('option');
@@ -152,6 +157,9 @@
                             option.textContent = `${technique.technique_id}: ${technique.name}`;
                             techniqueSelect.appendChild(option);
                         });
+                    })
+                    .catch(error => {
+                        console.error('Erro ao carregar técnicas:', error);
                     });
             }
         });
@@ -165,8 +173,13 @@
             
             if (techniqueId) {
                 // Fetch sub-techniques for this technique
-                fetch(`/api/techniques/${techniqueId}/subtechniques/`)
-                    .then(response => response.json())
+                fetch(`/api/mitre/technique/${techniqueId}/subtechniques/`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         data.forEach(subtechnique => {
                             const option = document.createElement('option');
@@ -174,6 +187,9 @@
                             option.textContent = `${subtechnique.sub_technique_id}: ${subtechnique.name}`;
                             subtechniqueSelect.appendChild(option);
                         });
+                    })
+                    .catch(error => {
+                        console.error('Erro ao carregar subtécnicas:', error);
                     });
             }
         });

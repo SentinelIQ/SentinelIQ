@@ -3,6 +3,15 @@
 
 {% block title %}Escalar Alerta para Caso{% endblock %}
 
+{% block extra_css %}
+<style>
+    .escalation-form textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
@@ -28,6 +37,7 @@
             <span>Você está prestes a escalar o alerta <strong>"{{ alert.title }}"</strong> para um novo caso. Esta ação irá:</span>
             <ul class="mb-0 mt-2">
                 <li>Criar um novo caso associado a este alerta</li>
+                <li>Transferir TLP, PAP, tags, observables e classificações MITRE ATT&CK</li>
                 <li>Alterar o status do alerta para "Em Progresso" (se estiver em "Novo" ou "Reconhecido")</li>
                 <li>Manter as mesmas informações de título, descrição e atribuição</li>
             </ul>
@@ -90,6 +100,32 @@
                                         {% endif %}
                                     </td>
                                 </tr>
+                                <tr>
+                                    <th>TLP:</th>
+                                    <td>
+                                        <span class="badge bg-{% if alert.tlp == 'white' %}light text-dark{% elif alert.tlp == 'green' %}success{% elif alert.tlp == 'amber' %}warning text-dark{% elif alert.tlp == 'red' %}danger{% endif %}">
+                                            TLP:{{ alert.tlp|upper }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>PAP:</th>
+                                    <td>
+                                        <span class="badge bg-{% if alert.pap == 'white' %}light text-dark{% elif alert.pap == 'green' %}success{% elif alert.pap == 'amber' %}warning text-dark{% elif alert.pap == 'red' %}danger{% endif %}">
+                                            PAP:{{ alert.pap|upper }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Tags:</th>
+                                    <td>
+                                        {% for tag in alert.tags.all %}
+                                            <span class="badge bg-secondary">{{ tag.name }}</span>
+                                        {% empty %}
+                                            <span class="text-muted">Sem tags</span>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -105,11 +141,7 @@
                         <table class="table table-sm">
                             <tbody>
                                 <tr>
-                                    <th style="width:30%">Título:</th>
-                                    <td><em>Case from alert: {{ alert.title }}</em></td>
-                                </tr>
-                                <tr>
-                                    <th>Prioridade:</th>
+                                    <th style="width:30%">Prioridade:</th>
                                     <td>
                                         <span class="badge {% if alert.severity == 'critical' %}bg-danger{% elif alert.severity == 'high' %}bg-warning text-dark{% elif alert.severity == 'medium' %}bg-info text-dark{% else %}bg-success{% endif %}">
                                             {% if alert.severity == 'critical' %}
@@ -140,15 +172,123 @@
                                         {% endif %}
                                     </td>
                                 </tr>
+                                <tr>
+                                    <th>TLP:</th>
+                                    <td>
+                                        <span class="badge bg-{% if alert.tlp == 'white' %}light text-dark{% elif alert.tlp == 'green' %}success{% elif alert.tlp == 'amber' %}warning text-dark{% elif alert.tlp == 'red' %}danger{% endif %}">
+                                            TLP:{{ alert.tlp|upper }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>PAP:</th>
+                                    <td>
+                                        <span class="badge bg-{% if alert.pap == 'white' %}light text-dark{% elif alert.pap == 'green' %}success{% elif alert.pap == 'amber' %}warning text-dark{% elif alert.pap == 'red' %}danger{% endif %}">
+                                            PAP:{{ alert.pap|upper }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Tags:</th>
+                                    <td>
+                                        {% for tag in alert.tags.all %}
+                                            <span class="badge bg-secondary">{{ tag.name }}</span>
+                                        {% empty %}
+                                            <span class="text-muted">Sem tags</span>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="fas fa-exchange-alt me-2"></i> Dados Adicionais a Serem Transferidos</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-eye"></i> Observables ({{ alert.observables.count }})</h6>
+                                <ul class="list-group small mb-3">
+                                    {% for observable in alert.observables.all|slice:":5" %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="badge bg-{% if observable.is_malicious %}danger{% else %}secondary{% endif %} me-2">
+                                                    {% if observable.is_malicious %}Malicioso{% else %}Não malicioso{% endif %}
+                                                </span>
+                                                <strong>{{ observable.get_type_display }}:</strong> {{ observable.value|truncatechars:30 }}
+                                            </div>
+                                        </li>
+                                    {% empty %}
+                                        <li class="list-group-item text-muted">Nenhum observable a transferir</li>
+                                    {% endfor %}
+                                    {% if alert.observables.count > 5 %}
+                                        <li class="list-group-item text-muted text-center">+ {{ alert.observables.count|add:"-5" }} mais</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-shield-alt"></i> MITRE ATT&CK</h6>
+                                <ul class="list-group small">
+                                    {% if alert.mitre_tactics.exists or alert.mitre_techniques.exists or alert.mitre_subtechniques.exists or alert.mitre_attack_groups.exists %}
+                                        {% if alert.mitre_tactics.exists %}
+                                            <li class="list-group-item">
+                                                <strong>Táticas:</strong> {{ alert.mitre_tactics.count }}
+                                            </li>
+                                        {% endif %}
+                                        {% if alert.mitre_techniques.exists %}
+                                            <li class="list-group-item">
+                                                <strong>Técnicas:</strong> {{ alert.mitre_techniques.count }}
+                                            </li>
+                                        {% endif %}
+                                        {% if alert.mitre_subtechniques.exists %}
+                                            <li class="list-group-item">
+                                                <strong>Subtécnicas:</strong> {{ alert.mitre_subtechniques.count }}
+                                            </li>
+                                        {% endif %}
+                                        {% if alert.mitre_attack_groups.exists %}
+                                            <li class="list-group-item">
+                                                <strong>Grupos ATT&CK:</strong> {{ alert.mitre_attack_groups.count }}
+                                            </li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li class="list-group-item text-muted">Nenhuma classificação MITRE ATT&CK a transferir</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         
-        <form method="post" action="{% url 'escalate_to_case' alert.id %}">
+        <form method="post" action="{% url 'escalate_to_case' alert.id %}" class="escalation-form">
             {% csrf_token %}
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="fas fa-edit me-2"></i> Personalizar Caso</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="case_title" class="form-label">Título do Caso</label>
+                        <input type="text" class="form-control" id="case_title" name="case_title" value="{{ suggested_title }}" required>
+                        <small class="text-muted">Escolha um título descritivo para o novo caso.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="case_description" class="form-label">Descrição do Caso</label>
+                        <textarea class="form-control" id="case_description" name="case_description" rows="5">{{ suggested_description }}</textarea>
+                        <small class="text-muted">Descreva o caso com detalhes adicionais, contexto ou instruções para investigação.</small>
+                    </div>
+                </div>
+            </div>
+            
             <div class="d-flex justify-content-end">
                 <a href="{% url 'alert_detail' alert.id %}" class="btn btn-secondary me-2">
                     <i class="fas fa-times me-1"></i> Cancelar

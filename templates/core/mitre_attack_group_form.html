@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container p-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3">{{ title }}</h1>
+                <a href="{% url 'mitre_attack_group_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> {% trans "Back to Groups" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{% trans "Group Information" %}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-danger">
+                                {{ form.name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger">
+                                {{ form.description.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">{% trans "Describe the attack pattern or methodology this group represents." %}</div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.tactics.id_for_label }}" class="form-label">{{ form.tactics.label }}</label>
+                                    {{ form.tactics }}
+                                    {% if form.tactics.errors %}
+                                    <div class="text-danger">
+                                        {{ form.tactics.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.techniques.id_for_label }}" class="form-label">{{ form.techniques.label }}</label>
+                                    {{ form.techniques }}
+                                    {% if form.techniques.errors %}
+                                    <div class="text-danger">
+                                        {{ form.techniques.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.subtechniques.id_for_label }}" class="form-label">{{ form.subtechniques.label }}</label>
+                                    {{ form.subtechniques }}
+                                    {% if form.subtechniques.errors %}
+                                    <div class="text-danger">
+                                        {{ form.subtechniques.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end mt-4">
+                            <a href="{% url 'mitre_attack_group_list' %}" class="btn btn-outline-secondary me-2">
+                                {% trans "Cancel" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {% trans "Save Group" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tacticsSelect = document.getElementById('{{ form.tactics.id_for_label }}');
+        const techniquesSelect = document.getElementById('{{ form.techniques.id_for_label }}');
+        const subtechniquesSelect = document.getElementById('{{ form.subtechniques.id_for_label }}');
+        
+        // Função para carregar as técnicas com base nas táticas selecionadas
+        function loadTechniques() {
+            const selectedTactics = Array.from(tacticsSelect.selectedOptions).map(option => option.value);
+            
+            if (selectedTactics.length === 0) return;
+            
+            // Mostrar indicador de carregamento
+            techniquesSelect.disabled = true;
+            
+            // Use o endpoint correto para múltiplas táticas
+            fetch(`/api/tactics/multiple/techniques/?tactics=${selectedTactics.join(',')}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Salvar seleções atuais
+                    const selectedTechniques = Array.from(techniquesSelect.selectedOptions).map(option => option.value);
+                    
+                    // Limpar e recriar as opções
+                    while (techniquesSelect.firstChild) {
+                        techniquesSelect.removeChild(techniquesSelect.firstChild);
+                    }
+                    
+                    // Adicionar as novas opções
+                    data.forEach(technique => {
+                        const option = document.createElement('option');
+                        option.value = technique.id;
+                        option.textContent = `${technique.technique_id}: ${technique.name}`;
+                        option.selected = selectedTechniques.includes(technique.id.toString());
+                        techniquesSelect.appendChild(option);
+                    });
+                    
+                    techniquesSelect.disabled = false;
+                    
+                    // Recarregar as subtécnicas após atualizar as técnicas
+                    loadSubtechniques();
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar técnicas:', error);
+                    techniquesSelect.disabled = false;
+                });
+        }
+        
+        // Função para carregar as subtécnicas com base nas técnicas selecionadas
+        function loadSubtechniques() {
+            const selectedTechniques = Array.from(techniquesSelect.selectedOptions).map(option => option.value);
+            
+            if (selectedTechniques.length === 0) return;
+            
+            // Mostrar indicador de carregamento
+            subtechniquesSelect.disabled = true;
+            
+            fetch(`/api/techniques/multiple/subtechniques/?techniques=${selectedTechniques.join(',')}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Salvar seleções atuais
+                    const selectedSubtechniques = Array.from(subtechniquesSelect.selectedOptions).map(option => option.value);
+                    
+                    // Limpar e recriar as opções
+                    while (subtechniquesSelect.firstChild) {
+                        subtechniquesSelect.removeChild(subtechniquesSelect.firstChild);
+                    }
+                    
+                    // Adicionar as novas opções
+                    data.forEach(subtechnique => {
+                        const option = document.createElement('option');
+                        option.value = subtechnique.id;
+                        option.textContent = `${subtechnique.sub_technique_id}: ${subtechnique.name}`;
+                        option.selected = selectedSubtechniques.includes(subtechnique.id.toString());
+                        subtechniquesSelect.appendChild(option);
+                    });
+                    
+                    subtechniquesSelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar subtécnicas:', error);
+                    subtechniquesSelect.disabled = false;
+                });
+        }
+        
+        // Manipulador de eventos para mudanças nas seleções de táticas
+        tacticsSelect.addEventListener('change', loadTechniques);
+        
+        // Manipulador de eventos para mudanças nas seleções de técnicas
+        // Usamos click aqui porque o evento change não é acionado imediatamente em selects múltiplos
+        techniquesSelect.addEventListener('click', function(event) {
+            // Pequeno delay para permitir que a seleção seja processada
+            setTimeout(loadSubtechniques, 100);
+        });
+        
+        // Adicionar manipuladores para eventos de teclado também
+        techniquesSelect.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                setTimeout(loadSubtechniques, 100);
+            }
+        });
+        
+        // Carregar subtécnicas para técnicas já selecionadas na inicialização
+        if (techniquesSelect.selectedOptions.length > 0) {
+            loadSubtechniques();
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %} 

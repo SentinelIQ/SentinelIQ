@@ -291,10 +291,14 @@ def escalate_to_case(request, pk):
             Alert.CRITICAL: Case.CRITICAL,
         }
         
+        # Obter título e descrição personalizados do formulário
+        title = request.POST.get('case_title', f'Case from alert: {alert.title}')
+        description = request.POST.get('case_description', f'Case escalated from alert #{alert.id}:\n\n{alert.description}')
+        
         # Criar o caso
         case = Case.objects.create(
-            title=f'Case from alert: {alert.title}',
-            description=f'Case escalated from alert #{alert.id}:\n\n{alert.description}',
+            title=title,
+            description=description,
             priority=severity_to_priority.get(alert.severity, Case.MEDIUM),
             status=Case.OPEN,
             organization=alert.organization,
@@ -305,6 +309,59 @@ def escalate_to_case(request, pk):
         
         # Adicionar o alerta aos alertas relacionados do caso
         case.related_alerts.add(alert)
+        
+        # Transferir tags
+        for tag in alert.tags.all():
+            case.tags.add(tag)
+            case.log_tags_change(
+                user=request.user,
+                old_tags=[],
+                new_tags=[tag.name]
+            )
+        
+        # Transferir observables
+        for observable in alert.observables.all():
+            case.observables.add(observable)
+            case.log_observable_added(
+                user=request.user,
+                observable=observable
+            )
+        
+        # Transferir MITRE ATT&CK táticas
+        for tactic in alert.mitre_tactics.all():
+            case.mitre_tactics.add(tactic)
+            case.log_mitre_attack_added(
+                user=request.user,
+                item_type='tactic',
+                item=tactic
+            )
+        
+        # Transferir MITRE ATT&CK técnicas
+        for technique in alert.mitre_techniques.all():
+            case.mitre_techniques.add(technique)
+            case.log_mitre_attack_added(
+                user=request.user,
+                item_type='technique',
+                item=technique
+            )
+        
+        # Transferir MITRE ATT&CK subtécnicas
+        for subtechnique in alert.mitre_subtechniques.all():
+            case.mitre_subtechniques.add(subtechnique)
+            case.log_mitre_attack_added(
+                user=request.user,
+                item_type='subtechnique',
+                item=subtechnique
+            )
+        
+        # Transferir MITRE ATT&CK grupos
+        for group in alert.mitre_attack_groups.all():
+            case.mitre_attack_groups.add(group)
+            case.log_mitre_attack_added(
+                user=request.user,
+                item_type='attack_group',
+                item=group
+            )
         
         # Atualizar o status do alerta para "in_progress"
         if alert.status == Alert.NEW or alert.status == Alert.ACKNOWLEDGED:
@@ -325,11 +382,31 @@ def escalate_to_case(request, pk):
         # Registrar evento de escalação no alerta
         alert.log_escalated_to_case(request.user, case)
         
+        # Registrar evento para TLP e PAP
+        case.log_tlp_change(
+            user=request.user,
+            old_tlp=None,
+            new_tlp=case.tlp
+        )
+        
+        case.log_pap_change(
+            user=request.user,
+            old_pap=None,
+            new_pap=case.pap
+        )
+        
         messages.success(request, _('Alert successfully escalated to case.'))
         return redirect('case_detail', pk=case.id)
     
     # Renderizar confirmação para escalação
-    return render(request, 'alerts/alert_escalate.html', {'alert': alert})
+    suggested_title = f'Case from alert: {alert.title}'
+    suggested_description = f'Case escalated from alert #{alert.id}:\n\n{alert.description}'
+    
+    return render(request, 'alerts/alert_escalate.html', {
+        'alert': alert,
+        'suggested_title': suggested_title,
+        'suggested_description': suggested_description
+    })
 
 
 @login_required

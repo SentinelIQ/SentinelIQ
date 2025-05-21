@@ -224,6 +224,14 @@ class Alert(models.Model):
         related_name='alerts',
         blank=True,
     )
+    # Grupos MITRE ATT&CK para suportar múltiplos vínculos MITRE em um alerta
+    mitre_attack_groups = models.ManyToManyField(
+        'core.MitreAttackGroup',
+        verbose_name=_('MITRE ATT&CK Groups'),
+        related_name='alerts',
+        blank=True,
+        help_text=_('Grupos de elementos MITRE ATT&CK (táticas, técnicas, subtécnicas) relacionados'),
+    )
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
     

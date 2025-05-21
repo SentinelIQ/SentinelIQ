@@ -43,4 +43,23 @@ urlpatterns = [
     # MITRE ATT&CK association routes for alerts
     path('alert/<int:alert_id>/mitre/add/', views.add_alert_mitre_attack, name='add_alert_mitre_attack'),
     path('alert/<int:alert_id>/mitre/remove/<str:item_type>/<int:item_id>/', views.remove_alert_mitre_attack, name='remove_alert_mitre_attack'),
+    
+    # MITRE ATT&CK Group routes
+    path('mitre/groups/', views.mitre_attack_group_list, name='mitre_attack_group_list'),
+    path('mitre/groups/create/', views.mitre_attack_group_create, name='mitre_attack_group_create'),
+    path('mitre/groups/<int:group_id>/', views.mitre_attack_group_detail, name='mitre_attack_group_detail'),
+    path('mitre/groups/<int:group_id>/edit/', views.mitre_attack_group_edit, name='mitre_attack_group_edit'),
+    path('mitre/groups/<int:group_id>/delete/', views.mitre_attack_group_delete, name='mitre_attack_group_delete'),
+    
+    # MITRE ATT&CK Group association routes for cases
+    path('case/<int:case_id>/mitre/group/add/', views.add_case_mitre_attack_group, name='add_case_mitre_attack_group'),
+    path('case/<int:case_id>/mitre/group/remove/<int:group_id>/', views.remove_case_mitre_attack_group, name='remove_case_mitre_attack_group'),
+    
+    # MITRE ATT&CK Group association routes for alerts
+    path('alert/<int:alert_id>/mitre/group/add/', views.add_alert_mitre_attack_group, name='add_alert_mitre_attack_group'),
+    path('alert/<int:alert_id>/mitre/group/remove/<int:group_id>/', views.remove_alert_mitre_attack_group, name='remove_alert_mitre_attack_group'),
+    
+    # API endpoints para recuperar técnicas/subtécnicas por múltiplas táticas/técnicas
+    path('api/tactics/multiple/techniques/', views.api_get_techniques_by_multiple_tactics, name='api_get_techniques_by_multiple_tactics'),
+    path('api/techniques/multiple/subtechniques/', views.api_get_subtechniques_by_multiple_techniques, name='api_get_subtechniques_by_multiple_techniques'),
 ] 

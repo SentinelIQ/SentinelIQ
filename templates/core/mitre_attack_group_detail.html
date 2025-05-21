@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "MITRE ATT&CK Group" %}: {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="container p-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3">{{ group.name }}</h1>
+                <div>
+                    <a href="{% url 'mitre_attack_group_edit' group.id %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> {% trans "Edit Group" %}
+                    </a>
+                    <a href="{% url 'mitre_attack_group_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> {% trans "Back to Groups" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{% trans "Group Details" %}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ group.description }}</p>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">{% trans "Created" %}: {{ group.created_at|date:"d/m/Y H:i" }}</small>
+                    <small class="text-muted float-end">{% trans "Last updated" %}: {{ group.updated_at|date:"d/m/Y H:i" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{% trans "Tactics" %} ({{ tactics.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if tactics %}
+                    <div class="list-group">
+                        {% for tactic in tactics %}
+                        <div class="list-group-item">
+                            <span class="mitre-badge tactic-badge" 
+                                  data-mitre-type="tactic" 
+                                  data-mitre-id="{{ tactic.id }}">
+                                {{ tactic.tactic_id }}
+                            </span>
+                            {{ tactic.name }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">{% trans "No tactics in this group." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">{% trans "Techniques" %} ({{ techniques.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if techniques %}
+                    <div class="list-group">
+                        {% for technique in techniques %}
+                        <div class="list-group-item">
+                            <span class="mitre-badge technique-badge" 
+                                  data-mitre-type="technique" 
+                                  data-mitre-id="{{ technique.id }}">
+                                {{ technique.technique_id }}
+                            </span>
+                            {{ technique.name }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">{% trans "No techniques in this group." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">{% trans "Sub-techniques" %} ({{ subtechniques.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if subtechniques %}
+                    <div class="list-group">
+                        {% for subtechnique in subtechniques %}
+                        <div class="list-group-item">
+                            <span class="mitre-badge subtechnique-badge" 
+                                  data-mitre-type="subtechnique" 
+                                  data-mitre-id="{{ subtechnique.id }}">
+                                {{ subtechnique.sub_technique_id }}
+                            </span>
+                            {{ subtechnique.name }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">{% trans "No sub-techniques in this group." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{% trans "Related Cases" %}</h5>
+                        <span class="badge bg-warning text-dark">{{ group.cases.count }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if cases %}
+                    <div class="list-group">
+                        {% for case in cases %}
+                        <a href="{% url 'case_detail' case.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ case.title }}</h6>
+                                <small>{{ case.get_status_display }}</small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% if group.cases.count > 5 %}
+                    <div class="text-center mt-3">
+                        <a href="#" class="btn btn-sm btn-outline-secondary">{% trans "View all" %} {{ group.cases.count }} {% trans "cases" %}</a>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <p class="text-muted">{% trans "No cases are using this group yet." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{% trans "Related Alerts" %}</h5>
+                        <span class="badge bg-danger text-white">{{ group.alerts.count }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if alerts %}
+                    <div class="list-group">
+                        {% for alert in alerts %}
+                        <a href="{% url 'alert_detail' alert.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ alert.title }}</h6>
+                                <small>{{ alert.get_severity_display }}</small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% if group.alerts.count > 5 %}
+                    <div class="text-center mt-3">
+                        <a href="#" class="btn btn-sm btn-outline-secondary">{% trans "View all" %} {{ group.alerts.count }} {% trans "alerts" %}</a>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <p class="text-muted">{% trans "No alerts are using this group yet." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/mitre_attack.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/mitre_attack_tooltips.js' %}"></script>
+{% endblock %} 

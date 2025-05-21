@@ -1,6 +1,6 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from .models import Tag, Observable, MitreTactic, MitreTechnique, MitreSubTechnique
+from .models import Tag, Observable, MitreTactic, MitreTechnique, MitreSubTechnique, MitreAttackGroup
 from alerts.models import Alert
 from cases.models import Case
 
@@ -73,6 +73,21 @@ class TagForm(forms.ModelForm):
 class ObservableForm(forms.ModelForm):
     """Form for creating and updating observables"""
     
+    # Campos para associar o observable a alertas e casos
+    alert = forms.ModelChoiceField(
+        queryset=Alert.objects.all(),
+        required=False,
+        empty_label="-- Selecione um alerta (opcional) --",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    case = forms.ModelChoiceField(
+        queryset=Case.objects.all(),
+        required=False,
+        empty_label="-- Selecione um caso (opcional) --",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
     class Meta:
         model = Observable
         fields = (
@@ -86,6 +101,25 @@ class ObservableForm(forms.ModelForm):
             'pap': forms.Select(attrs={'class': 'form-select'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        # Pegar o usuário atual da view para filtrar alertas e casos
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        if user:
+            # Filtrar alertas e casos pela organização do usuário
+            self.fields['alert'].queryset = Alert.objects.filter(
+                organization=user.organization
+            ).order_by('-created_at')
+            
+            self.fields['case'].queryset = Case.objects.filter(
+                organization=user.organization
+            ).order_by('-created_at')
+            
+            # Adicionar títulos como descrições nos dropdowns
+            self.fields['alert'].label_from_instance = lambda obj: f"{obj.title} (ID: {obj.id})"
+            self.fields['case'].label_from_instance = lambda obj: f"{obj.title} (ID: {obj.id})"
     
     def clean(self):
         cleaned_data = super().clean()
@@ -234,4 +268,25 @@ class MitreAttackSelectionForm(forms.Form):
         # If initial technique is provided, filter sub-techniques accordingly
         if 'technique' in self.initial:
             technique = self.initial['technique']
-            self.fields['subtechnique'].queryset = MitreSubTechnique.objects.filter(parent_technique=technique) 
+            self.fields['subtechnique'].queryset = MitreSubTechnique.objects.filter(parent_technique=technique)
+
+
+class MitreAttackGroupForm(forms.ModelForm):
+    """Form for creating and editing MITRE ATT&CK Groups"""
+    class Meta:
+        model = MitreAttackGroup
+        fields = ['name', 'description', 'tactics', 'techniques', 'subtechniques']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'tactics': forms.SelectMultiple(attrs={'class': 'form-select', 'size': '5'}),
+            'techniques': forms.SelectMultiple(attrs={'class': 'form-select', 'size': '5'}),
+            'subtechniques': forms.SelectMultiple(attrs={'class': 'form-select', 'size': '5'}),
+        }
+        
+    def __init__(self, *args, **kwargs):
+        organization = kwargs.pop('organization', None)
+        super().__init__(*args, **kwargs)
+        
+        if organization:
+            self.instance.organization = organization 

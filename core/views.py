@@ -8,10 +8,11 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.db import IntegrityError
+from django.utils import timezone
 
 from accounts.views import OrgAdminRequiredMixin
-from .models import Tag, Observable, MitreTactic, MitreTechnique, MitreSubTechnique
-from .forms import TagForm, ObservableForm, ObservableFilterForm, MitreAttackSelectionForm
+from .models import Tag, Observable, MitreTactic, MitreTechnique, MitreSubTechnique, MitreAttackGroup
+from .forms import TagForm, ObservableForm, ObservableFilterForm, MitreAttackSelectionForm, MitreAttackGroupForm
 from alerts.models import Alert
 from cases.models import Case
 
@@ -359,6 +360,10 @@ def observable_detail(request, pk):
     """View observable details"""
     observable = get_object_or_404(Observable, pk=pk)
     
+    # Update the last_seen time
+    observable.last_seen = timezone.now()
+    observable.save(update_fields=['last_seen'])
+    
     # Get related alerts and cases from the user's organization
     related_alerts = observable.alerts.filter(organization=request.user.organization)
     related_cases = observable.cases.filter(organization=request.user.organization)
@@ -376,31 +381,73 @@ def observable_detail(request, pk):
 def observable_create(request):
     """Create a new observable"""
     if request.method == 'POST':
-        form = ObservableForm(request.POST)
+        form = ObservableForm(request.POST, user=request.user)
         if form.is_valid():
             try:
-                observable = form.save()
+                # Salvar o observable com a organização correta
+                observable = form.save(commit=False)
+                observable.organization = request.user.organization
+                observable.last_seen = timezone.now()  # Inicializar o campo last_seen
+                observable.save()
+                
                 messages.success(request, 'Observable criado com sucesso!')
                 
-                # Optional: Redirect based on where the user came from
-                if 'alert_id' in request.GET:
-                    alert_id = request.GET.get('alert_id')
-                    alert = get_object_or_404(Alert, pk=alert_id)
+                # Verificar e associar a alertas/casos selecionados no formulário
+                alert = form.cleaned_data.get('alert')
+                case = form.cleaned_data.get('case')
+                
+                if alert:
                     alert.observables.add(observable)
                     alert.log_observable_added(request.user, observable)
-                    return redirect('alert_detail', alert_id)
-                elif 'case_id' in request.GET:
-                    case_id = request.GET.get('case_id')
-                    case = get_object_or_404(Case, pk=case_id)
+                    messages.success(request, f'Observable associado ao alerta {alert.title} com sucesso!')
+                    return redirect('alert_detail', pk=alert.id)
+                
+                elif case:
                     case.observables.add(observable)
                     case.log_observable_added(request.user, observable)
-                    return redirect('case_detail', case_id)
+                    messages.success(request, f'Observable associado ao caso {case.title} com sucesso!')
+                    return redirect('case_detail', pk=case.id)
+                
+                # Comportamento anterior de redirecionamento baseado em parâmetros na URL
+                elif 'alert_id' in request.GET:
+                    alert_id = request.GET.get('alert_id')
+                    alert = get_object_or_404(Alert, pk=alert_id, organization=request.user.organization)
+                    alert.observables.add(observable)
+                    alert.log_observable_added(request.user, observable)
+                    return redirect('alert_detail', pk=alert_id)
+                
+                elif 'case_id' in request.GET:
+                    case_id = request.GET.get('case_id')
+                    case = get_object_or_404(Case, pk=case_id, organization=request.user.organization)
+                    case.observables.add(observable)
+                    case.log_observable_added(request.user, observable)
+                    return redirect('case_detail', pk=case_id)
                 
                 return redirect('observable_list')
             except IntegrityError:
                 form.add_error(None, 'Este valor de observable já existe com este tipo. Os observables devem ser únicos por tipo e valor.')
     else:
-        form = ObservableForm()
+        # Pré-preencher o formulário com valores de case_id ou alert_id da URL
+        initial_data = {}
+        
+        alert_id = request.GET.get('alert_id')
+        case_id = request.GET.get('case_id')
+        
+        if alert_id:
+            try:
+                alert = Alert.objects.get(id=alert_id, organization=request.user.organization)
+                initial_data['alert'] = alert.id
+            except Alert.DoesNotExist:
+                pass
+        
+        if case_id:
+            try:
+                case = Case.objects.get(id=case_id, organization=request.user.organization)
+                initial_data['case'] = case.id
+            except Case.DoesNotExist:
+                pass
+        
+        form = ObservableForm(initial=initial_data, user=request.user)
     
     context = {
         'form': form,
@@ -413,16 +460,44 @@ def observable_create(request):
 @login_required
 def observable_update(request, pk):
     """Update an existing observable"""
-    observable = get_object_or_404(Observable, pk=pk)
+    observable = get_object_or_404(Observable, pk=pk, organization=request.user.organization)
     
     if request.method == 'POST':
-        form = ObservableForm(request.POST, instance=observable)
+        form = ObservableForm(request.POST, instance=observable, user=request.user)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Observable atualizado com sucesso!')
-            return redirect('observable_detail', pk=observable.pk)
+            observable = form.save()
+            
+            # Verificar e associar a alertas/casos selecionados no formulário
+            alert = form.cleaned_data.get('alert')
+            case = form.cleaned_data.get('case')
+            
+            if alert and alert not in observable.alerts.all():
+                alert.observables.add(observable)
+                alert.log_observable_added(request.user, observable)
+                messages.success(request, f'Observable associado ao alerta {alert.title} com sucesso!')
+                return redirect('alert_detail', pk=alert.id)
+            
+            elif case and case not in observable.cases.all():
+                case.observables.add(observable)
+                case.log_observable_added(request.user, observable)
+                messages.success(request, f'Observable associado ao caso {case.title} com sucesso!')
+                return redirect('case_detail', pk=case.id)
+            else:
+                messages.success(request, 'Observable atualizado com sucesso!')
+                return redirect('observable_detail', pk=observable.pk)
     else:
-        form = ObservableForm(instance=observable)
+        # Buscar alertas e casos relacionados para facilitar a seleção
+        related_alerts = observable.alerts.filter(organization=request.user.organization)
+        related_cases = observable.cases.filter(organization=request.user.organization)
+        
+        # Pré-selecionar o primeiro alerta ou caso se houver algum
+        initial_data = {}
+        if related_alerts.exists():
+            initial_data['alert'] = related_alerts.first().id
+        elif related_cases.exists():
+            initial_data['case'] = related_cases.first().id
+            
+        form = ObservableForm(instance=observable, initial=initial_data, user=request.user)
     
     context = {
         'form': form,
@@ -970,3 +1045,263 @@ def api_get_subtechnique_details(request, subtechnique_id):
     }
     
     return JsonResponse(data)
+
+
+@login_required
+def mitre_attack_group_list(request):
+    """List MITRE ATT&CK Groups for the organization"""
+    groups = MitreAttackGroup.objects.filter(organization=request.user.organization)
+    
+    context = {
+        'groups': groups,
+    }
+    
+    return render(request, 'core/mitre_attack_group_list.html', context)
+
+
+@login_required
+def mitre_attack_group_create(request):
+    """Create a new MITRE ATT&CK Group"""
+    if request.method == 'POST':
+        form = MitreAttackGroupForm(request.POST, organization=request.user.organization)
+        if form.is_valid():
+            group = form.save()
+            messages.success(request, _('MITRE ATT&CK Group created successfully.'))
+            return redirect('mitre_attack_group_detail', group_id=group.id)
+    else:
+        form = MitreAttackGroupForm(organization=request.user.organization)
+    
+    context = {
+        'form': form,
+        'title': _('Create MITRE ATT&CK Group')
+    }
+    
+    return render(request, 'core/mitre_attack_group_form.html', context)
+
+
+@login_required
+def mitre_attack_group_detail(request, group_id):
+    """View a MITRE ATT&CK Group"""
+    group = get_object_or_404(MitreAttackGroup, id=group_id, organization=request.user.organization)
+    
+    context = {
+        'group': group,
+        'tactics': group.tactics.all(),
+        'techniques': group.techniques.all(),
+        'subtechniques': group.subtechniques.all(),
+        'cases': group.cases.all()[:5],
+        'alerts': group.alerts.all()[:5],
+    }
+    
+    return render(request, 'core/mitre_attack_group_detail.html', context)
+
+
+@login_required
+def mitre_attack_group_edit(request, group_id):
+    """Edit a MITRE ATT&CK Group"""
+    group = get_object_or_404(MitreAttackGroup, id=group_id, organization=request.user.organization)
+    
+    if request.method == 'POST':
+        form = MitreAttackGroupForm(request.POST, instance=group, organization=request.user.organization)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _('MITRE ATT&CK Group updated successfully.'))
+            return redirect('mitre_attack_group_detail', group_id=group.id)
+    else:
+        form = MitreAttackGroupForm(instance=group, organization=request.user.organization)
+    
+    context = {
+        'form': form,
+        'group': group,
+        'title': _('Edit MITRE ATT&CK Group')
+    }
+    
+    return render(request, 'core/mitre_attack_group_form.html', context)
+
+
+@login_required
+def mitre_attack_group_delete(request, group_id):
+    """Delete a MITRE ATT&CK Group"""
+    group = get_object_or_404(MitreAttackGroup, id=group_id, organization=request.user.organization)
+    
+    if request.method == 'POST':
+        group.delete()
+        messages.success(request, _('MITRE ATT&CK Group deleted successfully.'))
+        return redirect('mitre_attack_group_list')
+    
+    context = {
+        'group': group,
+    }
+    
+    return render(request, 'core/mitre_attack_group_confirm_delete.html', context)
+
+
+@login_required
+def add_case_mitre_attack_group(request, case_id):
+    """Add a MITRE ATT&CK Group to a case"""
+    case = get_object_or_404(Case, id=case_id, organization=request.user.organization)
+    
+    if request.method == 'POST':
+        group_id = request.POST.get('group')
+        if group_id:
+            group = get_object_or_404(MitreAttackGroup, id=group_id, organization=request.user.organization)
+            case.mitre_attack_groups.add(group)
+            
+            # Log the action
+            case.add_timeline_event(
+                event_type=CaseEvent.MITRE_ATTACK_ADDED,
+                title=_('MITRE ATT&CK Group added'),
+                description=f"{group.name}",
+                user=request.user,
+                metadata={'group_id': group.id}
+            )
+            
+            messages.success(request, _('MITRE ATT&CK Group added to case successfully.'))
+            return redirect('case_detail', case_id=case.id)
+    
+    groups = MitreAttackGroup.objects.filter(organization=request.user.organization)
+    existing_groups = case.mitre_attack_groups.all()
+    available_groups = groups.exclude(id__in=[g.id for g in existing_groups])
+    
+    context = {
+        'case': case,
+        'groups': available_groups,
+        'existing_groups': existing_groups,
+    }
+    
+    return render(request, 'core/add_case_mitre_attack_group.html', context)
+
+
+@login_required
+def remove_case_mitre_attack_group(request, case_id, group_id):
+    """Remove a MITRE ATT&CK Group from a case"""
+    case = get_object_or_404(Case, id=case_id, organization=request.user.organization)
+    group = get_object_or_404(MitreAttackGroup, id=group_id, organization=request.user.organization)
+    
+    if request.method == 'POST':
+        case.mitre_attack_groups.remove(group)
+        
+        # Log the action
+        case.add_timeline_event(
+            event_type=CaseEvent.MITRE_ATTACK_REMOVED,
+            title=_('MITRE ATT&CK Group removed'),
+            description=f"{group.name}",
+            user=request.user,
+            metadata={'group_id': group.id}
+        )
+        
+        messages.success(request, _('MITRE ATT&CK Group removed from case successfully.'))
+    
+    return redirect('case_detail', case_id=case.id)
+
+
+@login_required
+def add_alert_mitre_attack_group(request, alert_id):
+    """Add a MITRE ATT&CK Group to an alert"""
+    alert = get_object_or_404(Alert, id=alert_id, organization=request.user.organization)
+    
+    if request.method == 'POST':
+        group_id = request.POST.get('group')
+        if group_id:
+            group = get_object_or_404(MitreAttackGroup, id=group_id, organization=request.user.organization)
+            alert.mitre_attack_groups.add(group)
+            
+            # Log the action
+            alert.add_timeline_event(
+                event_type=AlertEvent.MITRE_ATTACK_ADDED,
+                title=_('MITRE ATT&CK Group added'),
+                description=f"{group.name}",
+                user=request.user,
+                metadata={'group_id': group.id}
+            )
+            
+            messages.success(request, _('MITRE ATT&CK Group added to alert successfully.'))
+            return redirect('alert_detail', alert_id=alert.id)
+    
+    groups = MitreAttackGroup.objects.filter(organization=request.user.organization)
+    existing_groups = alert.mitre_attack_groups.all()
+    available_groups = groups.exclude(id__in=[g.id for g in existing_groups])
+    
+    context = {
+        'alert': alert,
+        'groups': available_groups,
+        'existing_groups': existing_groups,
+    }
+    
+    return render(request, 'core/add_alert_mitre_attack_group.html', context)
+
+
+@login_required
+def remove_alert_mitre_attack_group(request, alert_id, group_id):
+    """Remove a MITRE ATT&CK Group from an alert"""
+    alert = get_object_or_404(Alert, id=alert_id, organization=request.user.organization)
+    group = get_object_or_404(MitreAttackGroup, id=group_id, organization=request.user.organization)
+    
+    if request.method == 'POST':
+        alert.mitre_attack_groups.remove(group)
+        
+        # Log the action
+        alert.add_timeline_event(
+            event_type=AlertEvent.MITRE_ATTACK_REMOVED,
+            title=_('MITRE ATT&CK Group removed'),
+            description=f"{group.name}",
+            user=request.user,
+            metadata={'group_id': group.id}
+        )
+        
+        messages.success(request, _('MITRE ATT&CK Group removed from alert successfully.'))
+    
+    return redirect('alert_detail', alert_id=alert.id)
+
+
+@login_required
+def api_get_techniques_by_multiple_tactics(request):
+    """API endpoint to get techniques for multiple tactics"""
+    tactic_ids = request.GET.get('tactics', '').split(',')
+    tactics = MitreTactic.objects.filter(id__in=tactic_ids)
+    
+    # Buscar técnicas associadas a qualquer uma das táticas especificadas
+    techniques = MitreTechnique.objects.filter(tactics__in=tactics).distinct()
+    
+    data = []
+    for technique in techniques:
+        data.append({
+            'id': technique.id,
+            'technique_id': technique.technique_id,
+            'name': technique.name,
+            'description': technique.description,
+            'url': technique.url
+        })
+    
+    return JsonResponse(data, safe=False)
+
+
+@login_required
+def api_get_subtechniques_by_multiple_techniques(request):
+    """API endpoint to get subtechniques for multiple techniques"""
+    try:
+        technique_ids = request.GET.get('techniques', '').split(',')
+        technique_ids = [tid for tid in technique_ids if tid.strip()]  # Remove valores vazios
+        
+        if not technique_ids:
+            return JsonResponse([], safe=False)
+            
+        techniques = MitreTechnique.objects.filter(id__in=technique_ids)
+        
+        # Buscar subtécnicas associadas a qualquer uma das técnicas especificadas
+        subtechniques = MitreSubTechnique.objects.filter(parent_technique__in=techniques).order_by('sub_technique_id')
+        
+        data = []
+        for subtechnique in subtechniques:
+            data.append({
+                'id': subtechnique.id,
+                'sub_technique_id': subtechnique.sub_technique_id,
+                'name': subtechnique.name,
+                'description': subtechnique.description,
+                'url': subtechnique.url,
+                'parent_technique_id': subtechnique.parent_technique.id
+            })
+        
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
