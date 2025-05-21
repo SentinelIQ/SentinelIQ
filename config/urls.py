@@ -25,7 +25,8 @@ from organizations.views import (
     OrganizationUpdateView, OrganizationDeleteView
 )
 from alerts.views import (
-    AlertListView, AlertDetailView, AlertCreateView, AlertUpdateView, AlertDeleteView
+    AlertListView, AlertDetailView, AlertCreateView, AlertUpdateView, AlertDeleteView,
+    escalate_to_case
 )
 from cases.views import (
     CaseListView, CaseDetailView, CaseCreateView, CaseUpdateView, CaseDeleteView,
@@ -68,6 +69,7 @@ urlpatterns = [
     path('alerts/create/', AlertCreateView.as_view(), name='alert_create'),
     path('alerts/<int:pk>/update/', AlertUpdateView.as_view(), name='alert_update'),
     path('alerts/<int:pk>/delete/', AlertDeleteView.as_view(), name='alert_delete'),
+    path('alerts/<int:pk>/escalate/', escalate_to_case, name='escalate_to_case'),
     
     # Case URLs
     path('cases/', CaseListView.as_view(), name='case_list'),

@@ -96,6 +96,9 @@
         </nav>
     </div>
     <div class="d-flex">
+        <a href="{% url 'escalate_to_case' alert.id %}" class="btn btn-success me-2 d-flex align-items-center">
+            <i class="fas fa-arrow-circle-up me-2"></i> Escalar para Caso
+        </a>
         <a href="{% url 'alert_update' alert.id %}" class="btn btn-warning me-2 d-flex align-items-center">
             <i class="fas fa-edit me-2"></i> Editar
         </a>
@@ -301,6 +304,22 @@
                                         </span>
                                     </td>
                                 </tr>
+                                <tr>
+                                    <th class="bg-light">TLP</th>
+                                    <td>
+                                        <span class="badge {% if alert.tlp == 'red' %}bg-danger{% elif alert.tlp == 'amber' %}bg-warning text-dark{% elif alert.tlp == 'green' %}bg-success{% else %}bg-light text-dark border{% endif %}">
+                                            TLP:{% if alert.tlp == 'red' %}RED{% elif alert.tlp == 'amber' %}AMBER{% elif alert.tlp == 'green' %}GREEN{% else %}WHITE{% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">PAP</th>
+                                    <td>
+                                        <span class="badge {% if alert.pap == 'red' %}bg-danger{% elif alert.pap == 'amber' %}bg-warning text-dark{% elif alert.pap == 'green' %}bg-success{% else %}bg-light text-dark border{% endif %}">
+                                            PAP:{% if alert.pap == 'red' %}RED{% elif alert.pap == 'amber' %}AMBER{% elif alert.pap == 'green' %}GREEN{% else %}WHITE{% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -339,54 +358,36 @@
                     <div class="col-lg-12">
                         <h5 class="mb-4"><i class="fas fa-history me-2 text-primary"></i> Histórico do Alerta</h5>
                         <div class="timeline">
-                            <div class="timeline-item">
-                                <div class="card shadow-sm mb-0">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <span class="badge bg-success me-2">Criação</span>
-                                            <span class="small text-muted">{{ alert.created_at|date:"d/m/Y H:i" }}</span>
+                            {% if alert.timeline_events.all %}
+                                {% for event in alert.timeline_events.all %}
+                                    <div class="timeline-item">
+                                        <div class="card shadow-sm mb-0">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <span class="badge {% if event.event_type == 'created' %}bg-success{% elif event.event_type == 'status_changed' %}bg-info{% elif event.event_type == 'severity_changed' %}bg-warning text-dark{% elif event.event_type == 'assignee_changed' %}bg-primary{% elif event.event_type == 'tlp_changed' %}bg-primary{% elif event.event_type == 'pap_changed' %}bg-warning text-dark{% elif event.event_type == 'escalated' %}bg-success{% else %}bg-secondary{% endif %} me-2">
+                                                        <i class="fas {{ event.get_icon_class }} me-1"></i>
+                                                        {{ event.get_event_type_display }}
+                                                    </span>
+                                                    <span class="small text-muted">{{ event.created_at|date:"d/m/Y H:i" }}</span>
+                                                </div>
+                                                <p class="mb-0">{{ event.title }}</p>
+                                                {% if event.description %}
+                                                    <p class="small text-muted mt-1">{{ event.description }}</p>
+                                                {% endif %}
+                                                {% if event.user %}
+                                                    <div class="small text-muted mt-1">
+                                                        <i class="fas fa-user-circle me-1"></i> {{ event.user.username }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
                                         </div>
-                                        <p class="mb-0">Alerta criado com status <span class="fw-bold">Novo</span>.</p>
                                     </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-3">
+                                    <i class="fas fa-exclamation-circle text-muted fa-2x mb-2"></i>
+                                    <p class="mb-0 text-muted">Nenhum evento registrado para este alerta.</p>
                                 </div>
-                            </div>
-                            
-                            {% if alert.status != 'new' %}
-                            <div class="timeline-item">
-                                <div class="card shadow-sm mb-0">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <span class="badge bg-warning text-dark me-2">Atualização</span>
-                                            <span class="small text-muted">{{ alert.updated_at|date:"d/m/Y H:i" }}</span>
-                                        </div>
-                                        <p class="mb-0">Status atualizado para <span class="fw-bold">
-                                            {% if alert.status == 'acknowledged' %}
-                                                Reconhecido
-                                            {% elif alert.status == 'in_progress' %}
-                                                Em Progresso
-                                            {% elif alert.status == 'resolved' %}
-                                                Resolvido
-                                            {% else %}
-                                                Fechado
-                                            {% endif %}
-                                        </span>.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
-                            
-                            {% if alert.assigned_to %}
-                            <div class="timeline-item">
-                                <div class="card shadow-sm mb-0">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <span class="badge bg-info text-dark me-2">Atribuição</span>
-                                            <span class="small text-muted">{{ alert.updated_at|date:"d/m/Y H:i" }}</span>
-                                        </div>
-                                        <p class="mb-0">Alerta atribuído a <span class="fw-bold">{{ alert.assigned_to.get_full_name|default:alert.assigned_to.username }}</span>.</p>
-                                    </div>
-                                </div>
-                            </div>
                             {% endif %}
                         </div>
                     </div>

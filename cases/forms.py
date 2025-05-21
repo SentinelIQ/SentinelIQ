@@ -10,7 +10,7 @@ class CaseForm(forms.ModelForm):
         model = Case
         fields = (
             'title', 'description', 'priority', 'status', 
-            'assigned_to', 'due_date', 'related_alerts'
+            'assigned_to', 'due_date', 'related_alerts', 'tlp', 'pap'
         )
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -20,6 +20,8 @@ class CaseForm(forms.ModelForm):
             'assigned_to': forms.Select(attrs={'class': 'form-select'}),
             'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'related_alerts': forms.SelectMultiple(attrs={'class': 'form-select'}),
+            'tlp': forms.Select(attrs={'class': 'form-select'}),
+            'pap': forms.Select(attrs={'class': 'form-select'}),
         }
     
     def __init__(self, *args, organization=None, **kwargs):
@@ -62,6 +64,8 @@ class CaseFilterForm(forms.Form):
     """Form for filtering cases"""
     STATUS_CHOICES = [('', _('All Statuses'))] + list(Case.STATUS_CHOICES)
     PRIORITY_CHOICES = [('', _('All Priorities'))] + list(Case.PRIORITY_CHOICES)
+    TLP_CHOICES = [('', _('All TLP'))] + list(Case.TLP_CHOICES)
+    PAP_CHOICES = [('', _('All PAP'))] + list(Case.PAP_CHOICES)
     
     status = forms.ChoiceField(
         choices=STATUS_CHOICES, 
@@ -70,6 +74,16 @@ class CaseFilterForm(forms.Form):
     )
     priority = forms.ChoiceField(
         choices=PRIORITY_CHOICES, 
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    tlp = forms.ChoiceField(
+        choices=TLP_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    pap = forms.ChoiceField(
+        choices=PAP_CHOICES,
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'})
     )

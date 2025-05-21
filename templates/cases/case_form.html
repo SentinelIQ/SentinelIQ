@@ -158,6 +158,52 @@
                     {% endif %}
                 </div>
                 
+                <!-- TLP -->
+                <div class="col-md-6">
+                    <label for="{{ form.tlp.id_for_label }}" class="form-label">
+                        <i class="fas fa-shield-alt me-1"></i> TLP (Confidencialidade)
+                    </label>
+                    {{ form.tlp }}
+                    <small class="form-text text-muted">
+                        <ul class="mb-0 ps-3 mt-1">
+                            <li><strong style="color: red;">TLP:RED</strong> - Não compartilhar, apenas para destinatários específicos</li>
+                            <li><strong style="color: orange;">TLP:AMBER</strong> - Compartilhamento limitado dentro da organização</li>
+                            <li><strong style="color: green;">TLP:GREEN</strong> - Compartilhamento limitado a uma comunidade</li>
+                            <li><strong>TLP:WHITE</strong> - Compartilhamento irrestrito</li>
+                        </ul>
+                    </small>
+                    {% if form.tlp.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.tlp.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- PAP -->
+                <div class="col-md-6">
+                    <label for="{{ form.pap.id_for_label }}" class="form-label">
+                        <i class="fas fa-user-shield me-1"></i> PAP (Exposição)
+                    </label>
+                    {{ form.pap }}
+                    <small class="form-text text-muted">
+                        <ul class="mb-0 ps-3 mt-1">
+                            <li><strong style="color: red;">PAP:RED</strong> - Nenhuma ação permitida além de alertas</li>
+                            <li><strong style="color: orange;">PAP:AMBER</strong> - Ações limitadas aprovadas pelo proprietário</li>
+                            <li><strong style="color: green;">PAP:GREEN</strong> - Ações coordenadas permitidas</li>
+                            <li><strong>PAP:WHITE</strong> - Uso irrestrito da informação</li>
+                        </ul>
+                    </small>
+                    {% if form.pap.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.pap.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
                 <div class="col-12 mt-4">
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary">

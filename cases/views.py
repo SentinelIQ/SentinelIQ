@@ -49,6 +49,16 @@ class CaseListView(LoginRequiredMixin, ListView):
             if assignee:
                 queryset = queryset.filter(assigned_to=assignee)
             
+            # Filter by TLP
+            tlp = form.cleaned_data.get('tlp')
+            if tlp:
+                queryset = queryset.filter(tlp=tlp)
+            
+            # Filter by PAP
+            pap = form.cleaned_data.get('pap')
+            if pap:
+                queryset = queryset.filter(pap=pap)
+            
             # Search in title and description
             search = form.cleaned_data.get('search')
             if search:
@@ -174,6 +184,22 @@ class CaseUpdateView(LoginRequiredMixin, UpdateView):
                 user=self.request.user,
                 old_date=old_case.due_date,
                 new_date=self.object.due_date
+            )
+        
+        # Check for TLP change
+        if old_case.tlp != self.object.tlp:
+            self.object.log_tlp_change(
+                user=self.request.user,
+                old_tlp=old_case.tlp,
+                new_tlp=self.object.tlp
+            )
+        
+        # Check for PAP change
+        if old_case.pap != self.object.pap:
+            self.object.log_pap_change(
+                user=self.request.user,
+                old_pap=old_case.pap,
+                new_pap=self.object.pap
             )
         
         # Check for related alerts change

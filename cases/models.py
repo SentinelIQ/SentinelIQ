@@ -30,6 +30,32 @@ class Case(models.Model):
         (CRITICAL, _('Critical')),
     ]
     
+    # TLP (Traffic Light Protocol) choices
+    TLP_WHITE = 'white'
+    TLP_GREEN = 'green'
+    TLP_AMBER = 'amber'
+    TLP_RED = 'red'
+    
+    TLP_CHOICES = [
+        (TLP_WHITE, _('TLP:WHITE')),
+        (TLP_GREEN, _('TLP:GREEN')),
+        (TLP_AMBER, _('TLP:AMBER')),
+        (TLP_RED, _('TLP:RED')),
+    ]
+    
+    # PAP (Permissible Actions Protocol) choices
+    PAP_WHITE = 'white'
+    PAP_GREEN = 'green'
+    PAP_AMBER = 'amber'
+    PAP_RED = 'red'
+    
+    PAP_CHOICES = [
+        (PAP_WHITE, _('PAP:WHITE')),
+        (PAP_GREEN, _('PAP:GREEN')),
+        (PAP_AMBER, _('PAP:AMBER')),
+        (PAP_RED, _('PAP:RED')),
+    ]
+    
     title = models.CharField(_('Title'), max_length=255)
     description = models.TextField(_('Description'))
     organization = models.ForeignKey(
@@ -61,6 +87,20 @@ class Case(models.Model):
         'alerts.Alert',
         related_name='related_cases',
         blank=True,
+    )
+    tlp = models.CharField(
+        _('TLP'),
+        max_length=10,
+        choices=TLP_CHOICES,
+        default=TLP_AMBER,
+        help_text=_('Traffic Light Protocol - Confidentiality of information'),
+    )
+    pap = models.CharField(
+        _('PAP'),
+        max_length=10,
+        choices=PAP_CHOICES,
+        default=PAP_AMBER,
+        help_text=_('Permissible Actions Protocol - Level of exposure of information'),
     )
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
@@ -171,6 +211,32 @@ class Case(models.Model):
             metadata={'alert_id': alert.id}
         )
     
+    def log_tlp_change(self, user, old_tlp, new_tlp):
+        """Log a TLP change event"""
+        old_display = dict(self.TLP_CHOICES).get(old_tlp, old_tlp)
+        new_display = dict(self.TLP_CHOICES).get(new_tlp, new_tlp)
+        
+        return self.add_timeline_event(
+            event_type=CaseEvent.TLP_CHANGED,
+            title=_('TLP changed from {old} to {new}').format(old=old_display, new=new_display),
+            user=user,
+            old_value=old_tlp,
+            new_value=new_tlp
+        )
+    
+    def log_pap_change(self, user, old_pap, new_pap):
+        """Log a PAP change event"""
+        old_display = dict(self.PAP_CHOICES).get(old_pap, old_pap)
+        new_display = dict(self.PAP_CHOICES).get(new_pap, new_pap)
+        
+        return self.add_timeline_event(
+            event_type=CaseEvent.PAP_CHANGED,
+            title=_('PAP changed from {old} to {new}').format(old=old_display, new=new_display),
+            user=user,
+            old_value=old_pap,
+            new_value=new_pap
+        )
+    
     class Meta:
         verbose_name = _('Case')
         verbose_name_plural = _('Cases')
@@ -257,6 +323,8 @@ class CaseEvent(models.Model):
     ATTACHMENT_ADDED = 'attachment_added'
     ALERT_LINKED = 'alert_linked'
     ALERT_UNLINKED = 'alert_unlinked'
+    TLP_CHANGED = 'tlp_changed'
+    PAP_CHANGED = 'pap_changed'
     CUSTOM = 'custom'
     
     EVENT_TYPE_CHOICES = [
@@ -269,6 +337,8 @@ class CaseEvent(models.Model):
         (ATTACHMENT_ADDED, _('Attachment Added')),
         (ALERT_LINKED, _('Alert Linked')),
         (ALERT_UNLINKED, _('Alert Unlinked')),
+        (TLP_CHANGED, _('TLP Changed')),
+        (PAP_CHANGED, _('PAP Changed')),
         (CUSTOM, _('Custom Event')),
     ]
     
@@ -311,6 +381,8 @@ class CaseEvent(models.Model):
             self.ATTACHMENT_ADDED: 'fa-paperclip text-secondary',
             self.ALERT_LINKED: 'fa-link text-primary',
             self.ALERT_UNLINKED: 'fa-unlink text-danger',
+            self.TLP_CHANGED: 'fa-shield-alt text-primary',
+            self.PAP_CHANGED: 'fa-user-shield text-warning',
             self.CUSTOM: 'fa-star text-warning',
         }
         return icon_map.get(self.event_type, 'fa-circle')
