@@ -102,6 +102,12 @@ class Case(models.Model):
         default=PAP_AMBER,
         help_text=_('Permissible Actions Protocol - Level of exposure of information'),
     )
+    tags = models.ManyToManyField(
+        'core.Tag',
+        verbose_name=_('Tags'),
+        related_name='cases',
+        blank=True,
+    )
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
     
@@ -237,6 +243,21 @@ class Case(models.Model):
             new_value=new_pap
         )
     
+    def log_tags_change(self, user, old_tags, new_tags):
+        """Log tag changes to timeline"""
+        # Create tag names for display
+        old_tags_names = ', '.join([tag.name for tag in old_tags]) if old_tags else _('None')
+        new_tags_names = ', '.join([tag.name for tag in new_tags]) if new_tags else _('None')
+        
+        description = _('Changed from: {0} to: {1}').format(old_tags_names, new_tags_names)
+        
+        return self.add_timeline_event(
+            event_type=CaseEvent.TAGS_CHANGED,
+            title=_('Tags changed'),
+            description=description,
+            user=user
+        )
+    
     class Meta:
         verbose_name = _('Case')
         verbose_name_plural = _('Cases')
@@ -325,6 +346,7 @@ class CaseEvent(models.Model):
     ALERT_UNLINKED = 'alert_unlinked'
     TLP_CHANGED = 'tlp_changed'
     PAP_CHANGED = 'pap_changed'
+    TAGS_CHANGED = 'tags_changed'
     CUSTOM = 'custom'
     
     EVENT_TYPE_CHOICES = [
@@ -339,6 +361,7 @@ class CaseEvent(models.Model):
         (ALERT_UNLINKED, _('Alert Unlinked')),
         (TLP_CHANGED, _('TLP Changed')),
         (PAP_CHANGED, _('PAP Changed')),
+        (TAGS_CHANGED, _('Tags Changed')),
         (CUSTOM, _('Custom Event')),
     ]
     
@@ -383,6 +406,7 @@ class CaseEvent(models.Model):
             self.ALERT_UNLINKED: 'fa-unlink text-danger',
             self.TLP_CHANGED: 'fa-shield-alt text-primary',
             self.PAP_CHANGED: 'fa-user-shield text-warning',
+            self.TAGS_CHANGED: 'fa-tags text-info',
             self.CUSTOM: 'fa-star text-warning',
         }
         return icon_map.get(self.event_type, 'fa-circle')

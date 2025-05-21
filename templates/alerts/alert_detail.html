@@ -320,6 +320,33 @@
                                         </span>
                                     </td>
                                 </tr>
+                                <tr>
+                                    <th class="bg-light">Tags</th>
+                                    <td>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                {% if alert.tags.all %}
+                                                    {% for tag in alert.tags.all %}
+                                                        <span class="badge bg-{{ tag.color }} me-1">{{ tag.name }}</span>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <span class="text-muted">Nenhuma tag</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="ms-2">
+                                                <a href="{% url 'alert_update' alert.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit me-1"></i> Editar Tags
+                                                </a>
+                                                <a href="{% url 'tag_create' %}" class="btn btn-sm btn-outline-success" title="Criar Nova Tag">
+                                                    <i class="fas fa-plus-circle"></i>
+                                                </a>
+                                                <a href="{% url 'tag_list' %}" class="btn btn-sm btn-outline-info" title="Gerenciar Tags">
+                                                    <i class="fas fa-tags"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

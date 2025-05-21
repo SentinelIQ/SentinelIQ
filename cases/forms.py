@@ -10,7 +10,7 @@ class CaseForm(forms.ModelForm):
         model = Case
         fields = (
             'title', 'description', 'priority', 'status', 
-            'assigned_to', 'due_date', 'related_alerts', 'tlp', 'pap'
+            'assigned_to', 'due_date', 'related_alerts', 'tlp', 'pap', 'tags'
         )
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -22,6 +22,7 @@ class CaseForm(forms.ModelForm):
             'related_alerts': forms.SelectMultiple(attrs={'class': 'form-select'}),
             'tlp': forms.Select(attrs={'class': 'form-select'}),
             'pap': forms.Select(attrs={'class': 'form-select'}),
+            'tags': forms.SelectMultiple(attrs={'class': 'form-select', 'size': '5'}),
         }
     
     def __init__(self, *args, organization=None, **kwargs):
@@ -87,6 +88,12 @@ class CaseFilterForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+    tag = forms.ModelChoiceField(
+        queryset=None,
+        required=False,
+        empty_label=_('All Tags'),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     assigned_to = forms.ModelChoiceField(
         queryset=None,
         required=False,
@@ -108,6 +115,9 @@ class CaseFilterForm(forms.Form):
         else:
             from accounts.models import User
             self.fields['assigned_to'].queryset = User.objects.none()
+
+        from core.models import Tag
+        self.fields['tag'].queryset = Tag.objects.all()
 
 
 class CaseEventForm(forms.ModelForm):

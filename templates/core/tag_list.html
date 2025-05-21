@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Gerenciar Tags{% endblock %}
+
+{% block extra_css %}
+<style>
+    .badge {
+        transition: all 0.2s ease;
+    }
+    .badge:hover {
+        transform: scale(1.05);
+    }
+    .tag-sample {
+        min-width: 80px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-tags text-primary me-2"></i> Gerenciar Tags</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item active">Tags</li>
+            </ol>
+        </nav>
+    </div>
+    {% if user.is_superadmin or user.is_org_admin %}
+    <a href="{% url 'tag_create' %}" class="btn btn-primary d-flex align-items-center shadow-sm">
+        <i class="fas fa-plus-circle me-2"></i> Nova Tag
+    </a>
+    {% endif %}
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-search me-2"></i> Buscar Tags</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Buscar por nome da tag...">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i> Buscar
+                            </button>
+                            <a href="{% url 'tag_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-sync me-1"></i> Limpar
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i> Tags</h5>
+        <span class="badge bg-primary">{{ tags|length }} tags encontradas</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th width="50">#</th>
+                        <th>Nome</th>
+                        <th>Prévia</th>
+                        <th>Cor</th>
+                        <th>Contagem</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tag in tags %}
+                        <tr>
+                            <td>{{ tag.id }}</td>
+                            <td>{{ tag.name }}</td>
+                            <td>
+                                <span class="badge bg-{{ tag.color }} tag-sample">{{ tag.name }}</span>
+                            </td>
+                            <td>
+                                {% if tag.color == 'primary' %}
+                                    <span class="text-primary">Azul</span>
+                                {% elif tag.color == 'secondary' %}
+                                    <span class="text-secondary">Cinza</span>
+                                {% elif tag.color == 'success' %}
+                                    <span class="text-success">Verde</span>
+                                {% elif tag.color == 'danger' %}
+                                    <span class="text-danger">Vermelho</span>
+                                {% elif tag.color == 'warning' %}
+                                    <span class="text-warning">Amarelo</span>
+                                {% elif tag.color == 'info' %}
+                                    <span class="text-info">Ciano</span>
+                                {% elif tag.color == 'dark' %}
+                                    <span class="text-dark">Preto</span>
+                                {% elif tag.color == 'purple' %}
+                                    <span>Roxo</span>
+                                {% elif tag.color == 'pink' %}
+                                    <span>Rosa</span>
+                                {% elif tag.color == 'orange' %}
+                                    <span>Laranja</span>
+                                {% elif tag.color == 'teal' %}
+                                    <span>Verde-azulado</span>
+                                {% elif tag.color == 'indigo' %}
+                                    <span>Índigo</span>
+                                {% else %}
+                                    <span>{{ tag.color }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">{{ tag.alerts.count }} Alertas</span>
+                                <span class="badge bg-light text-dark">{{ tag.cases.count }} Casos</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'tag_update' tag.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'tag_delete' tag.id %}" class="btn btn-danger" data-bs-toggle="tooltip" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                                    <p class="mb-0 text-muted">Nenhuma tag encontrada.</p>
+                                    {% if search %}
+                                        <a href="{% url 'tag_list' %}" class="btn btn-sm btn-primary mt-3">
+                                            <i class="fas fa-sync me-1"></i> Limpar busca
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'tag_create' %}" class="btn btn-sm btn-primary mt-3">
+                                            <i class="fas fa-plus-circle me-1"></i> Criar nova tag
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if is_paginated %}
+<nav aria-label="Paginação" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}" aria-label="Primeira">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}" aria-label="Anterior">
+                <i class="fas fa-angle-left"></i>
+            </a>
+        </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">
+                <i class="fas fa-file-alt me-1"></i> Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}" aria-label="Próxima">
+                <i class="fas fa-angle-right"></i>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}" aria-label="Última">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Inicializar tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %} 

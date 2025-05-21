@@ -59,6 +59,11 @@ class CaseListView(LoginRequiredMixin, ListView):
             if pap:
                 queryset = queryset.filter(pap=pap)
             
+            # Filter by tag
+            tag = form.cleaned_data.get('tag')
+            if tag:
+                queryset = queryset.filter(tags=tag)
+            
             # Search in title and description
             search = form.cleaned_data.get('search')
             if search:
@@ -152,7 +157,6 @@ class CaseUpdateView(LoginRequiredMixin, UpdateView):
     
     def form_valid(self, form):
         old_case = Case.objects.get(pk=self.object.pk)
-        response = super().form_valid(form)
         
         # Check for status change
         if old_case.status != self.object.status:
@@ -200,6 +204,20 @@ class CaseUpdateView(LoginRequiredMixin, UpdateView):
                 user=self.request.user,
                 old_pap=old_case.pap,
                 new_pap=self.object.pap
+            )
+        
+        # Save the form to get M2M fields updated
+        response = super().form_valid(form)
+        
+        # Check for tags change
+        old_tags = set(old_case.tags.all())
+        new_tags = set(self.object.tags.all())
+        
+        if old_tags != new_tags:
+            self.object.log_tags_change(
+                user=self.request.user,
+                old_tags=old_tags,
+                new_tags=new_tags
             )
         
         # Check for related alerts change

@@ -32,11 +32,11 @@ from cases.views import (
     CaseListView, CaseDetailView, CaseCreateView, CaseUpdateView, CaseDeleteView,
     add_case_comment, add_case_attachment, delete_case_attachment, add_case_event
 )
-from core.views import home
+from core.views import home, handler404, handler500, TagListView, TagCreateView, TagUpdateView, TagDeleteView
 
 # Custom 404 and 500 handlers
-handler404 = 'core.views.handler404'
-handler500 = 'core.views.handler500'
+handler404 = handler404
+handler500 = handler500
 
 urlpatterns = [
     # Admin
@@ -63,6 +63,12 @@ urlpatterns = [
     path('organizations/<int:pk>/update/', OrganizationUpdateView.as_view(), name='organization_update'),
     path('organizations/<int:pk>/delete/', OrganizationDeleteView.as_view(), name='organization_delete'),
     
+    # Tag URLs
+    path('tags/', TagListView.as_view(), name='tag_list'),
+    path('tags/create/', TagCreateView.as_view(), name='tag_create'),
+    path('tags/<int:pk>/update/', TagUpdateView.as_view(), name='tag_update'),
+    path('tags/<int:pk>/delete/', TagDeleteView.as_view(), name='tag_delete'),
+    
     # Alert URLs
     path('alerts/', AlertListView.as_view(), name='alert_list'),
     path('alerts/<int:pk>/', AlertDetailView.as_view(), name='alert_detail'),
@@ -79,7 +85,7 @@ urlpatterns = [
     path('cases/<int:pk>/delete/', CaseDeleteView.as_view(), name='case_delete'),
     path('cases/<int:pk>/comment/', add_case_comment, name='add_case_comment'),
     path('cases/<int:pk>/attachment/', add_case_attachment, name='add_case_attachment'),
-    path('cases/<int:pk>/attachment/<int:attachment_pk>/delete/', delete_case_attachment, name='delete_case_attachment'),
+    path('cases/attachments/<int:pk>/delete/', delete_case_attachment, name='delete_case_attachment'),
     path('cases/<int:pk>/timeline/event/', add_case_event, name='add_case_event'),
 ]
 

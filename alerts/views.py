@@ -53,6 +53,11 @@ class AlertListView(LoginRequiredMixin, ListView):
             if pap:
                 queryset = queryset.filter(pap=pap)
             
+            # Filter by tag
+            tag = form.cleaned_data.get('tag')
+            if tag:
+                queryset = queryset.filter(tags=tag)
+            
             # Search in title and description
             search = form.cleaned_data.get('search')
             if search:
@@ -121,15 +126,6 @@ class AlertUpdateView(LoginRequiredMixin, UpdateView):
     model = Alert
     form_class = AlertForm
     template_name = 'alerts/alert_form.html'
-    success_url = reverse_lazy('alert_list')
-    
-    def get_queryset(self):
-        """Ensure users can only update alerts from their organization"""
-        user = self.request.user
-        if user.is_superadmin():
-            return Alert.objects.all()
-        else:
-            return Alert.objects.filter(organization=user.organization)
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -138,7 +134,6 @@ class AlertUpdateView(LoginRequiredMixin, UpdateView):
     
     def form_valid(self, form):
         old_alert = Alert.objects.get(pk=self.object.pk)
-        response = super().form_valid(form)
         
         # Check for status change
         if old_alert.status != self.object.status:
@@ -180,8 +175,25 @@ class AlertUpdateView(LoginRequiredMixin, UpdateView):
                 new_pap=self.object.pap
             )
         
+        # Save the form to get M2M fields updated
+        response = super().form_valid(form)
+        
+        # Check for tags change
+        old_tags = set(old_alert.tags.all())
+        new_tags = set(self.object.tags.all())
+        
+        if old_tags != new_tags:
+            self.object.log_tags_change(
+                user=self.request.user,
+                old_tags=old_tags,
+                new_tags=new_tags
+            )
+        
         messages.success(self.request, _('Alert updated successfully.'))
         return response
+    
+    def get_success_url(self):
+        return reverse('alert_detail', kwargs={'pk': self.object.pk})
 
 
 class AlertDeleteView(LoginRequiredMixin, OrgAdminRequiredMixin, DeleteView):

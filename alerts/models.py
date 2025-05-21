@@ -9,6 +9,7 @@ class AlertEvent(models.Model):
     ASSIGNEE_CHANGED = 'assignee_changed'
     TLP_CHANGED = 'tlp_changed'
     PAP_CHANGED = 'pap_changed'
+    TAGS_CHANGED = 'tags_changed'
     ESCALATED = 'escalated'
     CUSTOM = 'custom'
     
@@ -19,6 +20,7 @@ class AlertEvent(models.Model):
         (ASSIGNEE_CHANGED, _('Assignee Changed')),
         (TLP_CHANGED, _('TLP Changed')),
         (PAP_CHANGED, _('PAP Changed')),
+        (TAGS_CHANGED, _('Tags Changed')),
         (ESCALATED, _('Escalated to Case')),
         (CUSTOM, _('Custom Event')),
     ]
@@ -59,6 +61,7 @@ class AlertEvent(models.Model):
             self.ASSIGNEE_CHANGED: 'fa-user-edit text-primary',
             self.TLP_CHANGED: 'fa-shield-alt text-primary',
             self.PAP_CHANGED: 'fa-user-shield text-warning',
+            self.TAGS_CHANGED: 'fa-tags text-info',
             self.ESCALATED: 'fa-arrow-up text-success',
             self.CUSTOM: 'fa-star text-warning',
         }
@@ -161,6 +164,12 @@ class Alert(models.Model):
         default=PAP_AMBER,
         help_text=_('Permissible Actions Protocol - Level of exposure of information'),
     )
+    tags = models.ManyToManyField(
+        'core.Tag',
+        verbose_name=_('Tags'),
+        related_name='alerts',
+        blank=True,
+    )
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
     
@@ -240,6 +249,21 @@ class Alert(models.Model):
             user=user,
             old_value=old_pap,
             new_value=new_pap
+        )
+    
+    def log_tags_change(self, user, old_tags, new_tags):
+        """Log tag changes to timeline"""
+        # Create tag names for display
+        old_tags_names = ', '.join([tag.name for tag in old_tags]) if old_tags else _('None')
+        new_tags_names = ', '.join([tag.name for tag in new_tags]) if new_tags else _('None')
+        
+        description = _('Changed from: {0} to: {1}').format(old_tags_names, new_tags_names)
+        
+        return self.add_timeline_event(
+            event_type=AlertEvent.TAGS_CHANGED,
+            title=_('Tags changed'),
+            description=description,
+            user=user
         )
     
     def log_escalated_to_case(self, user, case):

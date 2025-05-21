@@ -80,6 +80,12 @@
                     {{ filter_form.pap }}
                 </div>
                 <div class="col-lg-3 col-md-6">
+                    <label for="{{ filter_form.tag.id_for_label }}" class="form-label">
+                        <i class="fas fa-tags me-1"></i> Tag
+                    </label>
+                    {{ filter_form.tag }}
+                </div>
+                <div class="col-lg-3 col-md-6">
                     <label for="{{ filter_form.assigned_to.id_for_label }}" class="form-label">
                         <i class="fas fa-user me-1"></i> Responsável
                     </label>
@@ -120,6 +126,7 @@
                         <th><i class="fas fa-tag me-1"></i> Status</th>
                         <th><i class="fas fa-shield-alt me-1"></i> TLP</th>
                         <th><i class="fas fa-user-shield me-1"></i> PAP</th>
+                        <th><i class="fas fa-tags me-1"></i> Tags</th>
                         <th><i class="fas fa-user me-1"></i> Responsável</th>
                         <th><i class="fas fa-calendar-alt me-1"></i> Data Limite</th>
                         <th><i class="fas fa-calendar-alt me-1"></i> Criado</th>
@@ -188,6 +195,18 @@
                                 </span>
                             </td>
                             <td>
+                                {% if case.tags.all %}
+                                    {% for tag in case.tags.all|slice:":2" %}
+                                        <span class="badge bg-{{ tag.color }} me-1">{{ tag.name }}</span>
+                                    {% endfor %}
+                                    {% if case.tags.all|length > 2 %}
+                                        <span class="badge bg-secondary">+{{ case.tags.all|length|add:"-2" }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted small">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
                                 {% if case.assigned_to %}
                                     <span class="d-flex align-items-center">
                                         <i class="fas fa-user-circle me-1"></i>
@@ -235,7 +254,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="10" class="text-center py-5">
+                            <td colspan="11" class="text-center py-5">
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="fas fa-search fa-3x text-muted mb-3"></i>
                                     <p class="mb-0 text-muted">Nenhum caso encontrado.</p>
@@ -257,12 +276,12 @@
     <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
         <li class="page-item">
-            <a class="page-link" href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.tlp %}&tlp={{ request.GET.tlp }}{% endif %}{% if request.GET.pap %}&pap={{ request.GET.pap }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Primeira">
+            <a class="page-link" href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.tlp %}&tlp={{ request.GET.tlp }}{% endif %}{% if request.GET.pap %}&pap={{ request.GET.pap }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Primeira">
                 <i class="fas fa-angle-double-left"></i>
             </a>
         </li>
         <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.tlp %}&tlp={{ request.GET.tlp }}{% endif %}{% if request.GET.pap %}&pap={{ request.GET.pap }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Anterior">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.tlp %}&tlp={{ request.GET.tlp }}{% endif %}{% if request.GET.pap %}&pap={{ request.GET.pap }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Anterior">
                 <i class="fas fa-angle-left"></i>
             </a>
         </li>
@@ -276,12 +295,12 @@
 
         {% if page_obj.has_next %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.tlp %}&tlp={{ request.GET.tlp }}{% endif %}{% if request.GET.pap %}&pap={{ request.GET.pap }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Próxima">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.tlp %}&tlp={{ request.GET.tlp }}{% endif %}{% if request.GET.pap %}&pap={{ request.GET.pap }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Próxima">
                 <i class="fas fa-angle-right"></i>
             </a>
         </li>
         <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.tlp %}&tlp={{ request.GET.tlp }}{% endif %}{% if request.GET.pap %}&pap={{ request.GET.pap }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Última">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.priority %}&priority={{ request.GET.priority }}{% endif %}{% if request.GET.tlp %}&tlp={{ request.GET.tlp }}{% endif %}{% if request.GET.pap %}&pap={{ request.GET.pap }}{% endif %}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Última">
                 <i class="fas fa-angle-double-right"></i>
             </a>
         </li>

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if object.id %}Editar Tag{% else %}Nova Tag{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .color-preview {
+        width: 25px;
+        height: 25px;
+        display: inline-block;
+        border-radius: 4px;
+        margin-right: 5px;
+        vertical-align: middle;
+    }
+    .tag-preview {
+        display: block;
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1">
+            <i class="fas fa-tag text-primary me-2"></i> 
+            {% if object.id %}Editar Tag{% else %}Nova Tag{% endif %}
+        </h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'tag_list' %}">Tags</a></li>
+                <li class="breadcrumb-item active">
+                    {% if object.id %}{{ object.name }}{% else %}Nova Tag{% endif %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-tag me-2"></i> 
+                    {% if object.id %}Editar Tag{% else %}Nova Tag{% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                            <i class="fas fa-font me-1"></i> Nome da Tag
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.name.errors }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Digite um nome exclusivo para esta tag</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.color.id_for_label }}" class="form-label">
+                            <i class="fas fa-palette me-1"></i> Cor da Tag
+                        </label>
+                        {{ form.color }}
+                        {% if form.color.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.color.errors }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Selecione uma cor para esta tag</div>
+                    </div>
+                    
+                    <div class="tag-preview">
+                        <h6>Prévia:</h6>
+                        <span id="tagPreview" class="badge bg-primary">Tag Exemplo</span>
+                    </div>
+                    
+                    <div class="mt-4 d-flex justify-content-between">
+                        <a href="{% url 'tag_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Voltar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i> Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Sobre Tags</h5>
+            </div>
+            <div class="card-body">
+                <p>As tags ajudam a categorizar e organizar seus alertas e casos. Utilize tags para:</p>
+                <ul>
+                    <li>Agrupar alertas e casos relacionados</li>
+                    <li>Marcar tópicos específicos ou tecnologias</li>
+                    <li>Facilitar a busca e filtro de informações</li>
+                    <li>Indicar status ou prioridades específicas</li>
+                </ul>
+                <hr>
+                <p class="mb-0"><strong>Dica:</strong> Crie um esquema de cores consistente para suas tags, ajudando a equipe a identificar rapidamente o significado de cada uma.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const nameInput = document.getElementById('{{ form.name.id_for_label }}');
+        const colorSelect = document.getElementById('{{ form.color.id_for_label }}');
+        const tagPreview = document.getElementById('tagPreview');
+        
+        // Função para atualizar a prévia da tag
+        function updateTagPreview() {
+            const name = nameInput.value || 'Tag Exemplo';
+            const color = colorSelect.value || 'primary';
+            
+            tagPreview.className = `badge bg-${color}`;
+            tagPreview.textContent = name;
+        }
+        
+        // Atualizar quando o usuário digitar ou mudar a cor
+        nameInput.addEventListener('input', updateTagPreview);
+        colorSelect.addEventListener('change', updateTagPreview);
+        
+        // Atualizar na carga inicial
+        updateTagPreview();
+    });
+</script>
+{% endblock %} 

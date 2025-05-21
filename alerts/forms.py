@@ -8,7 +8,7 @@ class AlertForm(forms.ModelForm):
     
     class Meta:
         model = Alert
-        fields = ('title', 'description', 'severity', 'status', 'assigned_to', 'tlp', 'pap')
+        fields = ('title', 'description', 'severity', 'status', 'assigned_to', 'tlp', 'pap', 'tags')
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
@@ -17,6 +17,7 @@ class AlertForm(forms.ModelForm):
             'assigned_to': forms.Select(attrs={'class': 'form-select'}),
             'tlp': forms.Select(attrs={'class': 'form-select'}),
             'pap': forms.Select(attrs={'class': 'form-select'}),
+            'tags': forms.SelectMultiple(attrs={'class': 'form-select', 'size': '5'}),
         }
     
     def __init__(self, *args, organization=None, **kwargs):
@@ -52,10 +53,21 @@ class AlertFilterForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+    tag = forms.ModelChoiceField(
+        queryset=None,
+        required=False,
+        empty_label=_('All Tags'),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     search = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': _('Search by title or description')
         })
-    ) 
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from core.models import Tag
+        self.fields['tag'].queryset = Tag.objects.all() 
