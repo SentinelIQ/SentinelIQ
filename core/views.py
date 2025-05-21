@@ -902,3 +902,71 @@ def api_get_subtechniques_by_technique(request, technique_id):
         })
     
     return JsonResponse(data, safe=False)
+
+
+@login_required
+def api_get_tactic_details(request, tactic_id):
+    """API endpoint to get details for a specific tactic"""
+    tactic = get_object_or_404(MitreTactic, pk=tactic_id)
+    
+    data = {
+        'id': tactic.id,
+        'tactic_id': tactic.tactic_id,
+        'name': tactic.name,
+        'description': tactic.description,
+        'url': tactic.url
+    }
+    
+    return JsonResponse(data)
+
+
+@login_required
+def api_get_technique_details(request, technique_id):
+    """API endpoint to get details for a specific technique"""
+    technique = get_object_or_404(MitreTechnique, pk=technique_id)
+    
+    # Get related tactics
+    tactics = []
+    for tactic in technique.tactics.all():
+        tactics.append({
+            'id': tactic.id,
+            'tactic_id': tactic.tactic_id,
+            'name': tactic.name
+        })
+    
+    data = {
+        'id': technique.id,
+        'technique_id': technique.technique_id,
+        'name': technique.name,
+        'description': technique.description,
+        'url': technique.url,
+        'tactics': tactics
+    }
+    
+    return JsonResponse(data)
+
+
+@login_required
+def api_get_subtechnique_details(request, subtechnique_id):
+    """API endpoint to get details for a specific sub-technique"""
+    subtechnique = get_object_or_404(MitreSubTechnique, pk=subtechnique_id)
+    
+    # Get parent technique info
+    parent = None
+    if subtechnique.parent_technique:
+        parent = {
+            'id': subtechnique.parent_technique.id,
+            'technique_id': subtechnique.parent_technique.technique_id,
+            'name': subtechnique.parent_technique.name
+        }
+    
+    data = {
+        'id': subtechnique.id,
+        'sub_technique_id': subtechnique.sub_technique_id,
+        'name': subtechnique.name,
+        'description': subtechnique.description,
+        'url': subtechnique.url,
+        'parent_technique': parent
+    }
+    
+    return JsonResponse(data)

@@ -1,0 +1,48 @@
+/**
+ * Estilos para elementos MITRE ATT&CK
+ */
+
+/* Estilo para badges clicáveis */
+.mitre-badge {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mitre-badge:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para o popover */
+.mitre-popover {
+    min-width: 250px;
+    max-width: 300px;
+    padding: 5px;
+}
+
+/* Personalização do Bootstrap Popover */
+.popover {
+    max-width: 350px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.popover-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ebebeb;
+    font-weight: 600;
+}
+
+/* Destaque para os tipos de elementos MITRE */
+.mitre-badge[data-mitre-type="tactic"] {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mitre-badge[data-mitre-type="technique"] {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mitre-badge[data-mitre-type="subtechnique"] {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+} 

@@ -27,17 +27,20 @@ urlpatterns = [
     path('cases/<int:case_id>/observables/<int:observable_id>/remove/', views.remove_case_observable, name='remove_case_observable'),
     
     # MITRE ATT&CK routes
-    path('mitre-attack/', views.mitre_attack_list, name='mitre_attack_list'),
+    path('mitre/', views.mitre_attack_list, name='mitre_attack_list'),
     
     # MITRE ATT&CK API routes
-    path('api/tactics/<int:tactic_id>/techniques/', views.api_get_techniques_by_tactic, name='api_get_techniques_by_tactic'),
-    path('api/techniques/<int:technique_id>/subtechniques/', views.api_get_subtechniques_by_technique, name='api_get_subtechniques_by_technique'),
+    path('api/mitre/tactic/<int:tactic_id>/techniques/', views.api_get_techniques_by_tactic, name='api_get_techniques_by_tactic'),
+    path('api/mitre/technique/<int:technique_id>/subtechniques/', views.api_get_subtechniques_by_technique, name='api_get_subtechniques_by_technique'),
+    path('api/mitre/tactic/<int:tactic_id>/', views.api_get_tactic_details, name='api_get_tactic_details'),
+    path('api/mitre/technique/<int:technique_id>/', views.api_get_technique_details, name='api_get_technique_details'),
+    path('api/mitre/subtechnique/<int:subtechnique_id>/', views.api_get_subtechnique_details, name='api_get_subtechnique_details'),
     
     # MITRE ATT&CK association routes for cases
-    path('cases/<int:case_id>/mitre-attack/add/', views.add_case_mitre_attack, name='add_case_mitre_attack'),
-    path('cases/<int:case_id>/mitre-attack/<str:item_type>/<int:item_id>/remove/', views.remove_case_mitre_attack, name='remove_case_mitre_attack'),
+    path('case/<int:case_id>/mitre/add/', views.add_case_mitre_attack, name='add_case_mitre_attack'),
+    path('case/<int:case_id>/mitre/remove/<str:item_type>/<int:item_id>/', views.remove_case_mitre_attack, name='remove_case_mitre_attack'),
     
     # MITRE ATT&CK association routes for alerts
-    path('alerts/<int:alert_id>/mitre-attack/add/', views.add_alert_mitre_attack, name='add_alert_mitre_attack'),
-    path('alerts/<int:alert_id>/mitre-attack/<str:item_type>/<int:item_id>/remove/', views.remove_alert_mitre_attack, name='remove_alert_mitre_attack'),
+    path('alert/<int:alert_id>/mitre/add/', views.add_alert_mitre_attack, name='add_alert_mitre_attack'),
+    path('alert/<int:alert_id>/mitre/remove/<str:item_type>/<int:item_id>/', views.remove_alert_mitre_attack, name='remove_alert_mitre_attack'),
 ] 
