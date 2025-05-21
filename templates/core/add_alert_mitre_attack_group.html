@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Adicionar Grupo MITRE ATT&CK ao Alerta{% endblock %}
+
+{% block extra_css %}
+<style>
+    .group-card {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .group-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .group-card.selected {
+        border-color: var(--primary);
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    .group-card.selected .card-header {
+        background-color: var(--primary);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-users-cog text-primary me-2"></i> Adicionar Grupo MITRE ATT&CK ao Alerta</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alert_list' %}">Alertas</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alert_detail' alert.id %}">{{ alert.title }}</a></li>
+                <li class="breadcrumb-item active">Adicionar Grupo MITRE ATT&CK</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Adicionar Grupo MITRE ATT&CK ao Alerta: {{ alert.title }}</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <div class="d-flex">
+                <div class="me-3">
+                    <i class="fas fa-info-circle fa-2x"></i>
+                </div>
+                <div>
+                    <h5 class="alert-heading">Grupos MITRE ATT&CK</h5>
+                    <p class="mb-0">
+                        Os grupos MITRE ATT&CK representam adversários conhecidos que realizam campanhas de ameaças cibernéticas.
+                        Associar um grupo a um alerta permite identificar possíveis agentes de ameaças por trás do incidente.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col">
+                <form id="searchForm" class="d-flex">
+                    <input type="text" id="searchInput" class="form-control me-2" placeholder="Pesquisar grupos por nome...">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <form method="post" action="{% url 'add_alert_mitre_attack_group' alert.id %}">
+            {% csrf_token %}
+            
+            <div class="row mb-4" id="groupContainer">
+                {% for group in mitre_attack_groups %}
+                    <div class="col-lg-4 col-md-6 mb-3 group-item">
+                        <div class="card group-card h-100">
+                            <div class="card-header d-flex align-items-center justify-content-between">
+                                <span class="text-truncate"><strong>{{ group.name }}</strong></span>
+                                <div class="form-check form-check-inline m-0">
+                                    <input class="form-check-input" type="checkbox" name="groups" value="{{ group.id }}" id="group-{{ group.id }}"
+                                        {% if group in alert.mitre_attack_groups.all %}checked disabled{% endif %}>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="small mb-2">
+                                    <strong>ID: </strong> <code>{{ group.external_id }}</code>
+                                </p>
+                                <p class="small mb-0 text-muted">{{ group.description|truncatechars:150 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12 text-center py-4">
+                        <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-0">Nenhum grupo MITRE ATT&CK encontrado.</p>
+                        <a href="{% url 'mitre_attack_group_create' %}" class="btn btn-sm btn-primary mt-3">
+                            <i class="fas fa-plus-circle me-1"></i> Cadastrar Novo Grupo
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'alert_detail' alert.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Voltar
+                </a>
+                <button type="submit" class="btn btn-primary" id="addSelectedBtn">
+                    <i class="fas fa-plus me-1"></i> Adicionar Selecionados
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const groupCards = document.querySelectorAll('.group-card');
+        const searchInput = document.getElementById('searchInput');
+        const searchForm = document.getElementById('searchForm');
+        const addSelectedBtn = document.getElementById('addSelectedBtn');
+        
+        // Marcar cards ao clicar
+        groupCards.forEach(card => {
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            if (!checkbox.disabled) {
+                card.addEventListener('click', function(e) {
+                    if (e.target !== checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        updateCardSelection(card, checkbox.checked);
+                    }
+                });
+                
+                checkbox.addEventListener('change', function() {
+                    updateCardSelection(card, checkbox.checked);
+                });
+                
+                // Definir estado inicial
+                updateCardSelection(card, checkbox.checked);
+            } else {
+                card.classList.add('bg-light');
+                card.querySelector('.card-header').classList.add('bg-secondary');
+                card.querySelector('.card-header').classList.add('text-white');
+                card.insertAdjacentHTML('beforeend', '<div class="card-footer bg-light"><small class="text-muted">Este grupo já está associado ao alerta</small></div>');
+            }
+        });
+        
+        // Filtrar grupos
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            filterGroups();
+        });
+        
+        searchInput.addEventListener('keyup', filterGroups);
+        
+        function filterGroups() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const groupItems = document.querySelectorAll('.group-item');
+            
+            groupItems.forEach(item => {
+                const groupName = item.querySelector('.card-header strong').textContent.toLowerCase();
+                const groupDesc = item.querySelector('.card-body .text-muted').textContent.toLowerCase();
+                const groupId = item.querySelector('.card-body code').textContent.toLowerCase();
+                
+                if (groupName.includes(searchTerm) || 
+                    groupDesc.includes(searchTerm) || 
+                    groupId.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        // Atualizar botão de adicionar
+        function updateAddButton() {
+            const checkedBoxes = document.querySelectorAll('input[name="groups"]:checked:not([disabled])');
+            addSelectedBtn.disabled = checkedBoxes.length === 0;
+            
+            if (checkedBoxes.length > 0) {
+                addSelectedBtn.innerHTML = `<i class="fas fa-plus me-1"></i> Adicionar ${checkedBoxes.length} Grupo(s)`;
+            } else {
+                addSelectedBtn.innerHTML = `<i class="fas fa-plus me-1"></i> Adicionar Selecionados`;
+            }
+        }
+        
+        // Atualizar seleção do card
+        function updateCardSelection(card, isChecked) {
+            if (isChecked) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+            updateAddButton();
+        }
+        
+        // Inicialização
+        updateAddButton();
+    });
+</script>
+{% endblock %} 

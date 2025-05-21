@@ -1,0 +1,37 @@
+<div class="row mb-3">
+    <div class="col-md-8">
+        <label for="{{ form.value.id_for_label }}" class="form-label">Valor do Observable</label>
+        {{ form.value }}
+        <div class="form-text">Digite o valor exato do indicador de compromisso.</div>
+    </div>
+    <div class="col-md-4">
+        <label for="{{ form.type.id_for_label }}" class="form-label">Tipo</label>
+        {{ form.type }}
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-8">
+        <label for="{{ form.description.id_for_label }}" class="form-label">Descrição</label>
+        {{ form.description }}
+    </div>
+    <div class="col-md-4">
+        <div class="mb-3">
+            <label for="{{ form.confidence.id_for_label }}" class="form-label">Nível de Confiança</label>
+            {{ form.confidence }}
+        </div>
+        
+        <div class="mb-3">
+            <label for="{{ form.pap.id_for_label }}" class="form-label">PAP Level</label>
+            {{ form.pap }}
+            <div class="form-text">Permissible Actions Protocol: Define como este indicador pode ser compartilhado.</div>
+        </div>
+        
+        <div class="form-check mb-3">
+            {{ form.is_malicious }}
+            <label class="form-check-label" for="{{ form.is_malicious.id_for_label }}">
+                Marcar como Malicioso
+            </label>
+        </div>
+    </div>
+</div> 
