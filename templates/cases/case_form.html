@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Editar Caso{% else %}Novo Caso{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .required-field label::after {
+        content: " *";
+        color: var(--danger);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1">
+            <i class="fas fa-briefcase text-primary me-2"></i> 
+            {% if form.instance.pk %}Editar Caso{% else %}Novo Caso{% endif %}
+        </h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'case_list' %}">Casos</a></li>
+                <li class="breadcrumb-item active">{% if form.instance.pk %}Editar{% else %}Novo{% endif %}</li>
+            </ol>
+        </nav>
+    </div>
+    <a href="{% url 'case_list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Voltar
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+            <i class="{% if form.instance.pk %}fas fa-edit{% else %}fas fa-plus-circle{% endif %} me-2"></i>
+            {% if form.instance.pk %}Editar Caso{% else %}Criar Novo Caso{% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <div class="row g-3">
+                <!-- Título -->
+                <div class="col-md-12 required-field">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">
+                        <i class="fas fa-heading me-1"></i> Título
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.title.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Descrição -->
+                <div class="col-md-12 required-field">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                        <i class="fas fa-align-left me-1"></i> Descrição
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.description.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Prioridade -->
+                <div class="col-md-6 required-field">
+                    <label for="{{ form.priority.id_for_label }}" class="form-label">
+                        <i class="fas fa-exclamation-triangle me-1"></i> Prioridade
+                    </label>
+                    {{ form.priority }}
+                    {% if form.priority.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.priority.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Status -->
+                <div class="col-md-6 required-field">
+                    <label for="{{ form.status.id_for_label }}" class="form-label">
+                        <i class="fas fa-tag me-1"></i> Status
+                    </label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.status.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Responsável -->
+                <div class="col-md-6">
+                    <label for="{{ form.assigned_to.id_for_label }}" class="form-label">
+                        <i class="fas fa-user me-1"></i> Responsável
+                    </label>
+                    {{ form.assigned_to }}
+                    {% if form.assigned_to.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.assigned_to.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Data Limite -->
+                <div class="col-md-6">
+                    <label for="{{ form.due_date.id_for_label }}" class="form-label">
+                        <i class="fas fa-calendar-alt me-1"></i> Data Limite
+                    </label>
+                    {{ form.due_date }}
+                    {% if form.due_date.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.due_date.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Alertas Relacionados -->
+                <div class="col-md-12">
+                    <label for="{{ form.related_alerts.id_for_label }}" class="form-label">
+                        <i class="fas fa-bell me-1"></i> Alertas Relacionados
+                    </label>
+                    {{ form.related_alerts }}
+                    <small class="form-text text-muted">Selecione os alertas relacionados a este caso (segure Ctrl para selecionar múltiplos)</small>
+                    {% if form.related_alerts.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.related_alerts.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-12 mt-4">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas {% if form.instance.pk %}fa-save{% else %}fa-plus-circle{% endif %} me-1"></i>
+                            {% if form.instance.pk %}Salvar Alterações{% else %}Criar Caso{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Adicionar classe de validação Bootstrap
+    document.addEventListener('DOMContentLoaded', function() {
+        const formControls = document.querySelectorAll('.form-control, .form-select');
+        formControls.forEach(function(control) {
+            if (control.required) {
+                control.parentElement.classList.add('required-field');
+            }
+        });
+    });
+</script>
+{% endblock %} 

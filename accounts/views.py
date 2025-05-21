@@ -11,6 +11,7 @@ from .models import User
 from .forms import CustomUserCreationForm, CustomUserChangeForm, CustomAuthenticationForm
 from organizations.models import Organization
 from alerts.models import Alert
+from cases.models import Case
 
 
 def login_view(request):
@@ -57,14 +58,17 @@ def dashboard(request):
         context['organizations_count'] = Organization.objects.count()
         context['users_count'] = User.objects.count()
         context['alerts_count'] = Alert.objects.count()  # Total de alertas para superadmin
+        context['cases_count'] = Case.objects.count()  # Total de casos para superadmin
         context['recent_organizations'] = Organization.objects.all().order_by('-created_at')[:5]  # 5 organizações mais recentes
         return render(request, 'accounts/dashboard_superadmin.html', context)
     elif request.user.is_org_admin():
         # Organization admin dashboard
         org = request.user.organization
         alerts = org.alerts.all()
+        cases = org.cases.all()
         context['alerts_count'] = alerts.count()
         context['users_count'] = org.users.count()
+        context['cases_count'] = cases.count()  # Total de casos da organização
         context['new_alerts_count'] = alerts.filter(status='new').count()
         context['resolved_alerts_count'] = alerts.filter(status='resolved').count()
         context['recent_alerts'] = alerts.order_by('-created_at')[:5]  # 5 alertas mais recentes
@@ -73,6 +77,8 @@ def dashboard(request):
         # Analyst dashboard
         context['assigned_alerts'] = request.user.assigned_alerts.all()[:5]
         context['alerts_count'] = request.user.assigned_alerts.count()  # Total de alertas atribuídos ao analista
+        context['assigned_cases'] = request.user.assigned_cases.all()[:5]  # Casos atribuídos ao analista
+        context['cases_count'] = request.user.assigned_cases.count()  # Total de casos atribuídos ao analista
         return render(request, 'accounts/dashboard_analyst.html', context)
 
 

@@ -27,6 +27,10 @@ from organizations.views import (
 from alerts.views import (
     AlertListView, AlertDetailView, AlertCreateView, AlertUpdateView, AlertDeleteView
 )
+from cases.views import (
+    CaseListView, CaseDetailView, CaseCreateView, CaseUpdateView, CaseDeleteView,
+    add_case_comment, add_case_attachment, delete_case_attachment, add_case_event
+)
 from core.views import home
 
 # Custom 404 and 500 handlers
@@ -64,6 +68,17 @@ urlpatterns = [
     path('alerts/create/', AlertCreateView.as_view(), name='alert_create'),
     path('alerts/<int:pk>/update/', AlertUpdateView.as_view(), name='alert_update'),
     path('alerts/<int:pk>/delete/', AlertDeleteView.as_view(), name='alert_delete'),
+    
+    # Case URLs
+    path('cases/', CaseListView.as_view(), name='case_list'),
+    path('cases/<int:pk>/', CaseDetailView.as_view(), name='case_detail'),
+    path('cases/create/', CaseCreateView.as_view(), name='case_create'),
+    path('cases/<int:pk>/update/', CaseUpdateView.as_view(), name='case_update'),
+    path('cases/<int:pk>/delete/', CaseDeleteView.as_view(), name='case_delete'),
+    path('cases/<int:pk>/comment/', add_case_comment, name='add_case_comment'),
+    path('cases/<int:pk>/attachment/', add_case_attachment, name='add_case_attachment'),
+    path('cases/<int:pk>/attachment/<int:attachment_pk>/delete/', delete_case_attachment, name='delete_case_attachment'),
+    path('cases/<int:pk>/timeline/event/', add_case_event, name='add_case_event'),
 ]
 
 # Serve static and media files in development

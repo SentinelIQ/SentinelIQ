@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=dev_secret_key
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=admin123
+      - ADMIN_EMAIL=admin@example.com
+      - ORG_NAME=SentinelIQ
+    depends_on:
+      - db
+    restart: unless-stopped
+  
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # Para ambiente de produção
+  web_prod:
+    build: .
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    expose:
+      - "8000"
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY:-prod_secret_key}
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+      - ORG_NAME=${ORG_NAME:-SentinelIQ}
+    depends_on:
+      - db
+    restart: unless-stopped
+    profiles:
+      - prod
+
+  # Nginx para servir arquivos estáticos em produção
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/:/etc/nginx/conf.d/
+      - static_volume:/home/app/staticfiles
+      - media_volume:/home/app/media
+    depends_on:
+      - web_prod
+    restart: unless-stopped
+    profiles:
+      - prod
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume: 

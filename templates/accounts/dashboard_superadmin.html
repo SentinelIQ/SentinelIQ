@@ -67,7 +67,7 @@
 </div>
 
 <div class="row mb-4">
-    <div class="col-xl-4 col-md-6 mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-primary shadow-sm h-100 py-2 stat-card">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -87,7 +87,7 @@
         </div>
     </div>
     
-    <div class="col-xl-4 col-md-6 mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-success shadow-sm h-100 py-2 stat-card">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -107,7 +107,7 @@
         </div>
     </div>
 
-    <div class="col-xl-4 col-md-6 mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-warning shadow-sm h-100 py-2 stat-card">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -121,6 +121,26 @@
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-bell fa-3x text-warning opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-danger shadow-sm h-100 py-2 stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            Total de Casos</div>
+                        <div class="h3 mb-0 font-weight-bold">{{ cases_count|default:"0" }}</div>
+                        <a href="{% url 'case_list' %}" class="text-decoration-none mt-2 d-block">
+                            <small>Ver detalhes <i class="fas fa-arrow-right"></i></small>
+                        </a>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-briefcase fa-3x text-danger opacity-50"></i>
                     </div>
                 </div>
             </div>
@@ -210,6 +230,13 @@
                         <i class="fas fa-arrow-right"></i>
                     </a>
                     
+                    <a href="{% url 'case_create' %}" class="btn btn-danger p-3 dashboard-action d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="fas fa-briefcase me-2"></i> Novo Caso
+                        </div>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    
                     <a href="{% url 'admin:index' %}" class="btn btn-secondary p-3 dashboard-action d-flex align-items-center justify-content-between">
                         <div>
                             <i class="fas fa-cog me-2"></i> Admin do Sistema
@@ -220,6 +247,13 @@
                     <a href="{% url 'alert_list' %}" class="btn btn-warning p-3 dashboard-action d-flex align-items-center justify-content-between">
                         <div>
                             <i class="fas fa-bell me-2"></i> Gerenciar Alertas
+                        </div>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    
+                    <a href="{% url 'case_list' %}" class="btn btn-info p-3 dashboard-action d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="fas fa-tasks me-2"></i> Gerenciar Casos
                         </div>
                         <i class="fas fa-arrow-right"></i>
                     </a>

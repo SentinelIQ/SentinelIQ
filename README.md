@@ -84,3 +84,96 @@ python manage.py runserver
 ## Contribuindo
 
 Contribuições são bem-vindas! Por favor, sinta-se à vontade para enviar um Pull Request.
+
+## Configuração com Docker
+
+### Pré-requisitos
+- Docker
+- Docker Compose
+
+### Configuração para Desenvolvimento
+
+1. Clone o repositório:
+```
+git clone <repositório>
+cd sentineliq
+```
+
+2. Crie um arquivo .env baseado no .env.example (opcional para desenvolvimento):
+```
+cp .env.example .env
+```
+
+3. Inicie os serviços:
+```
+docker-compose up -d
+```
+
+4. Acesse o aplicativo em [http://localhost:8000](http://localhost:8000)
+
+5. O sistema já é inicializado automaticamente com:
+   - Usuário admin: admin
+   - Senha: admin123
+   - Email: admin@example.com
+   - Organização: SentinelIQ
+
+   Você pode personalizar esses valores editando o arquivo .env ou alterando as variáveis de ambiente no docker-compose.yml.
+
+### Configuração para Produção
+
+1. Clone o repositório:
+```
+git clone <repositório>
+cd sentineliq
+```
+
+2. Crie um arquivo .env baseado no .env.example:
+```
+cp .env.example .env
+```
+
+3. Edite o arquivo .env com as configurações de produção, especialmente:
+   - SECRET_KEY (uma chave secreta única)
+   - ALLOWED_HOSTS (domínios permitidos)
+   - DEBUG (definir como False)
+   - ADMIN_USERNAME, ADMIN_PASSWORD, ADMIN_EMAIL (credenciais do superadmin)
+   - ORG_NAME (nome da organização padrão)
+
+4. Inicie os serviços de produção:
+```
+docker-compose --profile prod up -d
+```
+
+5. Acesse o aplicativo na porta 80 do seu servidor
+
+### Comandos Úteis
+
+- Visualizar logs:
+```
+docker-compose logs -f
+```
+
+- Reiniciar os serviços:
+```
+docker-compose restart
+```
+
+- Parar os serviços:
+```
+docker-compose down
+```
+
+- Aplicar migrações manualmente:
+```
+docker-compose exec web python manage.py migrate
+```
+
+- Coletar arquivos estáticos manualmente:
+```
+docker-compose exec web python manage.py collectstatic --noinput
+```
+
+- Executar o comando de inicialização do sistema manualmente:
+```
+docker-compose exec web python manage.py initialize_system --username admin --password senha_segura --email admin@exemplo.com --org-name "Minha Organização"
+```
