@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border-radius: var(--border-radius);
+        border: none;
+    }
+    .form-heading {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+        color: white;
+        border-top-left-radius: var(--border-radius);
+        border-top-right-radius: var(--border-radius);
+        padding: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-eye text-primary me-2"></i> {{ title }}</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'observable_list' %}">Observables</a></li>
+                <li class="breadcrumb-item active">{{ title }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card form-card">
+            <div class="form-heading">
+                <h4 class="mb-0">
+                    <i class="fas fa-{% if observable %}edit{% else %}plus-circle{% endif %} me-2"></i>
+                    {{ title }}
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <!-- Form errors alert -->
+                {% if form.errors %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <h5 class="alert-heading">Erros no formulário:</h5>
+                    <ul class="mb-0">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label for="{{ form.value.id_for_label }}" class="form-label">Valor do Observable</label>
+                            {{ form.value }}
+                            <div class="form-text">Digite o valor exato do indicador de compromisso.</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.type.id_for_label }}" class="form-label">Tipo</label>
+                            {{ form.type }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Descrição</label>
+                            {{ form.description }}
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="{{ form.confidence.id_for_label }}" class="form-label">Nível de Confiança</label>
+                                {{ form.confidence }}
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                {{ form.is_malicious }}
+                                <label class="form-check-label" for="{{ form.is_malicious.id_for_label }}">
+                                    Marcar como Malicioso
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% if request.GET.alert_id %}{% url 'alert_detail' request.GET.alert_id %}{% elif request.GET.case_id %}{% url 'case_detail' request.GET.case_id %}{% else %}{% url 'observable_list' %}{% endif %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-{% if observable %}save{% else %}plus-circle{% endif %} me-2"></i>
+                            {{ title }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

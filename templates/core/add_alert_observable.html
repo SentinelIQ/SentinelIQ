@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Adicionar Observable ao Alerta{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tab-pane {
+        padding: 20px 0;
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--dark);
+        font-weight: 600;
+    }
+    .nav-tabs .nav-link.active {
+        border: none;
+        border-bottom: 3px solid var(--primary);
+        color: var(--primary);
+    }
+    .existing-observable:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-plus-circle text-primary me-2"></i> Adicionar Observable ao Alerta</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alert_list' %}">Alertas</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alert_detail' alert.id %}">{{ alert.title }}</a></li>
+                <li class="breadcrumb-item active">Adicionar Observable</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Adicionar Observable ao Alerta: {{ alert.title }}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="observableTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="create-tab" data-bs-toggle="tab" data-bs-target="#create-tab-pane" type="button" role="tab" aria-controls="create-tab-pane" aria-selected="true">
+                            <i class="fas fa-plus-circle me-1"></i> Criar Novo
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="existing-tab" data-bs-toggle="tab" data-bs-target="#existing-tab-pane" type="button" role="tab" aria-controls="existing-tab-pane" aria-selected="false">
+                            <i class="fas fa-list me-1"></i> Usar Existente
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="observableTabContent">
+                    <div class="tab-pane fade show active" id="create-tab-pane" role="tabpanel" aria-labelledby="create-tab" tabindex="0">
+                        <h5 class="mb-3">Criar Novo Observable</h5>
+                        <form method="post" action="{% url 'add_alert_observable' alert.id %}">
+                            {% csrf_token %}
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <label for="{{ form.value.id_for_label }}" class="form-label">Valor do Observable</label>
+                                    {{ form.value }}
+                                    <div class="form-text">Digite o valor exato do indicador de compromisso.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="{{ form.type.id_for_label }}" class="form-label">Tipo</label>
+                                    {{ form.type }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">Descrição</label>
+                                    {{ form.description }}
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.confidence.id_for_label }}" class="form-label">Nível de Confiança</label>
+                                        {{ form.confidence }}
+                                    </div>
+                                    
+                                    <div class="form-check mb-3">
+                                        {{ form.is_malicious }}
+                                        <label class="form-check-label" for="{{ form.is_malicious.id_for_label }}">
+                                            Marcar como Malicioso
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'alert_detail' alert.id %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Voltar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle me-1"></i> Adicionar Observable
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="existing-tab-pane" role="tabpanel" aria-labelledby="existing-tab" tabindex="0">
+                        <h5 class="mb-3">Selecionar Observable Existente</h5>
+                        
+                        {% if existing_observables %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Valor</th>
+                                            <th>Malicioso</th>
+                                            <th>Confiança</th>
+                                            <th class="text-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for observable in existing_observables %}
+                                            <tr class="existing-observable">
+                                                <td>
+                                                    <span class="badge bg-secondary">{{ observable.get_type_display }}</span>
+                                                </td>
+                                                <td>
+                                                    <code>{{ observable.value }}</code>
+                                                </td>
+                                                <td>
+                                                    {% if observable.is_malicious %}
+                                                        <span class="badge bg-danger">Sim</span>
+                                                    {% else %}
+                                                        <span class="badge bg-success">Não</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if observable.confidence == 'high' %}
+                                                        <span class="badge bg-success">Alta</span>
+                                                    {% elif observable.confidence == 'medium' %}
+                                                        <span class="badge bg-info text-dark">Média</span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning text-dark">Baixa</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-center">
+                                                    <form method="post" action="{% url 'add_alert_observable' alert.id %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="observable_id" value="{{ observable.id }}">
+                                                        <button type="submit" class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-plus-circle me-1"></i> Adicionar
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                <p class="mb-0 text-muted">Nenhum observable disponível para adicionar.</p>
+                                <p class="text-muted">Crie um novo observable usando a outra aba.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

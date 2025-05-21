@@ -20,6 +20,10 @@
         border-radius: 5px;
         background-color: #f8f9fa;
     }
+    .required-asterisk {
+        color: red;
+        margin-left: 3px;
+    }
 </style>
 {% endblock %}
 
@@ -56,7 +60,7 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="{{ form.name.id_for_label }}" class="form-label">
-                            <i class="fas fa-font me-1"></i> Nome da Tag
+                            <i class="fas fa-font me-1"></i> Nome da Tag<span class="required-asterisk">*</span>
                         </label>
                         {{ form.name }}
                         {% if form.name.errors %}
@@ -69,7 +73,7 @@
                     
                     <div class="mb-3">
                         <label for="{{ form.color.id_for_label }}" class="form-label">
-                            <i class="fas fa-palette me-1"></i> Cor da Tag
+                            <i class="fas fa-palette me-1"></i> Cor da Tag<span class="required-asterisk">*</span>
                         </label>
                         {{ form.color }}
                         {% if form.color.errors %}
@@ -78,6 +82,37 @@
                             </div>
                         {% endif %}
                         <div class="form-text">Selecione uma cor para esta tag</div>
+                    </div>
+                    
+                    <!-- Campos para associar tag a alerta ou caso -->
+                    <div class="mb-3">
+                        <label for="{{ form.alert.id_for_label }}" class="form-label">
+                            <i class="fas fa-bell me-1"></i> Associar a um Alerta
+                        </label>
+                        {{ form.alert }}
+                        {% if form.alert.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.alert.errors }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Selecione um alerta para associar esta tag</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.case.id_for_label }}" class="form-label">
+                            <i class="fas fa-briefcase me-1"></i> Associar a um Caso
+                        </label>
+                        {{ form.case }}
+                        {% if form.case.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.case.errors }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Selecione um caso para associar esta tag</div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Você pode associar a tag a um alerta <strong>ou</strong> a um caso. Se ambos forem selecionados, a associação com o alerta terá prioridade.
                     </div>
                     
                     <div class="tag-preview">
@@ -125,6 +160,8 @@
         const nameInput = document.getElementById('{{ form.name.id_for_label }}');
         const colorSelect = document.getElementById('{{ form.color.id_for_label }}');
         const tagPreview = document.getElementById('tagPreview');
+        const alertSelect = document.getElementById('{{ form.alert.id_for_label }}');
+        const caseSelect = document.getElementById('{{ form.case.id_for_label }}');
         
         // Função para atualizar a prévia da tag
         function updateTagPreview() {
@@ -141,6 +178,19 @@
         
         // Atualizar na carga inicial
         updateTagPreview();
+        
+        // Garantir que apenas um de alerta ou caso seja selecionado por vez
+        alertSelect.addEventListener('change', function() {
+            if (alertSelect.value !== "") {
+                caseSelect.value = "";
+            }
+        });
+        
+        caseSelect.addEventListener('change', function() {
+            if (caseSelect.value !== "") {
+                alertSelect.value = "";
+            }
+        });
     });
 </script>
 {% endblock %} 

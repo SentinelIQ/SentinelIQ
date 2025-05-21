@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Excluir Observable{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-trash text-danger me-2"></i> Excluir Observable</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'observable_list' %}">Observables</a></li>
+                <li class="breadcrumb-item active">Excluir</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Confirmação</h5>
+            </div>
+            <div class="card-body p-4 text-center">
+                <div class="mb-4">
+                    <i class="fas fa-trash-alt fa-5x text-danger mb-3"></i>
+                    <h4>Tem certeza que deseja excluir este observable?</h4>
+                    <p class="mb-0 lead">
+                        <span class="badge bg-secondary">{{ observable.get_type_display }}</span>
+                        <code class="fs-5">{{ observable.value }}</code>
+                    </p>
+                </div>
+                
+                {% if observable.alerts.all or observable.cases.all %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Atenção:</strong> Este observable está associado a
+                    {% if observable.alerts.all %}{{ observable.alerts.count }} alerta(s){% endif %}
+                    {% if observable.alerts.all and observable.cases.all %}e{% endif %}
+                    {% if observable.cases.all %}{{ observable.cases.count }} caso(s){% endif %}.
+                    <br>
+                    Excluir este observable removerá todas estas associações.
+                </div>
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'observable_detail' observable.id %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i> Confirmar Exclusão
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

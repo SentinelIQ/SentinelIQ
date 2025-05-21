@@ -10,6 +10,8 @@ class AlertEvent(models.Model):
     TLP_CHANGED = 'tlp_changed'
     PAP_CHANGED = 'pap_changed'
     TAGS_CHANGED = 'tags_changed'
+    OBSERVABLE_ADDED = 'observable_added'
+    OBSERVABLE_REMOVED = 'observable_removed'
     ESCALATED = 'escalated'
     CUSTOM = 'custom'
     
@@ -21,6 +23,8 @@ class AlertEvent(models.Model):
         (TLP_CHANGED, _('TLP Changed')),
         (PAP_CHANGED, _('PAP Changed')),
         (TAGS_CHANGED, _('Tags Changed')),
+        (OBSERVABLE_ADDED, _('Observable Added')),
+        (OBSERVABLE_REMOVED, _('Observable Removed')),
         (ESCALATED, _('Escalated to Case')),
         (CUSTOM, _('Custom Event')),
     ]
@@ -62,6 +66,8 @@ class AlertEvent(models.Model):
             self.TLP_CHANGED: 'fa-shield-alt text-primary',
             self.PAP_CHANGED: 'fa-user-shield text-warning',
             self.TAGS_CHANGED: 'fa-tags text-info',
+            self.OBSERVABLE_ADDED: 'fa-eye text-success',
+            self.OBSERVABLE_REMOVED: 'fa-eye-slash text-danger',
             self.ESCALATED: 'fa-arrow-up text-success',
             self.CUSTOM: 'fa-star text-warning',
         }
@@ -170,6 +176,12 @@ class Alert(models.Model):
         related_name='alerts',
         blank=True,
     )
+    observables = models.ManyToManyField(
+        'core.Observable',
+        verbose_name=_('Observables'),
+        related_name='alerts',
+        blank=True,
+    )
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
     
@@ -264,6 +276,26 @@ class Alert(models.Model):
             title=_('Tags changed'),
             description=description,
             user=user
+        )
+    
+    def log_observable_added(self, user, observable):
+        """Log when an observable is added to the alert"""
+        return self.add_timeline_event(
+            event_type=AlertEvent.OBSERVABLE_ADDED,
+            title=_('Observable added'),
+            description=f"{observable.get_type_display()}: {observable.value}",
+            user=user,
+            metadata={'observable_id': observable.id}
+        )
+    
+    def log_observable_removed(self, user, observable):
+        """Log when an observable is removed from the alert"""
+        return self.add_timeline_event(
+            event_type=AlertEvent.OBSERVABLE_REMOVED,
+            title=_('Observable removed'),
+            description=f"{observable.get_type_display()}: {observable.value}",
+            user=user,
+            metadata={'observable_id': observable.id}
         )
     
     def log_escalated_to_case(self, user, case):

@@ -12,6 +12,7 @@ from .forms import CustomUserCreationForm, CustomUserChangeForm, CustomAuthentic
 from organizations.models import Organization
 from alerts.models import Alert
 from cases.models import Case
+from core.models import Observable
 
 
 def login_view(request):
@@ -59,6 +60,7 @@ def dashboard(request):
         context['users_count'] = User.objects.count()
         context['alerts_count'] = Alert.objects.count()  # Total de alertas para superadmin
         context['cases_count'] = Case.objects.count()  # Total de casos para superadmin
+        context['observables_count'] = Observable.objects.count()  # Total de observables para superadmin
         context['recent_organizations'] = Organization.objects.all().order_by('-created_at')[:5]  # 5 organizações mais recentes
         return render(request, 'accounts/dashboard_superadmin.html', context)
     elif request.user.is_org_admin():
@@ -72,13 +74,38 @@ def dashboard(request):
         context['new_alerts_count'] = alerts.filter(status='new').count()
         context['resolved_alerts_count'] = alerts.filter(status='resolved').count()
         context['recent_alerts'] = alerts.order_by('-created_at')[:5]  # 5 alertas mais recentes
+        
+        # Obtendo observables associados aos alertas da organização
+        alert_observable_ids = alerts.values_list('observables', flat=True)
+        # Obtendo observables associados aos casos da organização
+        case_observable_ids = cases.values_list('observables', flat=True)
+        # Combinando os IDs únicos
+        unique_observable_ids = set(list(alert_observable_ids) + list(case_observable_ids))
+        # Removendo None se existir
+        unique_observable_ids = {id for id in unique_observable_ids if id is not None}
+        context['observables_count'] = len(unique_observable_ids)
+        
         return render(request, 'accounts/dashboard_org_admin.html', context)
     else:
         # Analyst dashboard
-        context['assigned_alerts'] = request.user.assigned_alerts.all()[:5]
-        context['alerts_count'] = request.user.assigned_alerts.count()  # Total de alertas atribuídos ao analista
-        context['assigned_cases'] = request.user.assigned_cases.all()[:5]  # Casos atribuídos ao analista
-        context['cases_count'] = request.user.assigned_cases.count()  # Total de casos atribuídos ao analista
+        assigned_alerts = request.user.assigned_alerts.all()
+        assigned_cases = request.user.assigned_cases.all()
+        
+        context['assigned_alerts'] = assigned_alerts[:5]
+        context['alerts_count'] = assigned_alerts.count()  # Total de alertas atribuídos ao analista
+        context['assigned_cases'] = assigned_cases[:5]  # Casos atribuídos ao analista
+        context['cases_count'] = assigned_cases.count()  # Total de casos atribuídos ao analista
+        
+        # Obtendo observables associados aos alertas do analista
+        alert_observable_ids = assigned_alerts.values_list('observables', flat=True)
+        # Obtendo observables associados aos casos do analista
+        case_observable_ids = assigned_cases.values_list('observables', flat=True)
+        # Combinando os IDs únicos
+        unique_observable_ids = set(list(alert_observable_ids) + list(case_observable_ids))
+        # Removendo None se existir
+        unique_observable_ids = {id for id in unique_observable_ids if id is not None}
+        context['observables_count'] = len(unique_observable_ids)
+        
         return render(request, 'accounts/dashboard_analyst.html', context)
 
 

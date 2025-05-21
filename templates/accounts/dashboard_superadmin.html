@@ -146,6 +146,26 @@
             </div>
         </div>
     </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow-sm h-100 py-2 stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Total de Observables</div>
+                        <div class="h3 mb-0 font-weight-bold">{{ observables_count|default:"0" }}</div>
+                        <a href="{% url 'observable_list' %}" class="text-decoration-none mt-2 d-block">
+                            <small>Ver detalhes <i class="fas fa-arrow-right"></i></small>
+                        </a>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-eye fa-3x text-info opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="row">

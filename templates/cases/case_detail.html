@@ -252,8 +252,8 @@
                                 <a href="{% url 'case_update' case.id %}" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-edit me-1"></i> Editar Tags
                                 </a>
-                                <a href="{% url 'tag_create' %}" class="btn btn-sm btn-outline-success" title="Criar Nova Tag">
-                                    <i class="fas fa-plus-circle"></i>
+                                <a href="{% url 'tag_create' %}?case_id={{ case.id }}" class="btn btn-sm btn-outline-success" title="Criar Tag associada a este caso">
+                                    <i class="fas fa-plus-circle"></i> Nova Tag
                                 </a>
                                 <a href="{% url 'tag_list' %}" class="btn btn-sm btn-outline-info" title="Gerenciar Tags">
                                     <i class="fas fa-tags"></i>
@@ -375,6 +375,86 @@
                     <div class="text-center py-3">
                         <i class="fas fa-exclamation-circle text-muted fa-2x mb-2"></i>
                         <p class="mb-0 text-muted">Nenhum alerta relacionado.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Observables -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-eye me-2"></i> Observables (IOCs)</h5>
+                <a href="{% url 'add_case_observable' case.id %}" class="btn btn-sm btn-light">
+                    <i class="fas fa-plus-circle me-1"></i> Adicionar
+                </a>
+            </div>
+            <div class="card-body">
+                {% if case.observables.all %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-bug me-1"></i></th>
+                                    <th>Tipo</th>
+                                    <th>Valor</th>
+                                    <th>Confiança</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for observable in case.observables.all %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge {% if observable.is_malicious %}bg-danger{% else %}bg-success{% endif %}" 
+                                                  data-bs-toggle="tooltip" 
+                                                  title="{% if observable.is_malicious %}Malicioso{% else %}Não Malicioso{% endif %}">
+                                                <i class="fas {% if observable.is_malicious %}fa-bug{% else %}fa-check{% endif %}"></i>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ observable.get_type_display }}</span>
+                                        </td>
+                                        <td>
+                                            <code>{{ observable.value }}</code>
+                                        </td>
+                                        <td>
+                                            {% if observable.confidence == 'high' %}
+                                                <span class="badge bg-success">Alta</span>
+                                            {% elif observable.confidence == 'medium' %}
+                                                <span class="badge bg-info text-dark">Média</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Baixa</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'observable_detail' observable.id %}" class="btn btn-info" data-bs-toggle="tooltip" title="Visualizar">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'observable_update' observable.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form method="post" action="{% url 'remove_case_observable' case.id observable.id %}" class="d-inline" 
+                                                      onsubmit="return confirm('Tem certeza que deseja remover este observable?');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger" data-bs-toggle="tooltip" title="Remover">
+                                                        <i class="fas fa-unlink"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-search text-muted fa-2x mb-2"></i>
+                        <p class="mb-0 text-muted">Nenhum observable adicionado a este caso.</p>
+                        <a href="{% url 'add_case_observable' case.id %}" class="btn btn-primary btn-sm mt-3">
+                            <i class="fas fa-plus-circle me-1"></i> Adicionar Observable
+                        </a>
                     </div>
                 {% endif %}
             </div>

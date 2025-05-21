@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Observables (IOCs){% endblock %}
+
+{% block extra_css %}
+<style>
+    .observable-badge {
+        font-size: 0.85rem;
+        padding: 0.35rem 0.65rem;
+    }
+    .malicious-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+    .malicious-yes {
+        background-color: var(--danger);
+    }
+    .malicious-no {
+        background-color: var(--success);
+    }
+    .filter-card {
+        transition: all 0.3s ease;
+    }
+    .table-container {
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-eye text-primary me-2"></i> Observables (IOCs)</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item active">Observables</li>
+            </ol>
+        </nav>
+    </div>
+    <a href="{% url 'observable_create' %}" class="btn btn-primary d-flex align-items-center shadow-sm">
+        <i class="fas fa-plus-circle me-2"></i> Novo Observable
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4 filter-card">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Filtros</h5>
+        <button class="btn btn-sm btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true" aria-controls="filterCollapse">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+    <div class="collapse show" id="filterCollapse">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-lg-3 col-md-6">
+                    <label for="{{ filter_form.type.id_for_label }}" class="form-label">
+                        <i class="fas fa-tag me-1"></i> Tipo
+                    </label>
+                    {{ filter_form.type }}
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label for="{{ filter_form.is_malicious.id_for_label }}" class="form-label">
+                        <i class="fas fa-bug me-1"></i> Malicioso
+                    </label>
+                    {{ filter_form.is_malicious }}
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label for="{{ filter_form.confidence.id_for_label }}" class="form-label">
+                        <i class="fas fa-check-circle me-1"></i> Confiança
+                    </label>
+                    {{ filter_form.confidence }}
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label for="{{ filter_form.search.id_for_label }}" class="form-label">
+                        <i class="fas fa-search me-1"></i> Busca
+                    </label>
+                    <div class="input-group">
+                        {{ filter_form.search }}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i> Filtrar
+                        </button>
+                        <a href="{% url 'observable_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-sync me-1"></i> Limpar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i> Resultados</h5>
+        <span class="badge bg-primary">{{ observables|length }} observables encontrados</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-container">
+            <table class="table table-hover mb-0" id="observablesTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th><i class="fas fa-bug me-1"></i> Malicioso</th>
+                        <th><i class="fas fa-tag me-1"></i> Tipo</th>
+                        <th><i class="fas fa-key me-1"></i> Valor</th>
+                        <th><i class="fas fa-check-circle me-1"></i> Confiança</th>
+                        <th><i class="fas fa-calendar-alt me-1"></i> Última Visualização</th>
+                        <th><i class="fas fa-bell me-1"></i> Alertas</th>
+                        <th><i class="fas fa-briefcase me-1"></i> Casos</th>
+                        <th class="text-center"><i class="fas fa-cogs me-1"></i> Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for observable in observables %}
+                        <tr>
+                            <td>
+                                <span class="malicious-indicator {% if observable.is_malicious %}malicious-yes{% else %}malicious-no{% endif %}" 
+                                      data-bs-toggle="tooltip" 
+                                      title="{% if observable.is_malicious %}Malicioso{% else %}Não Malicioso{% endif %}">
+                                </span>
+                                {% if observable.is_malicious %}
+                                    <span class="badge bg-danger">Sim</span>
+                                {% else %}
+                                    <span class="badge bg-success">Não</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge observable-badge bg-secondary">
+                                    {{ observable.get_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <code>{{ observable.value }}</code>
+                            </td>
+                            <td>
+                                {% if observable.confidence == 'high' %}
+                                    <span class="badge bg-success">Alta</span>
+                                {% elif observable.confidence == 'medium' %}
+                                    <span class="badge bg-info text-dark">Média</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Baixa</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="small">{{ observable.last_seen|date:"d/m/Y H:i" }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">{{ observable.alert_count }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">{{ observable.case_count }}</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'observable_detail' observable.id %}" class="btn btn-info" data-bs-toggle="tooltip" title="Visualizar">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'observable_update' observable.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'observable_delete' observable.id %}" class="btn btn-danger" data-bs-toggle="tooltip" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                    <p class="mb-0 text-muted">Nenhum observable encontrado.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %} 

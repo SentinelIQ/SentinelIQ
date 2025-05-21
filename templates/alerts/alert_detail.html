@@ -240,6 +240,11 @@
                     <i class="fas fa-history me-1"></i> Timeline
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="observables-tab" data-bs-toggle="tab" data-bs-target="#observables-tab-pane" type="button" role="tab" aria-controls="observables-tab-pane" aria-selected="false">
+                    <i class="fas fa-eye me-1"></i> Observables
+                </button>
+            </li>
         </ul>
     </div>
     <div class="card-body">
@@ -337,8 +342,8 @@
                                                 <a href="{% url 'alert_update' alert.id %}" class="btn btn-sm btn-outline-primary">
                                                     <i class="fas fa-edit me-1"></i> Editar Tags
                                                 </a>
-                                                <a href="{% url 'tag_create' %}" class="btn btn-sm btn-outline-success" title="Criar Nova Tag">
-                                                    <i class="fas fa-plus-circle"></i>
+                                                <a href="{% url 'tag_create' %}?alert_id={{ alert.id }}" class="btn btn-sm btn-outline-success" title="Criar Tag associada a este alerta">
+                                                    <i class="fas fa-plus-circle"></i> Nova Tag
                                                 </a>
                                                 <a href="{% url 'tag_list' %}" class="btn btn-sm btn-outline-info" title="Gerenciar Tags">
                                                     <i class="fas fa-tags"></i>
@@ -417,6 +422,95 @@
                                 </div>
                             {% endif %}
                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aba de Observables -->
+            <div class="tab-pane fade" id="observables-tab-pane" role="tabpanel" aria-labelledby="observables-tab" tabindex="0">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <h5><i class="fas fa-eye me-2 text-primary"></i> Observables (IOCs)</h5>
+                            <a href="{% url 'add_alert_observable' alert.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-plus-circle me-1"></i> Adicionar Observable
+                            </a>
+                        </div>
+                        
+                        {% if alert.observables.all %}
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th><i class="fas fa-bug me-1"></i> Malicioso</th>
+                                            <th><i class="fas fa-tag me-1"></i> Tipo</th>
+                                            <th><i class="fas fa-key me-1"></i> Valor</th>
+                                            <th><i class="fas fa-check-circle me-1"></i> Confiança</th>
+                                            <th><i class="fas fa-calendar-alt me-1"></i> Detectado</th>
+                                            <th class="text-center"><i class="fas fa-cogs me-1"></i> Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for observable in alert.observables.all %}
+                                            <tr>
+                                                <td>
+                                                    {% if observable.is_malicious %}
+                                                        <span class="badge bg-danger">Sim</span>
+                                                    {% else %}
+                                                        <span class="badge bg-success">Não</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-secondary">
+                                                        {{ observable.get_type_display }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <code>{{ observable.value }}</code>
+                                                </td>
+                                                <td>
+                                                    {% if observable.confidence == 'high' %}
+                                                        <span class="badge bg-success">Alta</span>
+                                                    {% elif observable.confidence == 'medium' %}
+                                                        <span class="badge bg-info text-dark">Média</span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning text-dark">Baixa</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <span class="small">{{ observable.first_seen|date:"d/m/Y H:i" }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'observable_detail' observable.id %}" class="btn btn-info" data-bs-toggle="tooltip" title="Visualizar">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        <a href="{% url 'observable_update' observable.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <form method="post" action="{% url 'remove_alert_observable' alert.id observable.id %}" class="d-inline" 
+                                                              onsubmit="return confirm('Tem certeza que deseja remover este observable?');">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-danger" data-bs-toggle="tooltip" title="Remover">
+                                                                <i class="fas fa-unlink"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                <p class="mb-0 text-muted">Nenhum observable encontrado para este alerta.</p>
+                                <a href="{% url 'add_alert_observable' alert.id %}" class="btn btn-primary mt-3">
+                                    <i class="fas fa-plus-circle me-1"></i> Adicionar Observable
+                                </a>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
