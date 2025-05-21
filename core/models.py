@@ -141,4 +141,3 @@ class Observable(models.Model):
         verbose_name = _('Observable')
         verbose_name_plural = _('Observables')
         ordering = ['-updated_at']
-        unique_together = ['value', 'type']  # Prevent duplicate observables of the same type

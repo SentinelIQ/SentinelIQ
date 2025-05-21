@@ -155,16 +155,15 @@ def dashboard(request):
         status__in=['open', 'in_progress', 'pending']
     ).count()
     
+    # Usar a organização direta do observable em vez de relacionamentos
     total_observables = Observable.objects.filter(
-        Q(alerts__organization=request.user.organization) | 
-        Q(cases__organization=request.user.organization)
-    ).distinct().count()
+        organization=request.user.organization
+    ).count()
     
     malicious_observables = Observable.objects.filter(
-        Q(alerts__organization=request.user.organization) | 
-        Q(cases__organization=request.user.organization),
+        organization=request.user.organization,
         is_malicious=True
-    ).distinct().count()
+    ).count()
     
     # Get recent alerts
     recent_alerts = Alert.objects.filter(
@@ -311,10 +310,11 @@ def tag_delete(request, pk):
 def observable_list(request):
     """List all observables"""
     filter_form = ObservableFilterForm(request.GET)
+    
+    # Usar a organização direta do observable em vez de relacionamentos
     observables = Observable.objects.filter(
-        Q(alerts__organization=request.user.organization) | 
-        Q(cases__organization=request.user.organization)
-    ).distinct()
+        organization=request.user.organization
+    )
     
     # Apply filters if provided
     if filter_form.is_valid():
