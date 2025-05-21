@@ -3,6 +3,33 @@
 
 {% block title %}Dashboard - Analista{% endblock %}
 
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-icon {
+        font-size: 3rem;
+        opacity: 0.8;
+    }
+    .dashboard-action {
+        transition: all 0.3s ease;
+    }
+    .dashboard-action:hover {
+        transform: translateY(-3px);
+    }
+    .border-left-primary {
+        border-left: 0.25rem solid var(--primary) !important;
+    }
+    .border-left-info {
+        border-left: 0.25rem solid var(--info) !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-12">
@@ -26,6 +53,49 @@
                 <span class="fw-bold">Bem-vindo, {{ user.get_full_name|default:user.username }}!</span>
                 <div class="mt-1">
                     <i class="fas fa-building"></i> Organização: <strong>{{ user.organization.name }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cards de estatísticas -->
+<div class="row mb-4">
+    <div class="col-xl-6 col-md-6 mb-4">
+        <div class="card border-left-primary shadow-sm h-100 py-2 stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Alertas Atribuídos a Você</div>
+                        <div class="h3 mb-0 font-weight-bold">{{ alerts_count|default:"0" }}</div>
+                        <a href="{% url 'alert_list' %}" class="text-decoration-none mt-2 d-block">
+                            <small>Ver todos <i class="fas fa-arrow-right"></i></small>
+                        </a>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-tasks fa-3x text-primary opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-6 col-md-6 mb-4">
+        <div class="card border-left-info shadow-sm h-100 py-2 stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Organização</div>
+                        <div class="h3 mb-0 font-weight-bold">{{ user.organization.name }}</div>
+                        <div class="text-decoration-none mt-2 d-block text-muted">
+                            <small><i class="fas fa-users me-1"></i> Sua Equipe</small>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-building fa-3x text-info opacity-50"></i>
+                    </div>
                 </div>
             </div>
         </div>

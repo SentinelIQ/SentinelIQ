@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if form.instance.id %}Editar{% else %}Novo{% endif %} Alerta{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card {
+        border-top: 4px solid var(--primary);
+    }
+    .form-section {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    .form-section-title {
+        margin-bottom: 1.25rem;
+        font-weight: 600;
+        color: var(--primary);
+    }
+    .focused label {
+        color: var(--primary);
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(58, 134, 255, 0.15);
+    }
+    .form-floating > .form-control:focus ~ label,
+    .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        color: var(--primary);
+    }
+    .severity-critical {
+        color: var(--danger);
+    }
+    .severity-high {
+        color: var(--warning);
+    }
+    .severity-medium {
+        color: var(--info);
+    }
+    .severity-low {
+        color: var(--success);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1">
+            <i class="fas fa-{% if form.instance.id %}edit text-warning{% else %}plus-circle text-primary{% endif %} me-2"></i> 
+            {% if form.instance.id %}
+                Editar Alerta
+            {% else %}
+                Novo Alerta
+            {% endif %}
+        </h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alert_list' %}">Alertas</a></li>
+                <li class="breadcrumb-item active">
+                    {% if form.instance.id %}
+                        Editar {{ form.instance.title }}
+                    {% else %}
+                        Novo Alerta
+                    {% endif %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card shadow-sm form-card">
+    <div class="card-header bg-white">
+        <h4 class="mb-0">
+            {% if form.instance.id %}
+                <span class="text-warning">
+                    <i class="fas fa-edit me-2"></i> Editar Alerta: {{ form.instance.title }}
+                </span>
+            {% else %}
+                <span class="text-primary">
+                    <i class="fas fa-bell me-2"></i> Novo Alerta
+                </span>
+            {% endif %}
+        </h4>
+    </div>
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h5 class="form-section-title"><i class="fas fa-info-circle me-2"></i> Informações do Alerta</h5>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="form-floating mb-3">
+                            {{ form.title }}
+                            <label for="{{ form.title.id_for_label }}">Título do Alerta</label>
+                        </div>
+                        {% if form.title.errors %}
+                            <div class="text-danger small">
+                                {{ form.title.errors }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text small">
+                            Forneça um título descritivo e conciso para o alerta.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">Descrição</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="text-danger small">
+                            {{ form.description.errors }}
+                        </div>
+                    {% endif %}
+                    <div class="form-text small">
+                        Forneça uma descrição detalhada do alerta, incluindo o problema e possíveis soluções.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h5 class="form-section-title"><i class="fas fa-exclamation-triangle me-2"></i> Severidade e Status</h5>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="{{ form.severity.id_for_label }}" class="form-label">Severidade</label>
+                        {{ form.severity }}
+                        {% if form.severity.errors %}
+                            <div class="text-danger small">
+                                {{ form.severity.errors }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text small">
+                            <ul class="mb-0 ps-3">
+                                <li><span class="severity-critical fw-bold">Crítico:</span> Impacto significativo, requer ação imediata</li>
+                                <li><span class="severity-high fw-bold">Alto:</span> Impacto importante, requer ação em breve</li>
+                                <li><span class="severity-medium fw-bold">Médio:</span> Impacto moderado, requer atenção</li>
+                                <li><span class="severity-low fw-bold">Baixo:</span> Impacto mínimo, pode ser agendado</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                            <div class="text-danger small">
+                                {{ form.status.errors }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text small">
+                            <ul class="mb-0 ps-3">
+                                <li><strong>Novo:</strong> Alerta criado, ainda não analisado</li>
+                                <li><strong>Reconhecido:</strong> Alerta visto e aguardando ação</li>
+                                <li><strong>Em Progresso:</strong> Alerta sendo tratado</li>
+                                <li><strong>Resolvido:</strong> Problema solucionado</li>
+                                <li><strong>Fechado:</strong> Caso encerrado (falso positivo ou irrelevante)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h5 class="form-section-title"><i class="fas fa-user-check me-2"></i> Atribuição</h5>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="{{ form.assigned_to.id_for_label }}" class="form-label">Atribuir Para</label>
+                        {{ form.assigned_to }}
+                        {% if form.assigned_to.errors %}
+                            <div class="text-danger small">
+                                {{ form.assigned_to.errors }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text small">
+                            Selecione o usuário responsável por resolver este alerta.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end mt-4">
+                <a href="{% url 'alert_list' %}" class="btn btn-secondary me-2">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Salvar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

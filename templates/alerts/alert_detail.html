@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Alerta: {{ alert.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .alert-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+        color: white;
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .alert-status-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-right: 1.5rem;
+    }
+    .info-card {
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    .info-card:hover {
+        transform: translateY(-5px);
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--dark);
+        font-weight: 600;
+    }
+    .nav-tabs .nav-link.active {
+        border: none;
+        border-bottom: 3px solid var(--primary);
+        color: var(--primary);
+    }
+    .badge {
+        transition: all 0.2s ease;
+    }
+    .badge:hover {
+        transform: scale(1.05);
+    }
+    .timeline {
+        position: relative;
+        padding-left: 1.5rem;
+        margin-bottom: 0;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 2px;
+        background: var(--primary);
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -1.55rem;
+        top: 0;
+        height: 12px;
+        width: 12px;
+        border: 2px solid var(--primary);
+        border-radius: 50%;
+        background: white;
+    }
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1"><i class="fas fa-bell text-primary me-2"></i> Detalhes do Alerta</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alert_list' %}">Alertas</a></li>
+                <li class="breadcrumb-item active">{{ alert.title }}</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="d-flex">
+        <a href="{% url 'alert_update' alert.id %}" class="btn btn-warning me-2 d-flex align-items-center">
+            <i class="fas fa-edit me-2"></i> Editar
+        </a>
+        <a href="{% url 'alert_delete' alert.id %}" class="btn btn-danger d-flex align-items-center">
+            <i class="fas fa-trash me-2"></i> Excluir
+        </a>
+    </div>
+</div>
+
+<!-- Cabeçalho do Alerta -->
+<div class="alert-header shadow-sm d-flex align-items-center">
+    <div class="alert-status-icon">
+        {% if alert.status == 'new' %}
+            <i class="fas fa-exclamation"></i>
+        {% elif alert.status == 'acknowledged' %}
+            <i class="fas fa-eye"></i>
+        {% elif alert.status == 'in_progress' %}
+            <i class="fas fa-spinner"></i>
+        {% elif alert.status == 'resolved' %}
+            <i class="fas fa-check"></i>
+        {% else %}
+            <i class="fas fa-times"></i>
+        {% endif %}
+    </div>
+    <div>
+        <h1 class="mb-2">{{ alert.title }}</h1>
+        <div class="d-flex align-items-center flex-wrap">
+            <span class="badge bg-light text-dark me-3">
+                <i class="fas fa-calendar-alt me-1"></i> {{ alert.created_at|date:"d/m/Y H:i" }}
+            </span>
+            
+            <span class="badge me-3 {% if alert.severity == 'critical' %}bg-danger{% elif alert.severity == 'high' %}bg-warning text-dark{% elif alert.severity == 'medium' %}bg-info text-dark{% else %}bg-success{% endif %}">
+                <i class="fas fa-exclamation-triangle me-1"></i> 
+                {% if alert.severity == 'critical' %}
+                    Crítico
+                {% elif alert.severity == 'high' %}
+                    Alto
+                {% elif alert.severity == 'medium' %}
+                    Médio
+                {% else %}
+                    Baixo
+                {% endif %}
+            </span>
+            
+            <span class="badge {% if alert.status == 'new' %}bg-danger{% elif alert.status == 'acknowledged' %}bg-warning text-dark{% elif alert.status == 'in_progress' %}bg-info text-dark{% elif alert.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
+                <i class="fas fa-{% if alert.status == 'new' %}exclamation{% elif alert.status == 'acknowledged' %}eye{% elif alert.status == 'in_progress' %}spinner{% elif alert.status == 'resolved' %}check{% else %}times{% endif %} me-1"></i>
+                {% if alert.status == 'new' %}
+                    Novo
+                {% elif alert.status == 'acknowledged' %}
+                    Reconhecido
+                {% elif alert.status == 'in_progress' %}
+                    Em Progresso
+                {% elif alert.status == 'resolved' %}
+                    Resolvido
+                {% else %}
+                    Fechado
+                {% endif %}
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Cards de Informações -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow-sm info-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase text-muted mb-2">Organização</h6>
+                        <h5 class="mb-0">{{ alert.organization.name }}</h5>
+                    </div>
+                    <i class="fas fa-building fa-2x text-primary opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow-sm info-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase text-muted mb-2">Atribuído a</h6>
+                        <h5 class="mb-0">
+                            {% if alert.assigned_to %}
+                                {{ alert.assigned_to.get_full_name|default:alert.assigned_to.username }}
+                            {% else %}
+                                <span class="text-muted">Não atribuído</span>
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <i class="fas fa-user-check fa-2x text-primary opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow-sm info-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase text-muted mb-2">Criado em</h6>
+                        <h5 class="mb-0">{{ alert.created_at|date:"d/m/Y H:i" }}</h5>
+                    </div>
+                    <i class="fas fa-calendar-plus fa-2x text-primary opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow-sm info-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase text-muted mb-2">Última Atualização</h6>
+                        <h5 class="mb-0">{{ alert.updated_at|date:"d/m/Y H:i" }}</h5>
+                    </div>
+                    <i class="fas fa-sync-alt fa-2x text-primary opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Abas de Conteúdo -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white p-0 border-bottom-0">
+        <ul class="nav nav-tabs" id="alertTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details-tab-pane" type="button" role="tab" aria-controls="details-tab-pane" aria-selected="true">
+                    <i class="fas fa-info-circle me-1"></i> Detalhes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline-tab-pane" type="button" role="tab" aria-controls="timeline-tab-pane" aria-selected="false">
+                    <i class="fas fa-history me-1"></i> Timeline
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+        <div class="tab-content" id="alertTabsContent">
+            <!-- Aba de Detalhes -->
+            <div class="tab-pane fade show active" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
+                <div class="row">
+                    <div class="col-lg-12 mb-4">
+                        <h5 class="mb-3"><i class="fas fa-align-left me-2 text-primary"></i> Descrição</h5>
+                        <div class="card">
+                            <div class="card-body bg-light">
+                                <p class="mb-0 lead">{{ alert.description|linebreaksbr }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h5 class="mb-3"><i class="fas fa-file-alt me-2 text-primary"></i> Informações</h5>
+                        <table class="table table-hover">
+                            <tbody>
+                                <tr>
+                                    <th class="bg-light" style="width: 35%">Organização</th>
+                                    <td>{{ alert.organization.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Título</th>
+                                    <td>{{ alert.title }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Severidade</th>
+                                    <td>
+                                        <span class="badge {% if alert.severity == 'critical' %}bg-danger{% elif alert.severity == 'high' %}bg-warning text-dark{% elif alert.severity == 'medium' %}bg-info text-dark{% else %}bg-success{% endif %}">
+                                            {% if alert.severity == 'critical' %}
+                                                Crítico
+                                            {% elif alert.severity == 'high' %}
+                                                Alto
+                                            {% elif alert.severity == 'medium' %}
+                                                Médio
+                                            {% else %}
+                                                Baixo
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Status</th>
+                                    <td>
+                                        <span class="badge {% if alert.status == 'new' %}bg-danger{% elif alert.status == 'acknowledged' %}bg-warning text-dark{% elif alert.status == 'in_progress' %}bg-info text-dark{% elif alert.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {% if alert.status == 'new' %}
+                                                Novo
+                                            {% elif alert.status == 'acknowledged' %}
+                                                Reconhecido
+                                            {% elif alert.status == 'in_progress' %}
+                                                Em Progresso
+                                            {% elif alert.status == 'resolved' %}
+                                                Resolvido
+                                            {% else %}
+                                                Fechado
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <h5 class="mb-3"><i class="fas fa-clock me-2 text-primary"></i> Datas</h5>
+                        <table class="table table-hover">
+                            <tbody>
+                                <tr>
+                                    <th class="bg-light" style="width: 35%">Data de Criação</th>
+                                    <td>{{ alert.created_at|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Última Atualização</th>
+                                    <td>{{ alert.updated_at|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Atribuído a</th>
+                                    <td>
+                                        {% if alert.assigned_to %}
+                                            {{ alert.assigned_to.get_full_name|default:alert.assigned_to.username }}
+                                        {% else %}
+                                            <span class="text-muted">Não atribuído</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aba de Timeline -->
+            <div class="tab-pane fade" id="timeline-tab-pane" role="tabpanel" aria-labelledby="timeline-tab" tabindex="0">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h5 class="mb-4"><i class="fas fa-history me-2 text-primary"></i> Histórico do Alerta</h5>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="card shadow-sm mb-0">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="badge bg-success me-2">Criação</span>
+                                            <span class="small text-muted">{{ alert.created_at|date:"d/m/Y H:i" }}</span>
+                                        </div>
+                                        <p class="mb-0">Alerta criado com status <span class="fw-bold">Novo</span>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if alert.status != 'new' %}
+                            <div class="timeline-item">
+                                <div class="card shadow-sm mb-0">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="badge bg-warning text-dark me-2">Atualização</span>
+                                            <span class="small text-muted">{{ alert.updated_at|date:"d/m/Y H:i" }}</span>
+                                        </div>
+                                        <p class="mb-0">Status atualizado para <span class="fw-bold">
+                                            {% if alert.status == 'acknowledged' %}
+                                                Reconhecido
+                                            {% elif alert.status == 'in_progress' %}
+                                                Em Progresso
+                                            {% elif alert.status == 'resolved' %}
+                                                Resolvido
+                                            {% else %}
+                                                Fechado
+                                            {% endif %}
+                                        </span>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if alert.assigned_to %}
+                            <div class="timeline-item">
+                                <div class="card shadow-sm mb-0">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="badge bg-info text-dark me-2">Atribuição</span>
+                                            <span class="small text-muted">{{ alert.updated_at|date:"d/m/Y H:i" }}</span>
+                                        </div>
+                                        <p class="mb-0">Alerta atribuído a <span class="fw-bold">{{ alert.assigned_to.get_full_name|default:alert.assigned_to.username }}</span>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

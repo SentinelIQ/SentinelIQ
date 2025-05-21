@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from .models import User
 from .forms import CustomUserCreationForm, CustomUserChangeForm, CustomAuthenticationForm
 from organizations.models import Organization
+from alerts.models import Alert
 
 
 def login_view(request):
@@ -55,16 +56,23 @@ def dashboard(request):
         # Super admin dashboard
         context['organizations_count'] = Organization.objects.count()
         context['users_count'] = User.objects.count()
+        context['alerts_count'] = Alert.objects.count()  # Total de alertas para superadmin
+        context['recent_organizations'] = Organization.objects.all().order_by('-created_at')[:5]  # 5 organizações mais recentes
         return render(request, 'accounts/dashboard_superadmin.html', context)
     elif request.user.is_org_admin():
         # Organization admin dashboard
         org = request.user.organization
-        context['alerts_count'] = org.alerts.count()
+        alerts = org.alerts.all()
+        context['alerts_count'] = alerts.count()
         context['users_count'] = org.users.count()
+        context['new_alerts_count'] = alerts.filter(status='new').count()
+        context['resolved_alerts_count'] = alerts.filter(status='resolved').count()
+        context['recent_alerts'] = alerts.order_by('-created_at')[:5]  # 5 alertas mais recentes
         return render(request, 'accounts/dashboard_org_admin.html', context)
     else:
         # Analyst dashboard
         context['assigned_alerts'] = request.user.assigned_alerts.all()[:5]
+        context['alerts_count'] = request.user.assigned_alerts.count()  # Total de alertas atribuídos ao analista
         return render(request, 'accounts/dashboard_analyst.html', context)
 
 
