@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}
+    {% if template.is_active %}
+        {% trans "Deactivate Template" %}
+    {% else %}
+        {% trans "Activate Template" %}
+    {% endif %} 
+    | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header {% if template.is_active %}bg-warning{% else %}bg-success{% endif %}">
+                    <h5 class="mb-0">
+                        <i class="fas {% if template.is_active %}fa-toggle-off{% else %}fa-toggle-on{% endif %} me-2"></i>
+                        {% if template.is_active %}
+                            {% trans "Deactivate Template" %}
+                        {% else %}
+                            {% trans "Activate Template" %}
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas {% if template.is_active %}fa-toggle-off fa-3x text-warning{% else %}fa-toggle-on fa-3x text-success{% endif %} mb-3"></i>
+                        <h4>
+                            {% if template.is_active %}
+                                {% trans "Deactivate this task template?" %}
+                            {% else %}
+                                {% trans "Activate this task template?" %}
+                            {% endif %}
+                        </h4>
+                        <div class="alert {% if template.is_active %}alert-warning{% else %}alert-success{% endif %}">
+                            <p class="mb-0">
+                                <strong>{{ template.title }}</strong><br>
+                                <small>{{ template.description|truncatechars:100 }}</small>
+                            </p>
+                        </div>
+                        <p class="text-muted">
+                            {% if template.is_active %}
+                                {% trans "Inactive templates will not be used for automatic task generation when escalating alerts to cases." %}
+                            {% else %}
+                                {% trans "Active templates will be used for automatic task generation when escalating alerts to cases." %}
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        {% if request.GET.next %}
+                            <input type="hidden" name="next" value="{{ request.GET.next }}">
+                        {% endif %}
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{% url 'task_template_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i> {% trans "Cancel" %}
+                            </a>
+                            <button type="submit" class="btn {% if template.is_active %}btn-warning{% else %}btn-success{% endif %}">
+                                <i class="fas {% if template.is_active %}fa-toggle-off{% else %}fa-toggle-on{% endif %} me-2"></i>
+                                {% if template.is_active %}
+                                    {% trans "Deactivate Template" %}
+                                {% else %}
+                                    {% trans "Activate Template" %}
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -51,6 +51,32 @@
                             <i class="fas fa-briefcase me-1"></i> Casos
                         </a>
                     </li>
+                    {% if user.is_superadmin or user.is_org_admin %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" 
+                           id="templatesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-clipboard-list me-1"></i> Templates
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="templatesDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'threat_category_list' %}">
+                                    <i class="fas fa-shield-alt me-2"></i> Categorias de Ameaças
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'task_template_list' %}">
+                                    <i class="fas fa-tasks me-2"></i> Templates de Tarefas
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'task_template_bulk_create' %}">
+                                    <i class="fas fa-copy me-2"></i> Criação em Massa
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link d-flex align-items-center" href="{% url 'observable_list' %}">
                             <i class="fas fa-eye me-1"></i> Observables
@@ -153,6 +179,16 @@
                         <li class="mb-2">
                             <a href="{% url 'case_list' %}" class="text-decoration-none text-white-50">
                                 <i class="fas fa-angle-right me-2"></i>Casos
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{% url 'threat_category_list' %}" class="text-decoration-none text-white-50">
+                                <i class="fas fa-angle-right me-2"></i>Categorias de Ameaças
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{% url 'task_template_list' %}" class="text-decoration-none text-white-50">
+                                <i class="fas fa-angle-right me-2"></i>Templates de Tarefas
                             </a>
                         </li>
                         <li class="mb-2">

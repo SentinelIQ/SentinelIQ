@@ -1,6 +1,6 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from .models import Case, CaseComment, CaseAttachment, CaseEvent, Task
+from .models import Case, CaseComment, CaseAttachment, CaseEvent, Task, ThreatCategory, TaskTemplate
 
 
 class CaseForm(forms.ModelForm):
@@ -174,3 +174,98 @@ class TaskForm(forms.ModelForm):
                 organization=organization,
                 is_active=True
             ) 
+
+
+class ThreatCategoryForm(forms.ModelForm):
+    """Form for creating and updating threat categories"""
+    
+    class Meta:
+        model = ThreatCategory
+        fields = ['name', 'description', 'icon_class']
+        widgets = {
+            'name': forms.Select(attrs={'class': 'form-select'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'icon_class': forms.TextInput(attrs={'class': 'form-control'})
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['name'].label = _('Category Type')
+        self.fields['icon_class'].help_text = _('Font Awesome icon class (e.g. fa-bug, fa-shield-alt)')
+
+
+class TaskTemplateForm(forms.ModelForm):
+    """Form for creating and updating task templates"""
+    
+    class Meta:
+        model = TaskTemplate
+        fields = ['title', 'description', 'priority', 'threat_category', 
+                  'is_active', 'order', 'due_days']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'priority': forms.Select(attrs={'class': 'form-select'}),
+            'threat_category': forms.Select(attrs={'class': 'form-select'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'order': forms.NumberInput(attrs={'class': 'form-control'}),
+            'due_days': forms.NumberInput(attrs={'class': 'form-control'})
+        }
+    
+    def __init__(self, *args, organization=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Filter threat categories if organization is provided
+        if organization:
+            self.fields['threat_category'].queryset = ThreatCategory.objects.all()
+            
+            # Se estamos editando, não modificar organização
+            if self.instance.pk:
+                self.instance.organization = organization
+        
+        # Add help text for fields
+        self.fields['order'].help_text = _('Order in which tasks appear (lower numbers first)')
+        self.fields['due_days'].help_text = _('Number of days after case creation to set as due date')
+        self.fields['is_active'].help_text = _('Only active templates will be used for automatic task generation')
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        
+        # If this is a new instance and organization is provided
+        if hasattr(self, 'organization') and not instance.pk:
+            instance.organization = self.organization
+            
+        if commit:
+            instance.save()
+            
+        return instance
+
+
+class TaskTemplateFilterForm(forms.Form):
+    """Form for filtering task templates"""
+    
+    ACTIVE_CHOICES = [
+        ('', _('All')),
+        ('1', _('Active')),
+        ('0', _('Inactive')),
+    ]
+    
+    threat_category = forms.ModelChoiceField(
+        queryset=ThreatCategory.objects.all(),
+        required=False,
+        empty_label=_('All Categories'),
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    is_active = forms.ChoiceField(
+        choices=ACTIVE_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    search = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Search by title or description')
+        })
+    ) 

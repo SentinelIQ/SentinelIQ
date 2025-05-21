@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        {% trans "Edit Threat Category" %} | {{ block.super }}
+    {% else %}
+        {% trans "New Threat Category" %} | {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <a href="{% url 'threat_category_list' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> {% trans "Back to Categories" %}
+                </a>
+                
+                <h1 class="h3 mt-2">
+                    {% if form.instance.pk %}
+                        <i class="fas fa-edit me-2"></i> {% trans "Edit Threat Category" %}
+                    {% else %}
+                        <i class="fas fa-plus-circle me-2"></i> {% trans "New Threat Category" %}
+                    {% endif %}
+                </h1>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.name.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.description.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.icon_class.id_for_label }}" class="form-label">{{ form.icon_class.label }}</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-icons"></i></span>
+                                {{ form.icon_class }}
+                            </div>
+                            {% if form.icon_class.help_text %}
+                                <div class="form-text small">{{ form.icon_class.help_text }}</div>
+                            {% endif %}
+                            {% if form.icon_class.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.icon_class.errors }}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="mt-2">
+                                <p class="mb-1">{% trans "Common Icons:" %}</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary icon-select" data-icon="fa-bug">
+                                        <i class="fas fa-bug me-1"></i> {% trans "Bug" %}
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary icon-select" data-icon="fa-virus">
+                                        <i class="fas fa-virus me-1"></i> {% trans "Virus" %}
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary icon-select" data-icon="fa-shield-alt">
+                                        <i class="fas fa-shield-alt me-1"></i> {% trans "Shield" %}
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary icon-select" data-icon="fa-lock">
+                                        <i class="fas fa-lock me-1"></i> {% trans "Lock" %}
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary icon-select" data-icon="fa-user-secret">
+                                        <i class="fas fa-user-secret me-1"></i> {% trans "User Secret" %}
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary icon-select" data-icon="fa-exclamation-triangle">
+                                        <i class="fas fa-exclamation-triangle me-1"></i> {% trans "Warning" %}
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary icon-select" data-icon="fa-skull-crossbones">
+                                        <i class="fas fa-skull-crossbones me-1"></i> {% trans "Skull" %}
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary icon-select" data-icon="fa-robot">
+                                        <i class="fas fa-robot me-1"></i> {% trans "Robot" %}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{% url 'threat_category_list' %}" class="btn btn-outline-secondary">
+                                {% trans "Cancel" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.pk %}
+                                    <i class="fas fa-save me-2"></i> {% trans "Update Category" %}
+                                {% else %}
+                                    <i class="fas fa-plus me-2"></i> {% trans "Create Category" %}
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Icon selector
+        const iconButtons = document.querySelectorAll('.icon-select');
+        const iconInput = document.getElementById('{{ form.icon_class.id_for_label }}');
+        
+        iconButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const icon = this.getAttribute('data-icon');
+                iconInput.value = 'fas ' + icon;
+            });
+        });
+    });
+</script>
+{% endblock %} 

@@ -11,8 +11,8 @@ from django.utils import timezone
 from datetime import date
 
 from accounts.views import OrgAdminRequiredMixin
-from .models import Case, CaseComment, CaseAttachment, CaseEvent, Task
-from .forms import CaseForm, CaseCommentForm, CaseAttachmentForm, CaseFilterForm, CaseEventForm, TaskForm
+from .models import Case, CaseComment, CaseAttachment, CaseEvent, Task, ThreatCategory, TaskTemplate
+from .forms import CaseForm, CaseCommentForm, CaseAttachmentForm, CaseFilterForm, CaseEventForm, TaskForm, ThreatCategoryForm, TaskTemplateFilterForm, TaskTemplateForm
 from core.models import Observable
 
 
@@ -498,3 +498,323 @@ def toggle_task_status(request, case_id, task_id):
         'completed_at': task.completed_at.strftime('%Y-%m-%d %H:%M') if task.completed_at else None,
         'completed_by': task.completed_by.get_full_name() if task.completed_by else None
     })
+
+
+# Views para gerenciar categorias de ameaças e templates de tarefas
+class ThreatCategoryListView(LoginRequiredMixin, OrgAdminRequiredMixin, ListView):
+    """List view for threat categories"""
+    model = ThreatCategory
+    template_name = 'cases/threat_category_list.html'
+    context_object_name = 'categories'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adicionar contagem de templates para cada categoria
+        for category in context['categories']:
+            category.template_count = TaskTemplate.objects.filter(
+                threat_category=category,
+                organization=self.request.user.organization
+            ).count()
+        return context
+
+
+class ThreatCategoryDetailView(LoginRequiredMixin, DetailView):
+    """Detail view for threat categories"""
+    model = ThreatCategory
+    template_name = 'cases/threat_category_detail.html'
+    context_object_name = 'category'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Obter templates desta categoria para a organização do usuário
+        context['templates'] = TaskTemplate.objects.filter(
+            threat_category=self.object,
+            organization=self.request.user.organization
+        ).order_by('order')
+        return context
+
+
+class ThreatCategoryCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateView):
+    """Create view for threat categories"""
+    model = ThreatCategory
+    form_class = ThreatCategoryForm
+    template_name = 'cases/threat_category_form.html'
+    success_url = reverse_lazy('threat_category_list')
+    
+    def form_valid(self, form):
+        messages.success(self.request, _('Threat category created successfully.'))
+        return super().form_valid(form)
+
+
+class ThreatCategoryUpdateView(LoginRequiredMixin, OrgAdminRequiredMixin, UpdateView):
+    """Update view for threat categories"""
+    model = ThreatCategory
+    form_class = ThreatCategoryForm
+    template_name = 'cases/threat_category_form.html'
+    
+    def get_success_url(self):
+        return reverse('threat_category_detail', kwargs={'pk': self.object.pk})
+    
+    def form_valid(self, form):
+        messages.success(self.request, _('Threat category updated successfully.'))
+        return super().form_valid(form)
+
+
+class TaskTemplateListView(LoginRequiredMixin, ListView):
+    """List view for task templates"""
+    model = TaskTemplate
+    template_name = 'cases/task_template_list.html'
+    context_object_name = 'templates'
+    paginate_by = 15
+    
+    def get_queryset(self):
+        """Filter templates by organization and filter form params"""
+        queryset = TaskTemplate.objects.filter(
+            organization=self.request.user.organization
+        )
+        
+        # Apply filters from form
+        form = TaskTemplateFilterForm(self.request.GET)
+        if form.is_valid():
+            # Filter by threat category
+            threat_category = form.cleaned_data.get('threat_category')
+            if threat_category:
+                queryset = queryset.filter(threat_category=threat_category)
+            
+            # Filter by active status
+            is_active = form.cleaned_data.get('is_active')
+            if is_active == '1':
+                queryset = queryset.filter(is_active=True)
+            elif is_active == '0':
+                queryset = queryset.filter(is_active=False)
+            
+            # Search in title and description
+            search = form.cleaned_data.get('search')
+            if search:
+                queryset = queryset.filter(
+                    Q(title__icontains=search) | Q(description__icontains=search)
+                )
+        
+        return queryset.order_by('threat_category', 'order', 'title')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter_form'] = TaskTemplateFilterForm(self.request.GET)
+        return context
+
+
+class TaskTemplateCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateView):
+    """Create view for task templates"""
+    model = TaskTemplate
+    form_class = TaskTemplateForm
+    template_name = 'cases/task_template_form.html'
+    success_url = reverse_lazy('task_template_list')
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['organization'] = self.request.user.organization
+        return kwargs
+    
+    def form_valid(self, form):
+        form.instance.organization = self.request.user.organization
+        messages.success(self.request, _('Task template created successfully.'))
+        return super().form_valid(form)
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        # Pré-selecionar categoria de ameaça se fornecida na URL
+        category_id = self.request.GET.get('category')
+        if category_id:
+            try:
+                initial['threat_category'] = ThreatCategory.objects.get(pk=category_id)
+            except ThreatCategory.DoesNotExist:
+                pass
+        return initial
+
+
+class TaskTemplateUpdateView(LoginRequiredMixin, OrgAdminRequiredMixin, UpdateView):
+    """Update view for task templates"""
+    model = TaskTemplate
+    form_class = TaskTemplateForm
+    template_name = 'cases/task_template_form.html'
+    
+    def get_queryset(self):
+        """Ensure users can only update templates from their organization"""
+        return TaskTemplate.objects.filter(organization=self.request.user.organization)
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['organization'] = self.request.user.organization
+        return kwargs
+    
+    def get_success_url(self):
+        if 'category' in self.request.GET:
+            # Voltar para a página de detalhes da categoria
+            return reverse('threat_category_detail', kwargs={'pk': self.request.GET.get('category')})
+        return reverse('task_template_list')
+    
+    def form_valid(self, form):
+        messages.success(self.request, _('Task template updated successfully.'))
+        return super().form_valid(form)
+
+
+class TaskTemplateDeleteView(LoginRequiredMixin, OrgAdminRequiredMixin, DeleteView):
+    """Delete view for task templates"""
+    model = TaskTemplate
+    template_name = 'cases/task_template_confirm_delete.html'
+    success_url = reverse_lazy('task_template_list')
+    
+    def get_queryset(self):
+        """Ensure users can only delete templates from their organization"""
+        return TaskTemplate.objects.filter(organization=self.request.user.organization)
+    
+    def delete(self, request, *args, **kwargs):
+        template = self.get_object()
+        messages.success(request, _(f'Task template "{template.title}" was deleted successfully.'))
+        return super().delete(request, *args, **kwargs)
+    
+    def get_success_url(self):
+        if 'category' in self.request.GET:
+            # Voltar para a página de detalhes da categoria
+            return reverse('threat_category_detail', kwargs={'pk': self.request.GET.get('category')})
+        return reverse('task_template_list')
+
+
+@login_required
+def clone_task_template(request, pk):
+    """Clone a task template"""
+    template = get_object_or_404(TaskTemplate, pk=pk, organization=request.user.organization)
+    
+    if request.method == 'POST':
+        # Criar uma cópia do template
+        new_template = TaskTemplate.objects.create(
+            title=f"{template.title} (Clone)",
+            description=template.description,
+            priority=template.priority,
+            threat_category=template.threat_category,
+            organization=request.user.organization,
+            is_active=template.is_active,
+            order=template.order,
+            due_days=template.due_days
+        )
+        
+        messages.success(request, _('Task template cloned successfully.'))
+        return redirect('task_template_update', pk=new_template.pk)
+    
+    return render(request, 'cases/task_template_clone.html', {'template': template})
+
+
+@login_required
+def bulk_create_templates(request):
+    """Bulk create task templates from predefined options"""
+    if request.method == 'POST':
+        # Obter a categoria selecionada
+        category_id = request.POST.get('category')
+        template_type = request.POST.get('template_type')
+        
+        try:
+            category = ThreatCategory.objects.get(pk=category_id)
+            
+            templates_created = 0
+            
+            # Criar templates baseados no tipo selecionado
+            if template_type == 'phishing':
+                templates = [
+                    {
+                        'title': 'Verificar domínio de origem',
+                        'description': 'Verificar se o domínio do e-mail de phishing é legítimo ou se trata-se de um domínio malicioso/falsificado.',
+                        'priority': TaskTemplate.HIGH,
+                        'order': 1,
+                        'due_days': 1
+                    },
+                    {
+                        'title': 'Verificar anexos/URLs',
+                        'description': 'Analisar anexos ou URLs contidos no e-mail de phishing para identificação de malware ou páginas fraudulentas.',
+                        'priority': TaskTemplate.HIGH,
+                        'order': 2,
+                        'due_days': 1
+                    },
+                    {
+                        'title': 'Identificar usuários impactados',
+                        'description': 'Levantar lista de usuários que receberam o e-mail e verificar se algum interagiu com o conteúdo malicioso.',
+                        'priority': TaskTemplate.MEDIUM,
+                        'order': 3,
+                        'due_days': 2
+                    }
+                ]
+            elif template_type == 'malware':
+                templates = [
+                    {
+                        'title': 'Identificar malware',
+                        'description': 'Identificar o tipo e família do malware através de análise de assinaturas e comportamentos.',
+                        'priority': TaskTemplate.HIGH,
+                        'order': 1,
+                        'due_days': 1
+                    },
+                    {
+                        'title': 'Isolar sistemas afetados',
+                        'description': 'Isolar os sistemas afetados da rede para evitar propagação do malware.',
+                        'priority': TaskTemplate.HIGH,
+                        'order': 2,
+                        'due_days': 1
+                    },
+                    {
+                        'title': 'Investigar vetor de infecção',
+                        'description': 'Determinar como o malware entrou no ambiente (e-mail, download, mídia removível, exploração de vulnerabilidade, etc.).',
+                        'priority': TaskTemplate.MEDIUM,
+                        'order': 3,
+                        'due_days': 2
+                    }
+                ]
+            else:
+                templates = []
+            
+            # Criar os templates
+            for template_data in templates:
+                template = TaskTemplate.objects.create(
+                    title=template_data['title'],
+                    description=template_data['description'],
+                    priority=template_data['priority'],
+                    threat_category=category,
+                    organization=request.user.organization,
+                    order=template_data['order'],
+                    due_days=template_data['due_days'],
+                    is_active=True
+                )
+                templates_created += 1
+            
+            if templates_created > 0:
+                messages.success(request, _(f'Created {templates_created} task templates for {category}.'))
+            else:
+                messages.warning(request, _('No templates were created. Template type not supported.'))
+            
+            return redirect('threat_category_detail', pk=category.pk)
+        
+        except ThreatCategory.DoesNotExist:
+            messages.error(request, _('The selected threat category does not exist.'))
+    
+    # Obter todas as categorias de ameaça
+    categories = ThreatCategory.objects.all()
+    
+    return render(request, 'cases/task_template_bulk_create.html', {
+        'categories': categories
+    })
+
+
+@login_required
+def toggle_template_status(request, pk):
+    """Toggle active status of a task template"""
+    template = get_object_or_404(TaskTemplate, pk=pk, organization=request.user.organization)
+    
+    if request.method == 'POST':
+        template.is_active = not template.is_active
+        template.save()
+        
+        status_text = _('activated') if template.is_active else _('deactivated')
+        messages.success(request, _(f'Task template "{template.title}" {status_text} successfully.'))
+        
+        # Redirect to the previous page
+        next_url = request.POST.get('next', reverse('task_template_list'))
+        return redirect(next_url)
+    
+    return render(request, 'cases/task_template_toggle_status.html', {'template': template})

@@ -11,7 +11,7 @@ class Command(BaseCommand):
         parser.add_argument('--url', type=str, default='https://github.com/mitre-attack/attack-stix-data/raw/refs/heads/master/enterprise-attack/enterprise-attack.json',
                             help='URL to the MITRE ATT&CK STIX data JSON file')
         parser.add_argument('--preserve', action='store_true', help='Preserve existing data (default is to delete all before import)')
-    
+
     def handle(self, *args, **options):
         url = options['url']
         preserve = options['preserve']
@@ -141,7 +141,7 @@ class Command(BaseCommand):
                 url=url or f'https://attack.mitre.org/tactics/{tactic_id}/'
             )
             
-            self.stdout.write(self.style.SUCCESS(f'Created tactic: {tactic_id} - {name}'))
+                self.stdout.write(self.style.SUCCESS(f'Created tactic: {tactic_id} - {name}'))
             return tactic
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'Error creating tactic {tactic_id}: {str(e)}'))

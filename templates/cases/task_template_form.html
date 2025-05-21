@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        {% trans "Edit Task Template" %} | {{ block.super }}
+    {% else %}
+        {% trans "New Task Template" %} | {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                {% if request.GET.category %}
+                    <a href="{% url 'threat_category_detail' request.GET.category %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> {% trans "Back to Category" %}
+                    </a>
+                {% else %}
+                    <a href="{% url 'task_template_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> {% trans "Back to Templates" %}
+                    </a>
+                {% endif %}
+                
+                <h1 class="h3 mt-2">
+                    {% if form.instance.pk %}
+                        <i class="fas fa-edit me-2"></i> {% trans "Edit Task Template" %}
+                    {% else %}
+                        <i class="fas fa-plus-circle me-2"></i> {% trans "New Task Template" %}
+                    {% endif %}
+                </h1>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.title.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.description.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.threat_category.id_for_label }}" class="form-label">{{ form.threat_category.label }}</label>
+                                {{ form.threat_category }}
+                                {% if form.threat_category.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.threat_category.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.priority.id_for_label }}" class="form-label">{{ form.priority.label }}</label>
+                                {{ form.priority }}
+                                {% if form.priority.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.priority.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.order.id_for_label }}" class="form-label">{{ form.order.label }}</label>
+                                {{ form.order }}
+                                {% if form.order.help_text %}
+                                    <div class="form-text small">{{ form.order.help_text }}</div>
+                                {% endif %}
+                                {% if form.order.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.order.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.due_days.id_for_label }}" class="form-label">{{ form.due_days.label }}</label>
+                                {{ form.due_days }}
+                                {% if form.due_days.help_text %}
+                                    <div class="form-text small">{{ form.due_days.help_text }}</div>
+                                {% endif %}
+                                {% if form.due_days.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.due_days.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    {{ form.is_active.label }}
+                                </label>
+                            </div>
+                            {% if form.is_active.help_text %}
+                                <div class="form-text small">{{ form.is_active.help_text }}</div>
+                            {% endif %}
+                            {% if form.is_active.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.is_active.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            {% if request.GET.category %}
+                                <a href="{% url 'threat_category_detail' request.GET.category %}" class="btn btn-outline-secondary">
+                                    {% trans "Cancel" %}
+                                </a>
+                            {% else %}
+                                <a href="{% url 'task_template_list' %}" class="btn btn-outline-secondary">
+                                    {% trans "Cancel" %}
+                                </a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.pk %}
+                                    <i class="fas fa-save me-2"></i> {% trans "Update Template" %}
+                                {% else %}
+                                    <i class="fas fa-plus me-2"></i> {% trans "Create Template" %}
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

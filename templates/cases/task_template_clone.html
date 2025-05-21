@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Clone Task Template" %} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-copy me-2"></i> {% trans "Clone Task Template" %}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-copy fa-3x text-primary mb-3"></i>
+                        <h4>{% trans "Clone this task template?" %}</h4>
+                        <div class="alert alert-info">
+                            <p class="mb-0">
+                                <strong>{{ template.title }}</strong><br>
+                                <small>{{ template.description|truncatechars:100 }}</small>
+                            </p>
+                        </div>
+                        <p class="text-muted">{% trans "A copy of this template will be created with '(Clone)' appended to the title." %}</p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{% url 'threat_category_detail' template.threat_category.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i> {% trans "Cancel" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-copy me-2"></i> {% trans "Clone Template" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
