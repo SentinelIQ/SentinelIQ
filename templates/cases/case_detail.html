@@ -235,30 +235,58 @@
                     </div>
                 </div>
 
-                <div class="row mt-3">
+                <!-- Tags do caso -->
+                <div class="row mb-4">
                     <div class="col-12">
                         <p class="text-muted mb-1"><i class="fas fa-tags me-1"></i> Tags</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                {% if case.tags.all %}
-                                    {% for tag in case.tags.all %}
-                                        <span class="badge bg-{{ tag.color }} me-1">{{ tag.name }}</span>
+                        <div>
+                            {% for tag in case.tags.all %}
+                                <span class="badge bg-{{ tag.color }} mb-1">{{ tag.name }}</span>
+                            {% empty %}
+                                <span class="text-muted">Nenhuma tag adicionada</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- MITRE ATT&CK -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <p class="text-muted mb-0"><i class="fas fa-shield-virus me-1"></i> MITRE ATT&CK</p>
+                            <a href="{% url 'add_case_mitre_attack' case.id %}" class="btn btn-sm btn-light">
+                                <i class="fas fa-plus"></i> Adicionar
+                            </a>
+                        </div>
+                        <div class="mt-2">
+                            {% if case.mitre_tactics.exists or case.mitre_techniques.exists or case.mitre_subtechniques.exists %}
+                                <div class="mb-2">
+                                    <strong class="text-primary">Táticas:</strong>
+                                    {% for tactic in case.mitre_tactics.all %}
+                                        <span class="badge bg-primary mb-1 me-1">{{ tactic.tactic_id }}: {{ tactic.name }}</span>
+                                    {% empty %}
+                                        <span class="text-muted">Nenhuma tática</span>
                                     {% endfor %}
-                                {% else %}
-                                    <span class="text-muted">Nenhuma tag associada a este caso</span>
-                                {% endif %}
-                            </div>
-                            <div class="ms-2">
-                                <a href="{% url 'case_update' case.id %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-edit me-1"></i> Editar Tags
-                                </a>
-                                <a href="{% url 'tag_create' %}?case_id={{ case.id }}" class="btn btn-sm btn-outline-success" title="Criar Tag associada a este caso">
-                                    <i class="fas fa-plus-circle"></i> Nova Tag
-                                </a>
-                                <a href="{% url 'tag_list' %}" class="btn btn-sm btn-outline-info" title="Gerenciar Tags">
-                                    <i class="fas fa-tags"></i>
-                                </a>
-                            </div>
+                                </div>
+                                <div class="mb-2">
+                                    <strong class="text-success">Técnicas:</strong>
+                                    {% for technique in case.mitre_techniques.all %}
+                                        <span class="badge bg-success mb-1 me-1">{{ technique.technique_id }}: {{ technique.name }}</span>
+                                    {% empty %}
+                                        <span class="text-muted">Nenhuma técnica</span>
+                                    {% endfor %}
+                                </div>
+                                <div>
+                                    <strong class="text-info">Sub-técnicas:</strong>
+                                    {% for subtechnique in case.mitre_subtechniques.all %}
+                                        <span class="badge bg-info text-dark mb-1 me-1">{{ subtechnique.sub_technique_id }}: {{ subtechnique.name }}</span>
+                                    {% empty %}
+                                        <span class="text-muted">Nenhuma sub-técnica</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <span class="text-muted">Nenhum elemento MITRE ATT&CK adicionado</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

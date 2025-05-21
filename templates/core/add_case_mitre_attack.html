@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Add MITRE ATT&CK to Case" %}{% endblock %}
+
+{% block content %}
+<div class="container p-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3">{% trans "Add MITRE ATT&CK to Case" %}: {{ case.title }}</h1>
+                <a href="{% url 'case_detail' case.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> {% trans "Back to Case" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{% trans "Select MITRE ATT&CK Elements" %}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.tactic.id_for_label }}" class="form-label">{% trans "Tactic" %}</label>
+                            {{ form.tactic }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.technique.id_for_label }}" class="form-label">{% trans "Technique" %}</label>
+                            {{ form.technique }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.subtechnique.id_for_label }}" class="form-label">{% trans "Sub-technique" %}</label>
+                            {{ form.subtechnique }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> {% trans "Add to Case" %}
+                        </button>
+                        <a href="{% url 'mitre_attack_list' %}" class="btn btn-secondary" target="_blank">
+                            <i class="fas fa-search"></i> {% trans "Browse MITRE ATT&CK" %}
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">{% trans "Current MITRE ATT&CK Elements" %}</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Tactics -->
+                    <h6>{% trans "Tactics" %}</h6>
+                    <div class="list-group mb-3">
+                        {% for tactic in existing_tactics %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ tactic.tactic_id }}</strong> - {{ tactic.name }}
+                            </div>
+                            <form method="post" action="{% url 'remove_case_mitre_attack' case.id 'tactic' tactic.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item">
+                            <p class="mb-0 text-muted">{% trans "No tactics added yet." %}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Techniques -->
+                    <h6>{% trans "Techniques" %}</h6>
+                    <div class="list-group mb-3">
+                        {% for technique in existing_techniques %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ technique.technique_id }}</strong> - {{ technique.name }}
+                            </div>
+                            <form method="post" action="{% url 'remove_case_mitre_attack' case.id 'technique' technique.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item">
+                            <p class="mb-0 text-muted">{% trans "No techniques added yet." %}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Sub-techniques -->
+                    <h6>{% trans "Sub-techniques" %}</h6>
+                    <div class="list-group">
+                        {% for subtechnique in existing_subtechniques %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ subtechnique.sub_technique_id }}</strong> - {{ subtechnique.name }}
+                            </div>
+                            <form method="post" action="{% url 'remove_case_mitre_attack' case.id 'subtechnique' subtechnique.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item">
+                            <p class="mb-0 text-muted">{% trans "No sub-techniques added yet." %}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tacticSelect = document.getElementById('{{ form.tactic.id_for_label }}');
+        const techniqueSelect = document.getElementById('{{ form.technique.id_for_label }}');
+        const subtechniqueSelect = document.getElementById('{{ form.subtechnique.id_for_label }}');
+
+        // When tactic selection changes, update techniques
+        tacticSelect.addEventListener('change', function() {
+            const tacticId = this.value;
+            
+            // Reset technique and subtechnique selects
+            techniqueSelect.innerHTML = '<option value="">{% trans "Select a Technique" %}</option>';
+            subtechniqueSelect.innerHTML = '<option value="">{% trans "Select a Sub-technique (optional)" %}</option>';
+            
+            if (tacticId) {
+                // Fetch techniques for this tactic
+                fetch(`/api/tactics/${tacticId}/techniques/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(technique => {
+                            const option = document.createElement('option');
+                            option.value = technique.id;
+                            option.textContent = `${technique.technique_id}: ${technique.name}`;
+                            techniqueSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+
+        // When technique selection changes, update sub-techniques
+        techniqueSelect.addEventListener('change', function() {
+            const techniqueId = this.value;
+            
+            // Reset subtechnique select
+            subtechniqueSelect.innerHTML = '<option value="">{% trans "Select a Sub-technique (optional)" %}</option>';
+            
+            if (techniqueId) {
+                // Fetch sub-techniques for this technique
+                fetch(`/api/techniques/${techniqueId}/subtechniques/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(subtechnique => {
+                            const option = document.createElement('option');
+                            option.value = subtechnique.id;
+                            option.textContent = `${subtechnique.sub_technique_id}: ${subtechnique.name}`;
+                            subtechniqueSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

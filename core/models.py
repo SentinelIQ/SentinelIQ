@@ -141,3 +141,57 @@ class Observable(models.Model):
         verbose_name = _('Observable')
         verbose_name_plural = _('Observables')
         ordering = ['-updated_at']
+
+
+class MitreTactic(models.Model):
+    """MITRE ATT&CK Tactics (TA)"""
+    tactic_id = models.CharField(_('Tactic ID'), max_length=50, unique=True)
+    name = models.CharField(_('Name'), max_length=100)
+    description = models.TextField(_('Description'), blank=True)
+    url = models.URLField(_('URL'), blank=True)
+    
+    def __str__(self):
+        return f"{self.tactic_id}: {self.name}"
+    
+    class Meta:
+        verbose_name = _('MITRE Tactic')
+        verbose_name_plural = _('MITRE Tactics')
+        ordering = ['tactic_id']
+
+
+class MitreTechnique(models.Model):
+    """MITRE ATT&CK Techniques (T)"""
+    technique_id = models.CharField(_('Technique ID'), max_length=50, unique=True)
+    name = models.CharField(_('Name'), max_length=100)
+    description = models.TextField(_('Description'), blank=True)
+    url = models.URLField(_('URL'), blank=True)
+    tactics = models.ManyToManyField(MitreTactic, related_name='techniques')
+    
+    def __str__(self):
+        return f"{self.technique_id}: {self.name}"
+    
+    class Meta:
+        verbose_name = _('MITRE Technique')
+        verbose_name_plural = _('MITRE Techniques')
+        ordering = ['technique_id']
+
+
+class MitreSubTechnique(models.Model):
+    """MITRE ATT&CK Sub-techniques (T.XXX)"""
+    sub_technique_id = models.CharField(_('Sub-technique ID'), max_length=50, unique=True)
+    name = models.CharField(_('Name'), max_length=100)
+    description = models.TextField(_('Description'), blank=True)
+    url = models.URLField(_('URL'), blank=True)
+    parent_technique = models.ForeignKey(
+        MitreTechnique,
+        on_delete=models.CASCADE,
+        related_name='subtechniques'
+    )
+    
+    def __str__(self):
+        return f"{self.sub_technique_id}: {self.name}"
+    
+    class Meta:
+        verbose_name = _('MITRE Sub-technique')
+        verbose_name_plural = _('MITRE Sub-techniques')
+        ordering = ['sub_technique_id']

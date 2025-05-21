@@ -115,6 +115,25 @@ class Case(models.Model):
         related_name='cases',
         blank=True,
     )
+    # MITRE ATT&CK relations
+    mitre_tactics = models.ManyToManyField(
+        'core.MitreTactic',
+        verbose_name=_('MITRE Tactics'),
+        related_name='cases',
+        blank=True,
+    )
+    mitre_techniques = models.ManyToManyField(
+        'core.MitreTechnique',
+        verbose_name=_('MITRE Techniques'),
+        related_name='cases',
+        blank=True,
+    )
+    mitre_subtechniques = models.ManyToManyField(
+        'core.MitreSubTechnique',
+        verbose_name=_('MITRE Sub-techniques'),
+        related_name='cases',
+        blank=True,
+    )
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
     
@@ -279,8 +298,7 @@ class Case(models.Model):
         """Log when an observable is removed from the case"""
         return self.add_timeline_event(
             event_type=CaseEvent.OBSERVABLE_REMOVED,
-            title=_('Observable removed'),
-            description=f"{observable.get_type_display()}: {observable.value}",
+            title=_('Observable removed: {observable}').format(observable=observable),
             user=user,
             metadata={'observable_id': observable.id}
         )
@@ -332,6 +350,38 @@ class Case(models.Model):
             description=task.title,
             user=user,
             metadata={'task_id': task.id}
+        )
+    
+    def log_mitre_attack_added(self, user, item_type, item):
+        """Log a MITRE ATT&CK element added event"""
+        return self.add_timeline_event(
+            event_type=CaseEvent.MITRE_ATTACK_ADDED,
+            title=_('MITRE ATT&CK {type} added: {item}').format(
+                type=item_type.capitalize(), 
+                item=str(item)
+            ),
+            user=user,
+            metadata={
+                'mitre_type': item_type,
+                'mitre_id': item.pk,
+                'mitre_name': item.name
+            }
+        )
+    
+    def log_mitre_attack_removed(self, user, item_type, item):
+        """Log a MITRE ATT&CK element removed event"""
+        return self.add_timeline_event(
+            event_type=CaseEvent.MITRE_ATTACK_REMOVED,
+            title=_('MITRE ATT&CK {type} removed: {item}').format(
+                type=item_type.capitalize(), 
+                item=str(item)
+            ),
+            user=user,
+            metadata={
+                'mitre_type': item_type,
+                'mitre_id': item.pk,
+                'mitre_name': item.name
+            }
         )
     
     class Meta:
@@ -428,6 +478,8 @@ class CaseEvent(models.Model):
     TASK_ADDED = 'task_added'
     TASK_UPDATED = 'task_updated'
     TASK_COMPLETED = 'task_completed'
+    MITRE_ATTACK_ADDED = 'mitre_attack_added'
+    MITRE_ATTACK_REMOVED = 'mitre_attack_removed'
     CUSTOM = 'custom'
     
     EVENT_TYPE_CHOICES = [
@@ -448,6 +500,8 @@ class CaseEvent(models.Model):
         (TASK_ADDED, _('Task Added')),
         (TASK_UPDATED, _('Task Updated')),
         (TASK_COMPLETED, _('Task Completed')),
+        (MITRE_ATTACK_ADDED, _('MITRE ATT&CK Added')),
+        (MITRE_ATTACK_REMOVED, _('MITRE ATT&CK Removed')),
         (CUSTOM, _('Custom Event')),
     ]
     
@@ -498,6 +552,8 @@ class CaseEvent(models.Model):
             self.TASK_ADDED: 'fa-tasks text-success',
             self.TASK_UPDATED: 'fa-edit text-info',
             self.TASK_COMPLETED: 'fa-check-circle text-success',
+            self.MITRE_ATTACK_ADDED: 'fa-star text-warning',
+            self.MITRE_ATTACK_REMOVED: 'fa-star text-danger',
             self.CUSTOM: 'fa-star text-warning',
         }
         return icon_map.get(self.event_type, 'fa-circle')

@@ -10,8 +10,8 @@ from django.http import JsonResponse
 from django.db import IntegrityError
 
 from accounts.views import OrgAdminRequiredMixin
-from .models import Tag, Observable
-from .forms import TagForm, ObservableForm, ObservableFilterForm
+from .models import Tag, Observable, MitreTactic, MitreTechnique, MitreSubTechnique
+from .forms import TagForm, ObservableForm, ObservableFilterForm, MitreAttackSelectionForm
 from alerts.models import Alert
 from cases.models import Case
 
@@ -602,3 +602,303 @@ def remove_case_observable(request, case_id, observable_id):
             messages.error(request, 'Este observable não está associado ao caso.')
     
     return redirect('case_detail', case_id)
+
+
+@login_required
+def mitre_attack_list(request):
+    """List all MITRE ATT&CK elements"""
+    tactics = MitreTactic.objects.all().order_by('tactic_id')
+    
+    # Get any selected tactic for filtering
+    selected_tactic_id = request.GET.get('tactic')
+    selected_tactic = None
+    
+    if selected_tactic_id:
+        try:
+            selected_tactic = MitreTactic.objects.get(pk=selected_tactic_id)
+            techniques = MitreTechnique.objects.filter(tactics=selected_tactic).order_by('technique_id')
+        except MitreTactic.DoesNotExist:
+            techniques = MitreTechnique.objects.all().order_by('technique_id')
+    else:
+        techniques = MitreTechnique.objects.all().order_by('technique_id')
+    
+    # Get any selected technique for filtering
+    selected_technique_id = request.GET.get('technique')
+    selected_technique = None
+    
+    if selected_technique_id:
+        try:
+            selected_technique = MitreTechnique.objects.get(pk=selected_technique_id)
+            subtechniques = MitreSubTechnique.objects.filter(parent_technique=selected_technique).order_by('sub_technique_id')
+        except MitreTechnique.DoesNotExist:
+            subtechniques = MitreSubTechnique.objects.all().order_by('sub_technique_id')
+    else:
+        subtechniques = MitreSubTechnique.objects.all().order_by('sub_technique_id')
+    
+    context = {
+        'tactics': tactics,
+        'techniques': techniques,
+        'subtechniques': subtechniques,
+        'selected_tactic': selected_tactic,
+        'selected_technique': selected_technique
+    }
+    
+    return render(request, 'core/mitre_attack_list.html', context)
+
+
+@login_required
+def add_case_mitre_attack(request, case_id):
+    """Add MITRE ATT&CK elements to a case"""
+    case = get_object_or_404(Case, pk=case_id)
+    
+    # Check if user has permission to modify this case
+    if case.organization != request.user.organization:
+        messages.error(request, 'Você não tem permissão para modificar este caso.')
+        return redirect('case_list')
+    
+    if request.method == 'POST':
+        form = MitreAttackSelectionForm(request.POST)
+        
+        if form.is_valid():
+            tactic = form.cleaned_data.get('tactic')
+            technique = form.cleaned_data.get('technique')
+            subtechnique = form.cleaned_data.get('subtechnique')
+            
+            if tactic:
+                case.mitre_tactics.add(tactic)
+                case.log_mitre_attack_added(request.user, 'tactic', tactic)
+                messages.success(request, f'Tática MITRE ATT&CK adicionada ao caso: {tactic}')
+            
+            if technique:
+                case.mitre_techniques.add(technique)
+                case.log_mitre_attack_added(request.user, 'technique', technique)
+                messages.success(request, f'Técnica MITRE ATT&CK adicionada ao caso: {technique}')
+            
+            if subtechnique:
+                case.mitre_subtechniques.add(subtechnique)
+                case.log_mitre_attack_added(request.user, 'subtechnique', subtechnique)
+                messages.success(request, f'Sub-técnica MITRE ATT&CK adicionada ao caso: {subtechnique}')
+            
+            if not any([tactic, technique, subtechnique]):
+                messages.warning(request, 'Nenhum elemento MITRE ATT&CK selecionado.')
+            
+            return redirect('case_detail', case_id)
+    else:
+        # GET request: show form to add MITRE ATT&CK elements
+        tactic_id = request.GET.get('tactic')
+        technique_id = request.GET.get('technique')
+        
+        initial = {}
+        if tactic_id:
+            try:
+                initial['tactic'] = MitreTactic.objects.get(pk=tactic_id)
+            except MitreTactic.DoesNotExist:
+                pass
+        
+        if technique_id:
+            try:
+                initial['technique'] = MitreTechnique.objects.get(pk=technique_id)
+            except MitreTechnique.DoesNotExist:
+                pass
+        
+        form = MitreAttackSelectionForm(initial=initial)
+    
+    context = {
+        'case': case,
+        'form': form,
+        'existing_tactics': case.mitre_tactics.all(),
+        'existing_techniques': case.mitre_techniques.all(),
+        'existing_subtechniques': case.mitre_subtechniques.all(),
+    }
+    
+    return render(request, 'core/add_case_mitre_attack.html', context)
+
+
+@login_required
+def remove_case_mitre_attack(request, case_id, item_type, item_id):
+    """Remove MITRE ATT&CK elements from a case"""
+    case = get_object_or_404(Case, pk=case_id)
+    
+    # Check if user has permission to modify this case
+    if case.organization != request.user.organization:
+        messages.error(request, 'Você não tem permissão para modificar este caso.')
+        return redirect('case_list')
+    
+    if request.method == 'POST':
+        if item_type == 'tactic':
+            try:
+                item = MitreTactic.objects.get(pk=item_id)
+                case.mitre_tactics.remove(item)
+                case.log_mitre_attack_removed(request.user, 'tactic', item)
+                messages.success(request, f'Tática MITRE ATT&CK removida do caso: {item}')
+            except MitreTactic.DoesNotExist:
+                messages.error(request, 'Tática MITRE ATT&CK não encontrada.')
+        
+        elif item_type == 'technique':
+            try:
+                item = MitreTechnique.objects.get(pk=item_id)
+                case.mitre_techniques.remove(item)
+                case.log_mitre_attack_removed(request.user, 'technique', item)
+                messages.success(request, f'Técnica MITRE ATT&CK removida do caso: {item}')
+            except MitreTechnique.DoesNotExist:
+                messages.error(request, 'Técnica MITRE ATT&CK não encontrada.')
+        
+        elif item_type == 'subtechnique':
+            try:
+                item = MitreSubTechnique.objects.get(pk=item_id)
+                case.mitre_subtechniques.remove(item)
+                case.log_mitre_attack_removed(request.user, 'subtechnique', item)
+                messages.success(request, f'Sub-técnica MITRE ATT&CK removida do caso: {item}')
+            except MitreSubTechnique.DoesNotExist:
+                messages.error(request, 'Sub-técnica MITRE ATT&CK não encontrada.')
+        
+        else:
+            messages.error(request, 'Tipo de item MITRE ATT&CK inválido.')
+    
+    return redirect('case_detail', case_id)
+
+
+@login_required
+def add_alert_mitre_attack(request, alert_id):
+    """Add MITRE ATT&CK elements to an alert"""
+    alert = get_object_or_404(Alert, pk=alert_id)
+    
+    # Check if user has permission to modify this alert
+    if alert.organization != request.user.organization:
+        messages.error(request, 'Você não tem permissão para modificar este alerta.')
+        return redirect('alert_list')
+    
+    if request.method == 'POST':
+        form = MitreAttackSelectionForm(request.POST)
+        
+        if form.is_valid():
+            tactic = form.cleaned_data.get('tactic')
+            technique = form.cleaned_data.get('technique')
+            subtechnique = form.cleaned_data.get('subtechnique')
+            
+            if tactic:
+                alert.mitre_tactics.add(tactic)
+                alert.log_mitre_attack_added(request.user, 'tactic', tactic)
+                messages.success(request, f'Tática MITRE ATT&CK adicionada ao alerta: {tactic}')
+            
+            if technique:
+                alert.mitre_techniques.add(technique)
+                alert.log_mitre_attack_added(request.user, 'technique', technique)
+                messages.success(request, f'Técnica MITRE ATT&CK adicionada ao alerta: {technique}')
+            
+            if subtechnique:
+                alert.mitre_subtechniques.add(subtechnique)
+                alert.log_mitre_attack_added(request.user, 'subtechnique', subtechnique)
+                messages.success(request, f'Sub-técnica MITRE ATT&CK adicionada ao alerta: {subtechnique}')
+            
+            if not any([tactic, technique, subtechnique]):
+                messages.warning(request, 'Nenhum elemento MITRE ATT&CK selecionado.')
+            
+            return redirect('alert_detail', alert_id)
+    else:
+        # GET request: show form to add MITRE ATT&CK elements
+        tactic_id = request.GET.get('tactic')
+        technique_id = request.GET.get('technique')
+        
+        initial = {}
+        if tactic_id:
+            try:
+                initial['tactic'] = MitreTactic.objects.get(pk=tactic_id)
+            except MitreTactic.DoesNotExist:
+                pass
+        
+        if technique_id:
+            try:
+                initial['technique'] = MitreTechnique.objects.get(pk=technique_id)
+            except MitreTechnique.DoesNotExist:
+                pass
+        
+        form = MitreAttackSelectionForm(initial=initial)
+    
+    context = {
+        'alert': alert,
+        'form': form,
+        'existing_tactics': alert.mitre_tactics.all(),
+        'existing_techniques': alert.mitre_techniques.all(),
+        'existing_subtechniques': alert.mitre_subtechniques.all(),
+    }
+    
+    return render(request, 'core/add_alert_mitre_attack.html', context)
+
+
+@login_required
+def remove_alert_mitre_attack(request, alert_id, item_type, item_id):
+    """Remove MITRE ATT&CK elements from an alert"""
+    alert = get_object_or_404(Alert, pk=alert_id)
+    
+    # Check if user has permission to modify this alert
+    if alert.organization != request.user.organization:
+        messages.error(request, 'Você não tem permissão para modificar este alerta.')
+        return redirect('alert_list')
+    
+    if request.method == 'POST':
+        if item_type == 'tactic':
+            try:
+                item = MitreTactic.objects.get(pk=item_id)
+                alert.mitre_tactics.remove(item)
+                alert.log_mitre_attack_removed(request.user, 'tactic', item)
+                messages.success(request, f'Tática MITRE ATT&CK removida do alerta: {item}')
+            except MitreTactic.DoesNotExist:
+                messages.error(request, 'Tática MITRE ATT&CK não encontrada.')
+        
+        elif item_type == 'technique':
+            try:
+                item = MitreTechnique.objects.get(pk=item_id)
+                alert.mitre_techniques.remove(item)
+                alert.log_mitre_attack_removed(request.user, 'technique', item)
+                messages.success(request, f'Técnica MITRE ATT&CK removida do alerta: {item}')
+            except MitreTechnique.DoesNotExist:
+                messages.error(request, 'Técnica MITRE ATT&CK não encontrada.')
+        
+        elif item_type == 'subtechnique':
+            try:
+                item = MitreSubTechnique.objects.get(pk=item_id)
+                alert.mitre_subtechniques.remove(item)
+                alert.log_mitre_attack_removed(request.user, 'subtechnique', item)
+                messages.success(request, f'Sub-técnica MITRE ATT&CK removida do alerta: {item}')
+            except MitreSubTechnique.DoesNotExist:
+                messages.error(request, 'Sub-técnica MITRE ATT&CK não encontrada.')
+        
+        else:
+            messages.error(request, 'Tipo de item MITRE ATT&CK inválido.')
+    
+    return redirect('alert_detail', alert_id)
+
+
+@login_required
+def api_get_techniques_by_tactic(request, tactic_id):
+    """API endpoint to get techniques for a specific tactic"""
+    tactic = get_object_or_404(MitreTactic, pk=tactic_id)
+    techniques = MitreTechnique.objects.filter(tactics=tactic).order_by('technique_id')
+    
+    data = []
+    for technique in techniques:
+        data.append({
+            'id': technique.id,
+            'technique_id': technique.technique_id,
+            'name': technique.name,
+        })
+    
+    return JsonResponse(data, safe=False)
+
+
+@login_required
+def api_get_subtechniques_by_technique(request, technique_id):
+    """API endpoint to get sub-techniques for a specific technique"""
+    technique = get_object_or_404(MitreTechnique, pk=technique_id)
+    subtechniques = MitreSubTechnique.objects.filter(parent_technique=technique).order_by('sub_technique_id')
+    
+    data = []
+    for subtechnique in subtechniques:
+        data.append({
+            'id': subtechnique.id,
+            'sub_technique_id': subtechnique.sub_technique_id,
+            'name': subtechnique.name,
+        })
+    
+    return JsonResponse(data, safe=False)

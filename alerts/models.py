@@ -16,6 +16,8 @@ class AlertEvent(models.Model):
     RELATED_ALERT_ADDED = 'related_alert_added'
     RELATED_ALERT_REMOVED = 'related_alert_removed'
     ESCALATED = 'escalated'
+    MITRE_ATTACK_ADDED = 'mitre_attack_added'
+    MITRE_ATTACK_REMOVED = 'mitre_attack_removed'
     CUSTOM = 'custom'
     
     EVENT_TYPE_CHOICES = [
@@ -32,6 +34,8 @@ class AlertEvent(models.Model):
         (RELATED_ALERT_ADDED, _('Related Alert Added')),
         (RELATED_ALERT_REMOVED, _('Related Alert Removed')),
         (ESCALATED, _('Escalated to Case')),
+        (MITRE_ATTACK_ADDED, _('MITRE ATT&CK Added')),
+        (MITRE_ATTACK_REMOVED, _('MITRE ATT&CK Removed')),
         (CUSTOM, _('Custom Event')),
     ]
     
@@ -79,6 +83,8 @@ class AlertEvent(models.Model):
             self.RELATED_ALERT_ADDED: 'fa-plus-circle text-success',
             self.RELATED_ALERT_REMOVED: 'fa-minus-circle text-danger',
             self.ESCALATED: 'fa-arrow-up text-success',
+            self.MITRE_ATTACK_ADDED: 'fa-plus-circle text-success',
+            self.MITRE_ATTACK_REMOVED: 'fa-minus-circle text-danger',
             self.CUSTOM: 'fa-star text-warning',
         }
         return icon_map.get(self.event_type, 'fa-circle')
@@ -198,6 +204,25 @@ class Alert(models.Model):
         symmetrical=True,
         blank=True,
         help_text=_('Alerts that are related or similar to this one')
+    )
+    # MITRE ATT&CK relations
+    mitre_tactics = models.ManyToManyField(
+        'core.MitreTactic',
+        verbose_name=_('MITRE Tactics'),
+        related_name='alerts',
+        blank=True,
+    )
+    mitre_techniques = models.ManyToManyField(
+        'core.MitreTechnique',
+        verbose_name=_('MITRE Techniques'),
+        related_name='alerts',
+        blank=True,
+    )
+    mitre_subtechniques = models.ManyToManyField(
+        'core.MitreSubTechnique',
+        verbose_name=_('MITRE Sub-techniques'),
+        related_name='alerts',
+        blank=True,
     )
     created_at = models.DateTimeField(_('Created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('Updated at'), auto_now=True)
@@ -346,13 +371,44 @@ class Alert(models.Model):
         )
     
     def log_related_alert_removed(self, user, related_alert):
-        """Log when a related alert is removed"""
+        """Log a related alert removed event"""
         return self.add_timeline_event(
             event_type=AlertEvent.RELATED_ALERT_REMOVED,
-            title=_('Related alert removed'),
-            description=f"Alert #{related_alert.id}: {related_alert.title}",
+            title=_('Related alert removed: {alert}').format(alert=related_alert.title),
             user=user,
             metadata={'related_alert_id': related_alert.id}
+        )
+    
+    def log_mitre_attack_added(self, user, item_type, item):
+        """Log a MITRE ATT&CK element added event"""
+        return self.add_timeline_event(
+            event_type=AlertEvent.MITRE_ATTACK_ADDED,
+            title=_('MITRE ATT&CK {type} added: {item}').format(
+                type=item_type.capitalize(), 
+                item=str(item)
+            ),
+            user=user,
+            metadata={
+                'mitre_type': item_type,
+                'mitre_id': item.pk,
+                'mitre_name': item.name
+            }
+        )
+    
+    def log_mitre_attack_removed(self, user, item_type, item):
+        """Log a MITRE ATT&CK element removed event"""
+        return self.add_timeline_event(
+            event_type=AlertEvent.MITRE_ATTACK_REMOVED,
+            title=_('MITRE ATT&CK {type} removed: {item}').format(
+                type=item_type.capitalize(), 
+                item=str(item)
+            ),
+            user=user,
+            metadata={
+                'mitre_type': item_type,
+                'mitre_id': item.pk,
+                'mitre_name': item.name
+            }
         )
     
     def __str__(self):

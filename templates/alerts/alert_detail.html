@@ -382,6 +382,62 @@
                         </table>
                     </div>
                 </div>
+                
+                <!-- Tags do alerta -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <p class="text-muted mb-1"><i class="fas fa-tags me-1"></i> Tags</p>
+                        <div>
+                            {% for tag in alert.tags.all %}
+                                <span class="badge bg-{{ tag.color }} mb-1">{{ tag.name }}</span>
+                            {% empty %}
+                                <span class="text-muted">Nenhuma tag adicionada</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- MITRE ATT&CK -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <p class="text-muted mb-0"><i class="fas fa-shield-virus me-1"></i> MITRE ATT&CK</p>
+                            <a href="{% url 'add_alert_mitre_attack' alert.id %}" class="btn btn-sm btn-light">
+                                <i class="fas fa-plus"></i> Adicionar
+                            </a>
+                        </div>
+                        <div class="mt-2">
+                            {% if alert.mitre_tactics.exists or alert.mitre_techniques.exists or alert.mitre_subtechniques.exists %}
+                                <div class="mb-2">
+                                    <strong class="text-primary">Táticas:</strong>
+                                    {% for tactic in alert.mitre_tactics.all %}
+                                        <span class="badge bg-primary mb-1 me-1">{{ tactic.tactic_id }}: {{ tactic.name }}</span>
+                                    {% empty %}
+                                        <span class="text-muted">Nenhuma tática</span>
+                                    {% endfor %}
+                                </div>
+                                <div class="mb-2">
+                                    <strong class="text-success">Técnicas:</strong>
+                                    {% for technique in alert.mitre_techniques.all %}
+                                        <span class="badge bg-success mb-1 me-1">{{ technique.technique_id }}: {{ technique.name }}</span>
+                                    {% empty %}
+                                        <span class="text-muted">Nenhuma técnica</span>
+                                    {% endfor %}
+                                </div>
+                                <div>
+                                    <strong class="text-info">Sub-técnicas:</strong>
+                                    {% for subtechnique in alert.mitre_subtechniques.all %}
+                                        <span class="badge bg-info text-dark mb-1 me-1">{{ subtechnique.sub_technique_id }}: {{ subtechnique.name }}</span>
+                                    {% empty %}
+                                        <span class="text-muted">Nenhuma sub-técnica</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <span class="text-muted">Nenhum elemento MITRE ATT&CK adicionado</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Aba de Timeline -->

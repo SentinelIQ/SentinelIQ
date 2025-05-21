@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "MITRE ATT&CK Framework" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3">{% trans "MITRE ATT&CK Framework" %}</h1>
+            </div>
+            <p class="text-muted">
+                {% trans "Visualize and manage MITRE ATT&CK tactics, techniques, and sub-techniques." %}
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Tactics Column -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{% trans "Tactics (TA)" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for tactic in tactics %}
+                        <a href="?tactic={{ tactic.id }}" 
+                           class="list-group-item list-group-item-action {% if selected_tactic and selected_tactic.id == tactic.id %}active{% endif %}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ tactic.tactic_id }}</h5>
+                            </div>
+                            <p class="mb-1">{{ tactic.name }}</p>
+                            <small>{% if tactic.url %}<a href="{{ tactic.url }}" target="_blank" class="text-info">{% trans "View in ATT&CK" %}</a>{% endif %}</small>
+                        </a>
+                        {% empty %}
+                        <div class="list-group-item">
+                            <p class="mb-0 text-muted">{% trans "No tactics found." %}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Techniques Column -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        {% trans "Techniques (T)" %}
+                        {% if selected_tactic %}
+                            {% trans "for" %} {{ selected_tactic.name }}
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for technique in techniques %}
+                        <a href="?{% if selected_tactic %}tactic={{ selected_tactic.id }}&{% endif %}technique={{ technique.id }}" 
+                           class="list-group-item list-group-item-action {% if selected_technique and selected_technique.id == technique.id %}active{% endif %}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ technique.technique_id }}</h5>
+                            </div>
+                            <p class="mb-1">{{ technique.name }}</p>
+                            <small>{% if technique.url %}<a href="{{ technique.url }}" target="_blank" class="text-info">{% trans "View in ATT&CK" %}</a>{% endif %}</small>
+                        </a>
+                        {% empty %}
+                        <div class="list-group-item">
+                            <p class="mb-0 text-muted">
+                                {% if selected_tactic %}
+                                    {% trans "No techniques found for this tactic." %}
+                                {% else %}
+                                    {% trans "No techniques found. Select a tactic first." %}
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-techniques Column -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        {% trans "Sub-techniques" %}
+                        {% if selected_technique %}
+                            {% trans "for" %} {{ selected_technique.name }}
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for subtechnique in subtechniques %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ subtechnique.sub_technique_id }}</h5>
+                            </div>
+                            <p class="mb-1">{{ subtechnique.name }}</p>
+                            <small>{% if subtechnique.url %}<a href="{{ subtechnique.url }}" target="_blank" class="text-info">{% trans "View in ATT&CK" %}</a>{% endif %}</small>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item">
+                            <p class="mb-0 text-muted">
+                                {% if selected_technique %}
+                                    {% trans "No sub-techniques found for this technique." %}
+                                {% else %}
+                                    {% trans "No sub-techniques found. Select a technique first." %}
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

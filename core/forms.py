@@ -1,6 +1,6 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from .models import Tag, Observable
+from .models import Tag, Observable, MitreTactic, MitreTechnique, MitreSubTechnique
 from alerts.models import Alert
 from cases.models import Case
 
@@ -123,26 +123,115 @@ class ObservableForm(forms.ModelForm):
 
 
 class ObservableFilterForm(forms.Form):
+    """Form for filtering observables"""
     type = forms.ChoiceField(
-        choices=[('', '-- Todos os tipos --')] + Observable.TYPE_CHOICES,
+        choices=[('', _('All Types'))] + Observable.TYPE_CHOICES,
         required=False,
+        label=_('Type'),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
-    search = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Buscar pelo valor...'})
-    )
+    
     is_malicious = forms.ChoiceField(
         choices=[
-            ('', '-- Todos --'),
-            ('true', 'Malicioso'),
-            ('false', 'Não Malicioso')
+            ('', _('All')),
+            ('true', _('Malicious')),
+            ('false', _('Not Malicious')),
         ],
         required=False,
+        label=_('Malicious'),
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+    
     confidence = forms.ChoiceField(
-        choices=[('', '-- Todos --')] + Observable.CONFIDENCE_CHOICES,
+        choices=[('', _('All Confidence'))] + Observable.CONFIDENCE_CHOICES,
         required=False,
+        label=_('Confidence'),
         widget=forms.Select(attrs={'class': 'form-select'})
-    ) 
+    )
+    
+    search = forms.CharField(
+        required=False,
+        label=_('Search'),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': _('Search by value or description')
+        })
+    )
+
+
+class MitreTacticForm(forms.ModelForm):
+    """Form for MITRE ATT&CK Tactics"""
+    class Meta:
+        model = MitreTactic
+        fields = ['tactic_id', 'name', 'description', 'url']
+        widgets = {
+            'tactic_id': forms.TextInput(attrs={'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'url': forms.URLInput(attrs={'class': 'form-control'}),
+        }
+
+
+class MitreTechniqueForm(forms.ModelForm):
+    """Form for MITRE ATT&CK Techniques"""
+    class Meta:
+        model = MitreTechnique
+        fields = ['technique_id', 'name', 'description', 'url', 'tactics']
+        widgets = {
+            'technique_id': forms.TextInput(attrs={'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'url': forms.URLInput(attrs={'class': 'form-control'}),
+            'tactics': forms.SelectMultiple(attrs={'class': 'form-select'}),
+        }
+
+
+class MitreSubTechniqueForm(forms.ModelForm):
+    """Form for MITRE ATT&CK Sub-techniques"""
+    class Meta:
+        model = MitreSubTechnique
+        fields = ['sub_technique_id', 'name', 'description', 'url', 'parent_technique']
+        widgets = {
+            'sub_technique_id': forms.TextInput(attrs={'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'url': forms.URLInput(attrs={'class': 'form-control'}),
+            'parent_technique': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+
+class MitreAttackSelectionForm(forms.Form):
+    """Form for selecting MITRE ATT&CK elements to add to alerts or cases"""
+    tactic = forms.ModelChoiceField(
+        queryset=MitreTactic.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label=_('Select a Tactic')
+    )
+    
+    technique = forms.ModelChoiceField(
+        queryset=MitreTechnique.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label=_('Select a Technique')
+    )
+    
+    subtechnique = forms.ModelChoiceField(
+        queryset=MitreSubTechnique.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label=_('Select a Sub-technique (optional)')
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # If initial tactic is provided, filter techniques accordingly
+        if 'tactic' in self.initial:
+            tactic = self.initial['tactic']
+            self.fields['technique'].queryset = MitreTechnique.objects.filter(tactics=tactic)
+        
+        # If initial technique is provided, filter sub-techniques accordingly
+        if 'technique' in self.initial:
+            technique = self.initial['technique']
+            self.fields['subtechnique'].queryset = MitreSubTechnique.objects.filter(parent_technique=technique) 
