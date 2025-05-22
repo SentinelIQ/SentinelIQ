@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Confirmar Exclusão de Usuário{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .user-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background-color: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .confirm-message {
+        background-color: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.2);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .alert {
+        border-radius: var(--border-radius);
+    }
+    
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+        border-color: rgba(220, 53, 69, 0.2);
+        color: var(--text-primary);
+    }
+    
+    .alert-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-color: rgba(255, 193, 7, 0.2);
+        color: var(--text-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-trash text-danger me-2"></i> Confirmar Exclusão</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'accounts:user_list' %}"><i class="fas fa-users me-1"></i> Usuários</a></li>
+                <li class="breadcrumb-item active">Excluir Usuário</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header py-3">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-exclamation-triangle text-warning me-2"></i> Atenção</h5>
+    </div>
+    <div class="card-body">
+        <div class="mb-4">
+            <div class="d-flex align-items-center mb-3">
+                <div class="user-avatar">
+                    {{ object.username|first|upper }}
+                </div>
+                <div>
+                    <h5 class="mb-1 fw-bold">{{ object.get_full_name|default:object.username }}</h5>
+                    <div class="d-flex align-items-center">
+                        <span class="me-3">
+                            <i class="fas fa-envelope text-muted me-1"></i>
+                            <span>{{ object.email }}</span>
+                        </span>
+                        <span>
+                            {% if object.role == 'superadmin' %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-user-shield me-1"></i> Super Admin
+                                </span>
+                            {% elif object.role == 'org_admin' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-user-cog me-1"></i> Admin da Org.
+                                </span>
+                            {% else %}
+                                <span class="badge bg-info text-dark">
+                                    <i class="fas fa-user me-1"></i> Analista
+                                </span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if object.role == 'superadmin' %}
+        <div class="alert alert-danger mb-4">
+            <div class="d-flex">
+                <div class="me-3">
+                    <i class="fas fa-exclamation-circle fa-2x"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1">Atenção! Usuário Super Admin</h5>
+                    <p class="mb-0">
+                        Você está prestes a excluir um usuário com permissões de Super Admin. 
+                        Esta ação pode afetar o acesso e a administração do sistema.
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if object.organization %}
+        <div class="alert alert-warning mb-4">
+            <div class="d-flex">
+                <div class="me-3">
+                    <i class="fas fa-building fa-2x"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1">Organização Associada</h5>
+                    <p class="mb-0">
+                        Este usuário está associado à organização <strong>{{ object.organization.name }}</strong>. 
+                        Remover este usuário não afetará a organização, apenas removerá o acesso do usuário.
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="confirm-message mb-4">
+            <div class="d-flex">
+                <div class="me-3 text-danger">
+                    <i class="fas fa-trash-alt fa-3x"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-2">Você tem certeza que deseja excluir este usuário?</h5>
+                    <p class="mb-0 text-danger fw-bold">
+                        Esta ação não pode ser desfeita. Todos os dados associados a este usuário serão permanentemente removidos.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-end mt-4">
+                <a href="{% url 'accounts:user_list' %}" class="btn btn-secondary me-2">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Confirmar Exclusão
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

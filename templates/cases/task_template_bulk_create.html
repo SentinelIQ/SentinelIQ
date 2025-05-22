@@ -3,152 +3,264 @@
 
 {% block title %}{% trans "Bulk Create Task Templates" %} | {{ block.super }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .form-control, .form-select {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(58, 134, 255, 0.15);
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+    }
+    
+    .form-label {
+        color: var(--text-primary);
+    }
+    
+    .form-text {
+        color: var(--text-secondary);
+    }
+    
+    .table {
+        color: var(--text-primary);
+    }
+    
+    .table thead th {
+        border-bottom-color: var(--border-color);
+    }
+    
+    .table td, .table th {
+        border-color: var(--border-color);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+    }
+    
+    .btn-outline-secondary {
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .accordion-item {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .accordion-button {
+        background-color: var(--bg-sidebar);
+        color: var(--text-primary);
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: var(--primary);
+        color: #fff;
+    }
+    
+    .accordion-button:focus {
+        box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.25);
+        border-color: var(--primary);
+    }
+    
+    .accordion-button::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    }
+    
+    .accordion-body {
+        background-color: var(--bg-card);
+        color: var(--text-primary);
+    }
+    
+    .badge.bg-warning.text-dark {
+        background-color: rgba(255, 193, 7, 0.8) !important;
+        color: #212529 !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid px-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="mb-4">
-                <a href="{% url 'cases:task_template_list' %}" class="btn btn-sm btn-outline-secondary">
-                    <i class="fas fa-arrow-left"></i> {% trans "Back to Templates" %}
-                </a>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold"><i class="fas fa-copy text-primary me-2"></i> {% trans "Bulk Create Task Templates" %}</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> {% trans "Home" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'cases:case_list' %}"><i class="fas fa-briefcase me-1"></i> {% trans "Cases" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'cases:task_template_list' %}"><i class="fas fa-tasks me-1"></i> {% trans "Task Templates" %}</a></li>
+                    <li class="breadcrumb-item active">{% trans "Bulk Create" %}</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{% url 'cases:task_template_list' %}" class="btn btn-secondary shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i> {% trans "Back to Templates" %}
+            </a>
+        </div>
+    </div>
+            
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-magic me-2"></i> {% trans "Create Multiple Templates at Once" %}</h5>
+        </div>
+        <div class="card-body p-4">
+            <p class="text-muted mb-4">{% trans "Select a threat category and template type to generate pre-defined task templates." %}</p>
+            
+            <form method="post">
+                {% csrf_token %}
                 
-                <h1 class="h3 mt-2">
-                    <i class="fas fa-copy me-2"></i> {% trans "Bulk Create Task Templates" %}
-                </h1>
-            </div>
-            
-            <div class="card shadow mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">{% trans "Create Multiple Templates at Once" %}</h5>
+                <div class="mb-3">
+                    <label for="category" class="form-label fw-bold">{% trans "Threat Category" %}</label>
+                    <select name="category" id="category" class="form-select" required>
+                        <option value="">{% trans "Select a category" %}</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                                <i class="{{ category.icon_class }}"></i> {{ category.get_name_display }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <div class="card-body">
-                    <p>{% trans "Select a threat category and template type to generate pre-defined task templates." %}</p>
-                    
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label for="category" class="form-label">{% trans "Threat Category" %}</label>
-                            <select name="category" id="category" class="form-select" required>
-                                <option value="">{% trans "Select a category" %}</option>
-                                {% for category in categories %}
-                                    <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
-                                        {{ category.get_name_display }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="template_type" class="form-label">{% trans "Template Type" %}</label>
-                            <select name="template_type" id="template_type" class="form-select" required>
-                                <option value="">{% trans "Select a template type" %}</option>
-                                <option value="phishing">{% trans "Phishing Response" %}</option>
-                                <option value="malware">{% trans "Malware Response" %}</option>
-                                <option value="ransomware">{% trans "Ransomware Response" %}</option>
-                                <option value="vuln">{% trans "Vulnerability Management" %}</option>
-                            </select>
-                            <div class="form-text">{% trans "Choose a template type to generate a set of predefined tasks appropriate for this threat type." %}</div>
-                        </div>
-                        
-                        <div class="mt-4">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-copy me-2"></i> {% trans "Generate Templates" %}
-                            </button>
-                        </div>
-                    </form>
+                
+                <div class="mb-4">
+                    <label for="template_type" class="form-label fw-bold">{% trans "Template Type" %}</label>
+                    <select name="template_type" id="template_type" class="form-select" required>
+                        <option value="">{% trans "Select a template type" %}</option>
+                        <option value="phishing">{% trans "Phishing Response" %}</option>
+                        <option value="malware">{% trans "Malware Response" %}</option>
+                        <option value="ransomware">{% trans "Ransomware Response" %}</option>
+                        <option value="vuln">{% trans "Vulnerability Management" %}</option>
+                    </select>
+                    <div class="form-text">{% trans "Choose a template type to generate a set of predefined tasks appropriate for this threat type." %}</div>
                 </div>
-            </div>
-            
-            <!-- Template preview sections -->
-            <div class="accordion" id="templatePreviews">
-                <!-- Phishing Template -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="phishingHeading">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#phishingCollapse">
-                            <i class="fas fa-fish me-2"></i> {% trans "Phishing Response Templates" %}
-                        </button>
-                    </h2>
-                    <div id="phishingCollapse" class="accordion-collapse collapse" data-bs-parent="#templatePreviews">
-                        <div class="accordion-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>{% trans "Title" %}</th>
-                                            <th>{% trans "Priority" %}</th>
-                                            <th>{% trans "Order" %}</th>
-                                            <th>{% trans "Due Days" %}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>{% trans "Verify domain origin" %}</td>
-                                            <td><span class="badge bg-danger">{% trans "High" %}</span></td>
-                                            <td>1</td>
-                                            <td>1</td>
-                                        </tr>
-                                        <tr>
-                                            <td>{% trans "Check attachments/URLs" %}</td>
-                                            <td><span class="badge bg-danger">{% trans "High" %}</span></td>
-                                            <td>2</td>
-                                            <td>1</td>
-                                        </tr>
-                                        <tr>
-                                            <td>{% trans "Identify impacted users" %}</td>
-                                            <td><span class="badge bg-warning text-dark">{% trans "Medium" %}</span></td>
-                                            <td>3</td>
-                                            <td>2</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-copy me-2"></i> {% trans "Generate Templates" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Template preview sections -->
+    <div class="accordion shadow-sm" id="templatePreviews">
+        <!-- Phishing Template -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="phishingHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#phishingCollapse">
+                    <i class="fas fa-fish me-2"></i> {% trans "Phishing Response Templates" %}
+                </button>
+            </h2>
+            <div id="phishingCollapse" class="accordion-collapse collapse" data-bs-parent="#templatePreviews">
+                <div class="accordion-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th><i class="fas fa-clipboard-list me-1"></i> {% trans "Title" %}</th>
+                                    <th><i class="fas fa-exclamation-triangle me-1"></i> {% trans "Priority" %}</th>
+                                    <th><i class="fas fa-sort-numeric-down me-1"></i> {% trans "Order" %}</th>
+                                    <th><i class="fas fa-calendar-day me-1"></i> {% trans "Due Days" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">{% trans "Verify domain origin" %}</td>
+                                    <td><span class="badge bg-danger"><i class="fas fa-exclamation-circle me-1"></i> {% trans "High" %}</span></td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">{% trans "Check attachments/URLs" %}</td>
+                                    <td><span class="badge bg-danger"><i class="fas fa-exclamation-circle me-1"></i> {% trans "High" %}</span></td>
+                                    <td>2</td>
+                                    <td>1</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">{% trans "Identify impacted users" %}</td>
+                                    <td><span class="badge bg-warning"><i class="fas fa-exclamation-triangle me-1"></i> {% trans "Medium" %}</span></td>
+                                    <td>3</td>
+                                    <td>2</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                
-                <!-- Malware Template -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="malwareHeading">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#malwareCollapse">
-                            <i class="fas fa-bug me-2"></i> {% trans "Malware Response Templates" %}
-                        </button>
-                    </h2>
-                    <div id="malwareCollapse" class="accordion-collapse collapse" data-bs-parent="#templatePreviews">
-                        <div class="accordion-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>{% trans "Title" %}</th>
-                                            <th>{% trans "Priority" %}</th>
-                                            <th>{% trans "Order" %}</th>
-                                            <th>{% trans "Due Days" %}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>{% trans "Identify malware" %}</td>
-                                            <td><span class="badge bg-danger">{% trans "High" %}</span></td>
-                                            <td>1</td>
-                                            <td>1</td>
-                                        </tr>
-                                        <tr>
-                                            <td>{% trans "Isolate affected systems" %}</td>
-                                            <td><span class="badge bg-danger">{% trans "High" %}</span></td>
-                                            <td>2</td>
-                                            <td>1</td>
-                                        </tr>
-                                        <tr>
-                                            <td>{% trans "Investigate infection vector" %}</td>
-                                            <td><span class="badge bg-warning text-dark">{% trans "Medium" %}</span></td>
-                                            <td>3</td>
-                                            <td>2</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+            </div>
+        </div>
+        
+        <!-- Malware Template -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="malwareHeading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#malwareCollapse">
+                    <i class="fas fa-bug me-2"></i> {% trans "Malware Response Templates" %}
+                </button>
+            </h2>
+            <div id="malwareCollapse" class="accordion-collapse collapse" data-bs-parent="#templatePreviews">
+                <div class="accordion-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th><i class="fas fa-clipboard-list me-1"></i> {% trans "Title" %}</th>
+                                    <th><i class="fas fa-exclamation-triangle me-1"></i> {% trans "Priority" %}</th>
+                                    <th><i class="fas fa-sort-numeric-down me-1"></i> {% trans "Order" %}</th>
+                                    <th><i class="fas fa-calendar-day me-1"></i> {% trans "Due Days" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">{% trans "Identify malware" %}</td>
+                                    <td><span class="badge bg-danger"><i class="fas fa-exclamation-circle me-1"></i> {% trans "High" %}</span></td>
+                                    <td>1</td>
+                                    <td>1</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">{% trans "Isolate affected systems" %}</td>
+                                    <td><span class="badge bg-danger"><i class="fas fa-exclamation-circle me-1"></i> {% trans "High" %}</span></td>
+                                    <td>2</td>
+                                    <td>1</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">{% trans "Investigate infection vector" %}</td>
+                                    <td><span class="badge bg-warning"><i class="fas fa-exclamation-triangle me-1"></i> {% trans "Medium" %}</span></td>
+                                    <td>3</td>
+                                    <td>2</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

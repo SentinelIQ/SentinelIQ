@@ -13,6 +13,8 @@
         border-left: 3px solid var(--primary);
         padding-left: 15px;
         margin-bottom: 15px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 0 6px 6px 0;
     }
     .attachment-list {
         max-height: 300px;
@@ -20,6 +22,8 @@
     }
     .related-alert {
         transition: transform 0.2s ease;
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
     }
     .related-alert:hover {
         transform: translateY(-2px);
@@ -37,7 +41,7 @@
         left: 8px;
         height: 100%;
         width: 2px;
-        background-color: #e0e0e0;
+        background-color: var(--border-color);
     }
     .timeline-item {
         position: relative;
@@ -54,30 +58,87 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #fff;
-        border: 2px solid #ccc;
+        background-color: var(--bg-card);
+        border: 2px solid var(--border-color);
         z-index: 1;
     }
     .timeline-icon i {
         font-size: 10px;
+        color: var(--text-primary);
     }
     .timeline-content {
         padding: 12px 15px;
-        background-color: #f8f9fa;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: 8px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
     .timeline-date {
-        color: #6c757d;
+        color: var(--text-secondary);
         font-size: 0.8rem;
     }
     .timeline-title {
         margin-bottom: 5px;
         font-weight: 600;
+        color: var(--text-primary);
     }
     .timeline-description {
         margin-top: 8px;
-        color: #555;
+        color: var(--text-secondary);
+    }
+    
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .table {
+        color: var(--text-primary);
+    }
+    
+    .table thead th {
+        border-bottom-color: var(--border-color);
+        color: var(--text-secondary);
+    }
+    
+    .table td, .table th {
+        border-color: var(--border-color);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+    }
+    
+    .table-success {
+        background-color: rgba(25, 135, 84, 0.15) !important;
+        color: var(--text-primary);
+    }
+    
+    .table-danger {
+        background-color: rgba(220, 53, 69, 0.15) !important;
+        color: var(--text-primary);
+    }
+    
+    /* Description box styles */
+    .bg-light {
+        background-color: var(--bg-body) !important;
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+    
+    .text-break {
+        word-wrap: break-word !important;
+        word-break: break-word !important;
     }
 </style>
 {% endblock %}
@@ -85,11 +146,11 @@
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1"><i class="fas fa-briefcase text-primary me-2"></i> Detalhes do Caso</h2>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-briefcase text-primary me-2"></i> Detalhes do Caso</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'cases:case_list' %}">Casos</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cases:case_list' %}"><i class="fas fa-briefcase me-1"></i> Casos</a></li>
                 <li class="breadcrumb-item active">{{ case.title }}</li>
             </ol>
         </nav>

@@ -7,9 +7,11 @@
 <style>
     .form-card {
         border-top: 4px solid var(--primary);
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
     }
     .form-section {
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--border-color);
         padding-bottom: 1.5rem;
         margin-bottom: 1.5rem;
     }
@@ -25,13 +27,71 @@
     .focused label {
         color: var(--primary);
     }
+    .form-control, .form-select {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
     .form-control:focus, .form-select:focus {
         border-color: var(--primary);
         box-shadow: 0 0 0 0.2rem rgba(58, 134, 255, 0.15);
+        background-color: var(--bg-body);
+        color: var(--text-primary);
     }
     .form-floating > .form-control:focus ~ label,
     .form-floating > .form-control:not(:placeholder-shown) ~ label {
         color: var(--primary);
+    }
+    
+    .form-floating > .form-control ~ label {
+        color: var(--text-secondary);
+    }
+    
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar) !important;
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .text-muted, .form-text {
+        color: var(--text-secondary) !important;
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .alert-info {
+        background-color: rgba(13, 202, 240, 0.1);
+        border-color: rgba(13, 202, 240, 0.2);
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    /* Estilo para o textarea */
+    textarea.form-control {
+        min-height: 120px;
     }
 </style>
 {% endblock %}
@@ -39,7 +99,7 @@
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1">
+        <h2 class="mb-1 fw-bold">
             <i class="fas fa-{% if form.instance.id %}edit text-warning{% else %}plus-circle text-primary{% endif %} me-2"></i> 
             {% if form.instance.id %}
                 Editar Organização
@@ -49,8 +109,8 @@
         </h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'organizations:organization_list' %}">Organizações</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'organizations:organization_list' %}"><i class="fas fa-building me-1"></i> Organizações</a></li>
                 <li class="breadcrumb-item active">
                     {% if form.instance.id %}
                         Editar {{ form.instance.name }}
@@ -64,7 +124,7 @@
 </div>
 
 <div class="card shadow-sm form-card">
-    <div class="card-header bg-white">
+    <div class="card-header">
         <h4 class="mb-0">
             {% if form.instance.id %}
                 <span class="text-warning">
@@ -99,12 +159,12 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card h-100 bg-light">
+                        <div class="card h-100">
                             <div class="card-body d-flex align-items-center">
                                 <div class="form-check form-switch">
                                     {{ form.is_active }}
                                     <label class="form-check-label fw-bold" for="{{ form.is_active.id_for_label }}">
-                                        <i class="fas fa-toggle-on me-1"></i> Organização Ativa
+                                        <i class="fas fa-toggle-on me-1 text-success"></i> Organização Ativa
                                     </label>
                                 </div>
                             </div>
@@ -139,7 +199,7 @@
                 <div class="alert alert-info d-flex">
                     <i class="fas fa-info-circle fa-lg me-3 align-self-center"></i>
                     <div>
-                        <p class="mb-1"><strong>Informações Importantes</strong></p>
+                        <p class="mb-1 fw-bold">Informações Importantes</p>
                         <ul class="mb-0">
                             <li>Um <strong>slug</strong> será gerado automaticamente com base no nome da organização</li>
                             <li>Após a criação, você poderá adicionar usuários à organização</li>

@@ -3,14 +3,56 @@
 
 {% block title %}Campos Personalizados para Alertas{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .table {
+        color: var(--text-primary);
+    }
+    
+    .table thead th {
+        border-bottom-color: var(--border-color);
+        color: var(--text-secondary);
+    }
+    
+    .table td, .table th {
+        border-color: var(--border-color);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+    }
+    
+    .alert-info {
+        background-color: rgba(13, 202, 240, 0.15);
+        border-color: rgba(13, 202, 240, 0.4);
+        color: var(--text-primary);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1"><i class="fas fa-cogs text-primary me-2"></i> Campos Personalizados para Alertas</h2>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-cogs text-primary me-2"></i> Campos Personalizados para Alertas</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_list' %}">Alertas</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_list' %}"><i class="fas fa-bell me-1"></i> Alertas</a></li>
                 <li class="breadcrumb-item active">Campos Personalizados</li>
             </ol>
         </nav>
@@ -24,7 +66,7 @@
 
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-primary text-white">
-        <h5 class="mb-0"><i class="fas fa-list me-2"></i> Lista de Campos Personalizados</h5>
+        <h5 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i> Lista de Campos Personalizados</h5>
     </div>
     <div class="card-body">
         {% if custom_fields %}
@@ -55,7 +97,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'alerts:alert_custom_field_update' field.id %}" class="btn btn-sm btn-warning">
+                                    <a href="{% url 'alerts:alert_custom_field_update' field.id %}" class="btn btn-sm btn-warning me-1">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <a href="{% url 'alerts:alert_custom_field_delete' field.id %}" class="btn btn-sm btn-danger">
@@ -71,8 +113,8 @@
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i> Não há campos personalizados definidos para alertas ainda.
             </div>
-            <p>Campos personalizados permitem coletar informações adicionais em alertas, como:</p>
-            <ul>
+            <p class="text-muted">Campos personalizados permitem coletar informações adicionais em alertas, como:</p>
+            <ul class="text-muted">
                 <li>Origem do alerta (email, sistema de detecção, analista, etc.)</li>
                 <li>Sistemas afetados</li>
                 <li>Número de referência do incidente</li>

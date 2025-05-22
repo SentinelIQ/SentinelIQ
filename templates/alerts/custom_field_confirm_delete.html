@@ -3,15 +3,39 @@
 
 {% block title %}Confirmar Exclusão de Campo{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .alert-warning {
+        background-color: rgba(255, 193, 7, 0.15);
+        border-color: rgba(255, 193, 7, 0.4);
+        color: var(--text-primary);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1"><i class="fas fa-trash text-danger me-2"></i> Confirmar Exclusão</h2>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-trash text-danger me-2"></i> Confirmar Exclusão</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_list' %}">Alertas</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_custom_field_list' %}">Campos Personalizados</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_list' %}"><i class="fas fa-bell me-1"></i> Alertas</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_custom_field_list' %}"><i class="fas fa-cogs me-1"></i> Campos Personalizados</a></li>
                 <li class="breadcrumb-item active">Excluir Campo</li>
             </ol>
         </nav>
@@ -20,7 +44,7 @@
 
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-danger text-white">
-        <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Confirmar Exclusão</h5>
+        <h5 class="mb-0 fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> Confirmar Exclusão</h5>
     </div>
     <div class="card-body">
         <div class="alert alert-warning">
@@ -28,8 +52,8 @@
             <strong>Atenção:</strong> Esta ação não pode ser desfeita!
         </div>
         
-        <p class="mb-4">
-            Você está prestes a excluir o campo personalizado <strong>"{{ object.label }}"</strong> ({{ object.get_field_type_display }}).
+        <p class="mb-4 text-muted">
+            Você está prestes a excluir o campo personalizado <strong class="text-danger">"{{ object.label }}"</strong> ({{ object.get_field_type_display }}).
             Todos os valores associados a este campo em alertas existentes serão permanentemente excluídos.
         </p>
         

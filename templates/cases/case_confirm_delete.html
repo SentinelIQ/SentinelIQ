@@ -3,14 +3,59 @@
 
 {% block title %}Confirmar Exclusão | {{ case.title }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .border-danger {
+        border-color: rgba(220, 53, 69, 0.3) !important;
+    }
+    
+    .alert-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-color: rgba(255, 193, 7, 0.2);
+        color: var(--text-primary);
+    }
+    
+    .confirm-message {
+        background-color: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.2);
+        border-radius: var(--border-radius);
+        padding: 1rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1"><i class="fas fa-trash text-danger me-2"></i> Confirmar Exclusão</h2>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-trash text-danger me-2"></i> Confirmar Exclusão</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'cases:case_list' %}">Casos</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cases:case_list' %}"><i class="fas fa-briefcase me-1"></i> Casos</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'cases:case_detail' case.id %}">{{ case.title }}</a></li>
                 <li class="breadcrumb-item active">Excluir</li>
             </ol>
@@ -21,75 +66,95 @@
 <div class="row justify-content-center">
     <div class="col-lg-6">
         <div class="card shadow-sm border-danger">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Confirmar Exclusão</h5>
+            <div class="card-header">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-exclamation-triangle text-danger me-2"></i> Confirmar Exclusão</h5>
             </div>
             <div class="card-body">
                 <div class="text-center mb-4">
                     <i class="fas fa-trash-alt fa-5x text-danger mb-3"></i>
-                    <h4>Tem certeza que deseja excluir este caso?</h4>
+                    <h4 class="fw-bold">Tem certeza que deseja excluir este caso?</h4>
                     <p class="lead"><strong>"{{ case.title }}"</strong></p>
                     <div class="alert alert-warning">
                         <i class="fas fa-exclamation-circle me-2"></i> Esta ação não pode ser desfeita. Todos os comentários e anexos associados a este caso também serão excluídos.
                     </div>
                 </div>
                 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <p class="mb-1"><i class="fas fa-building me-1"></i> <strong>Organização:</strong></p>
-                        <p>{{ case.organization.name }}</p>
+                <div class="confirm-message mb-4">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><i class="fas fa-building me-1"></i> <strong>Organização:</strong></p>
+                            <p>{{ case.organization.name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><i class="fas fa-user me-1"></i> <strong>Responsável:</strong></p>
+                            <p>{{ case.assigned_to|default:"Não atribuído" }}</p>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <p class="mb-1"><i class="fas fa-user me-1"></i> <strong>Responsável:</strong></p>
-                        <p>{{ case.assigned_to|default:"Não atribuído" }}</p>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><i class="fas fa-exclamation-triangle me-1"></i> <strong>Prioridade:</strong></p>
+                            <p>
+                                {% if case.priority == 'critical' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-exclamation-circle me-1"></i> Crítico
+                                    </span>
+                                {% elif case.priority == 'high' %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-exclamation-triangle me-1"></i> Alto
+                                    </span>
+                                {% elif case.priority == 'medium' %}
+                                    <span class="badge bg-info text-dark">
+                                        <i class="fas fa-exclamation me-1"></i> Médio
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i> Baixo
+                                    </span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><i class="fas fa-tag me-1"></i> <strong>Status:</strong></p>
+                            <p>
+                                {% if case.status == 'open' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-folder-open me-1"></i> Aberto
+                                    </span>
+                                {% elif case.status == 'in_progress' %}
+                                    <span class="badge bg-info text-dark">
+                                        <i class="fas fa-spinner me-1"></i> Em Progresso
+                                    </span>
+                                {% elif case.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-clock me-1"></i> Pendente
+                                    </span>
+                                {% elif case.status == 'resolved' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i> Resolvido
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-times-circle me-1"></i> Fechado
+                                    </span>
+                                {% endif %}
+                            </p>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <p class="mb-1"><i class="fas fa-exclamation-triangle me-1"></i> <strong>Prioridade:</strong></p>
-                        <p>
-                            {% if case.priority == 'critical' %}
-                                <span class="badge bg-danger">Crítico</span>
-                            {% elif case.priority == 'high' %}
-                                <span class="badge bg-warning text-dark">Alto</span>
-                            {% elif case.priority == 'medium' %}
-                                <span class="badge bg-info text-dark">Médio</span>
-                            {% else %}
-                                <span class="badge bg-success">Baixo</span>
-                            {% endif %}
-                        </p>
-                    </div>
-                    <div class="col-md-6">
-                        <p class="mb-1"><i class="fas fa-tag me-1"></i> <strong>Status:</strong></p>
-                        <p>
-                            {% if case.status == 'open' %}
-                                <span class="badge bg-danger">Aberto</span>
-                            {% elif case.status == 'in_progress' %}
-                                <span class="badge bg-info text-dark">Em Progresso</span>
-                            {% elif case.status == 'pending' %}
-                                <span class="badge bg-warning text-dark">Pendente</span>
-                            {% elif case.status == 'resolved' %}
-                                <span class="badge bg-success">Resolvido</span>
-                            {% else %}
-                                <span class="badge bg-secondary">Fechado</span>
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <p class="mb-1"><i class="fas fa-comments me-1"></i> <strong>Comentários:</strong></p>
-                        <p>{{ case.comments.count }} comentário(s)</p>
-                    </div>
-                    <div class="col-12">
-                        <p class="mb-1"><i class="fas fa-paperclip me-1"></i> <strong>Anexos:</strong></p>
-                        <p>{{ case.attachments.count }} anexo(s)</p>
-                    </div>
-                    <div class="col-12">
-                        <p class="mb-1"><i class="fas fa-bell me-1"></i> <strong>Alertas relacionados:</strong></p>
-                        <p>{{ case.related_alerts.count }} alerta(s)</p>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="mb-1"><i class="fas fa-comments me-1"></i> <strong>Comentários:</strong></p>
+                            <p>{{ case.comments.count }} comentário(s)</p>
+                        </div>
+                        <div class="col-12">
+                            <p class="mb-1"><i class="fas fa-paperclip me-1"></i> <strong>Anexos:</strong></p>
+                            <p>{{ case.attachments.count }} anexo(s)</p>
+                        </div>
+                        <div class="col-12">
+                            <p class="mb-1"><i class="fas fa-bell me-1"></i> <strong>Alertas relacionados:</strong></p>
+                            <p>{{ case.related_alerts.count }} alerta(s)</p>
+                        </div>
                     </div>
                 </div>
                 

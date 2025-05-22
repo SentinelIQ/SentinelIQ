@@ -22,7 +22,88 @@
         transition: background-color 0.2s ease;
     }
     .case-row:hover {
-        background-color: rgba(0, 0, 0, 0.03);
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header.bg-light {
+        background-color: var(--bg-sidebar) !important;
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .form-control, .form-select {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: var(--bg-sidebar);
+        border-color: var(--primary);
+        color: var(--text-primary);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .table {
+        color: var(--text-primary);
+    }
+    
+    .table thead th {
+        border-bottom-color: var(--border-color);
+    }
+    
+    .table td, .table th {
+        border-color: var(--border-color);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .page-link {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--primary);
+    }
+    
+    .page-link:hover {
+        background-color: rgba(13, 110, 253, 0.1);
+        border-color: var(--border-color);
+        color: var(--primary);
+    }
+    
+    .page-item.disabled .page-link {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+        color: var(--text-secondary);
+    }
+    
+    .bg-light.text-dark {
+        color: var(--text-primary) !important;
     }
 </style>
 {% endblock %}
@@ -30,10 +111,10 @@
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1"><i class="fas fa-briefcase text-primary me-2"></i> Casos</h2>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-briefcase text-primary me-2"></i> Casos</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
                 <li class="breadcrumb-item active">Casos</li>
             </ol>
         </nav>
@@ -47,7 +128,7 @@
 
 <div class="card shadow-sm mb-4 filter-card">
     <div class="card-header bg-light d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Filtros</h5>
+        <h5 class="mb-0 fw-bold"><i class="fas fa-filter me-2"></i> Filtros</h5>
         <button class="btn btn-sm btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true" aria-controls="filterCollapse">
             <i class="fas fa-chevron-down"></i>
         </button>
@@ -112,7 +193,7 @@
 
 <div class="card shadow-sm">
     <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="fas fa-list me-2"></i> Resultados</h5>
+        <h5 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i> Resultados</h5>
         <span class="badge bg-primary">{{ cases|length }} casos encontrados</span>
     </div>
     <div class="card-body p-0">

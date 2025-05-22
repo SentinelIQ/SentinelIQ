@@ -18,15 +18,15 @@
                 <table class="table table-hover">
                     <tbody>
                         <tr>
-                            <th style="width: 35%">Organização</th>
+                            <th style="width: 35%; background-color: rgba(255,255,255,0.05);">Organização</th>
                             <td>{{ alert.organization.name }}</td>
                         </tr>
                         <tr>
-                            <th>Título</th>
+                            <th style="background-color: rgba(255,255,255,0.05);">Título</th>
                             <td>{{ alert.title }}</td>
                         </tr>
                         <tr>
-                            <th>Severidade</th>
+                            <th style="background-color: rgba(255,255,255,0.05);">Severidade</th>
                             <td>
                                 <span class="badge {% if alert.severity == 'critical' %}bg-danger{% elif alert.severity == 'high' %}bg-warning text-dark{% elif alert.severity == 'medium' %}bg-info text-dark{% else %}bg-success{% endif %}">
                                     {% if alert.severity == 'critical' %}
@@ -42,7 +42,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <th>Status</th>
+                            <th style="background-color: rgba(255,255,255,0.05);">Status</th>
                             <td>
                                 <span class="badge {% if alert.status == 'new' %}bg-danger{% elif alert.status == 'acknowledged' %}bg-warning text-dark{% elif alert.status == 'in_progress' %}bg-info text-dark{% elif alert.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
                                     {% if alert.status == 'new' %}
@@ -60,7 +60,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <th>Categoria de Ameaça</th>
+                            <th style="background-color: rgba(255,255,255,0.05);">Categoria de Ameaça</th>
                             <td>
                                 {% if alert.threat_category %}
                                     <span class="badge bg-dark">
@@ -73,17 +73,17 @@
                             </td>
                         </tr>
                         <tr>
-                            <th>TLP</th>
+                            <th style="background-color: rgba(255,255,255,0.05);">TLP</th>
                             <td>
-                                <span class="badge {% if alert.tlp == 'red' %}bg-danger{% elif alert.tlp == 'amber' %}bg-warning text-dark{% elif alert.tlp == 'green' %}bg-success{% else %}bg-light text-dark border{% endif %}">
+                                <span class="badge {% if alert.tlp == 'red' %}bg-danger{% elif alert.tlp == 'amber' %}bg-warning text-dark{% elif alert.tlp == 'green' %}bg-success{% else %}bg-light text-dark border{% endif %}" style="font-size: 0.9rem;">
                                     TLP:{% if alert.tlp == 'red' %}RED{% elif alert.tlp == 'amber' %}AMBER{% elif alert.tlp == 'green' %}GREEN{% else %}WHITE{% endif %}
                                 </span>
                             </td>
                         </tr>
                         <tr>
-                            <th>PAP</th>
+                            <th style="background-color: rgba(255,255,255,0.05);">PAP</th>
                             <td>
-                                <span class="badge {% if alert.pap == 'red' %}bg-danger{% elif alert.pap == 'amber' %}bg-warning text-dark{% elif alert.pap == 'green' %}bg-success{% else %}bg-light text-dark border{% endif %}">
+                                <span class="badge {% if alert.pap == 'red' %}bg-danger{% elif alert.pap == 'amber' %}bg-warning text-dark{% elif alert.pap == 'green' %}bg-success{% else %}bg-light text-dark border{% endif %}" style="font-size: 0.9rem;">
                                     PAP:{% if alert.pap == 'red' %}RED{% elif alert.pap == 'amber' %}AMBER{% elif alert.pap == 'green' %}GREEN{% else %}WHITE{% endif %}
                                 </span>
                             </td>
@@ -120,15 +120,15 @@
                 <table class="table table-hover">
                     <tbody>
                         <tr>
-                            <th style="width: 35%">Data de Criação</th>
+                            <th style="width: 35%; background-color: rgba(255,255,255,0.05);">Data de Criação</th>
                             <td>{{ alert.created_at|date:"d/m/Y H:i" }}</td>
                         </tr>
                         <tr>
-                            <th>Última Atualização</th>
+                            <th style="background-color: rgba(255,255,255,0.05);">Última Atualização</th>
                             <td>{{ alert.updated_at|date:"d/m/Y H:i" }}</td>
                         </tr>
                         <tr>
-                            <th>Atribuído a</th>
+                            <th style="background-color: rgba(255,255,255,0.05);">Atribuído a</th>
                             <td>
                                 {% if alert.assigned_to %}
                                     {{ alert.assigned_to.get_full_name|default:alert.assigned_to.username }}

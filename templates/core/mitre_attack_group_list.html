@@ -4,46 +4,128 @@
 
 {% block title %}{% trans "MITRE ATT&CK Groups" %}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .table {
+        color: var(--text-primary);
+    }
+    
+    .table thead th {
+        border-bottom-color: var(--border-color);
+    }
+    
+    .table td, .table th {
+        border-color: var(--border-color);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+    }
+    
+    .btn-outline-primary, 
+    .btn-outline-danger {
+        color: var(--text-primary);
+    }
+    
+    .btn-outline-primary:hover {
+        color: #fff;
+    }
+    
+    .btn-outline-danger:hover {
+        color: #fff;
+    }
+    
+    .btn-info {
+        background-color: var(--info);
+        border-color: var(--info);
+    }
+    
+    .primary-header {
+        border-left: 4px solid var(--primary);
+    }
+    
+    .info-header {
+        border-left: 4px solid var(--info);
+    }
+    
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container p-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="h3">{% trans "MITRE ATT&CK Groups" %}</h1>
-                <div>
-                    <a href="{% url 'core:mitre_attack_list' %}" class="btn btn-info">
-                        <i class="fas fa-list"></i> {% trans "Browse MITRE Framework" %}
-                    </a>
-                    <a href="{% url 'core:mitre_attack_group_create' %}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> {% trans "Create New Group" %}
-                    </a>
-                </div>
-            </div>
+<div class="container-fluid p-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold">
+                <i class="fas fa-users text-primary me-2"></i> {% trans "MITRE ATT&CK Groups" %}
+            </h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> {% trans "Home" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:mitre_attack_list' %}"><i class="fas fa-shield-alt me-1"></i> {% trans "MITRE ATT&CK" %}</a></li>
+                    <li class="breadcrumb-item active">{% trans "Groups" %}</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{% url 'core:mitre_attack_list' %}" class="btn btn-info me-2">
+                <i class="fas fa-list me-1"></i> {% trans "Browse Framework" %}
+            </a>
+            <a href="{% url 'core:mitre_attack_group_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> {% trans "Create New Group" %}
+            </a>
         </div>
     </div>
 
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">{% trans "Your MITRE ATT&CK Groups" %}</h5>
+            <div class="card shadow-sm">
+                <div class="card-header primary-header">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-layer-group me-2 text-primary"></i> {% trans "Your MITRE ATT&CK Groups" %}</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-dark">
                                 <tr>
-                                    <th>{% trans "Name" %}</th>
-                                    <th>{% trans "Elements" %}</th>
-                                    <th>{% trans "Created" %}</th>
-                                    <th>{% trans "Actions" %}</th>
+                                    <th><i class="fas fa-signature me-1"></i> {% trans "Name" %}</th>
+                                    <th><i class="fas fa-cubes me-1"></i> {% trans "Elements" %}</th>
+                                    <th><i class="fas fa-calendar-alt me-1"></i> {% trans "Created" %}</th>
+                                    <th class="text-center"><i class="fas fa-cogs me-1"></i> {% trans "Actions" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for group in groups %}
                                 <tr>
                                     <td>
-                                        <a href="{% url 'core:mitre_attack_group_detail' group.id %}">{{ group.name }}</a>
+                                        <a href="{% url 'core:mitre_attack_group_detail' group.id %}" class="fw-bold">{{ group.name }}</a>
                                     </td>
                                     <td>
                                         <div class="d-flex flex-wrap gap-1">
@@ -53,21 +135,22 @@
                                         </div>
                                     </td>
                                     <td>{{ group.created_at|date:"d/m/Y H:i" }}</td>
-                                    <td>
-                                        <a href="{% url 'core:mitre_attack_group_edit' group.id %}" class="btn btn-sm btn-outline-primary">
+                                    <td class="text-center">
+                                        <a href="{% url 'core:mitre_attack_group_edit' group.id %}" class="btn btn-sm btn-outline-primary me-1" title="{% trans 'Edit' %}">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="{% url 'core:mitre_attack_group_delete' group.id %}" class="btn btn-sm btn-outline-danger">
+                                        <a href="{% url 'core:mitre_attack_group_delete' group.id %}" class="btn btn-sm btn-outline-danger" title="{% trans 'Delete' %}">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" class="text-center py-4">
-                                        <p class="text-muted mb-0">{% trans "No MITRE ATT&CK Groups created yet." %}</p>
-                                        <a href="{% url 'core:mitre_attack_group_create' %}" class="btn btn-primary mt-3">
-                                            <i class="fas fa-plus"></i> {% trans "Create your first group" %}
+                                    <td colspan="4" class="text-center py-5">
+                                        <i class="fas fa-layer-group fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted mb-3">{% trans "No MITRE ATT&CK Groups created yet." %}</p>
+                                        <a href="{% url 'core:mitre_attack_group_create' %}" class="btn btn-primary">
+                                            <i class="fas fa-plus me-1"></i> {% trans "Create your first group" %}
                                         </a>
                                     </td>
                                 </tr>
@@ -82,9 +165,9 @@
 
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">{% trans "About MITRE ATT&CK Groups" %}</h5>
+            <div class="card shadow-sm">
+                <div class="card-header info-header">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-info-circle text-info me-2"></i> {% trans "About MITRE ATT&CK Groups" %}</h5>
                 </div>
                 <div class="card-body">
                     <p>{% trans "MITRE ATT&CK Groups allow you to organize related tactics, techniques, and sub-techniques that represent a specific attack pattern or kill chain." %}</p>

@@ -3,48 +3,120 @@
 
 {% block title %}{% trans "Threat Categories" %} | {{ block.super }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .table {
+        color: var(--text-primary);
+    }
+    
+    .table thead th {
+        border-bottom-color: var(--border-color);
+    }
+    
+    .table td, .table th {
+        border-color: var(--border-color);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .btn-outline-primary, .btn-outline-secondary, .btn-outline-success {
+        color: var(--text-primary);
+        border-color: currentColor;
+    }
+    
+    .btn-outline-primary:hover, .btn-outline-secondary:hover, .btn-outline-success:hover {
+        color: var(--bg-body);
+    }
+    
+    .empty-state {
+        background-color: rgba(255, 255, 255, 0.02);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">{% trans "Threat Categories" %}</h1>
-        <a href="{% url 'cases:threat_category_create' %}" class="btn btn-primary">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold"><i class="fas fa-shield-alt text-primary me-2"></i> {% trans "Threat Categories" %}</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'cases:case_list' %}"><i class="fas fa-briefcase me-1"></i> {% trans "Cases" %}</a></li>
+                    <li class="breadcrumb-item active">{% trans "Threat Categories" %}</li>
+                </ol>
+            </nav>
+        </div>
+        <a href="{% url 'cases:threat_category_create' %}" class="btn btn-primary shadow-sm">
             <i class="fas fa-plus me-2"></i> {% trans "Add Category" %}
         </a>
     </div>
 
-    <div class="card shadow mb-4">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i> {% trans "Threat Categories" %}</h5>
+        </div>
         <div class="card-body">
             {% if categories %}
                 <div class="table-responsive">
                     <table class="table table-hover">
-                        <thead>
+                        <thead class="table-dark">
                             <tr>
-                                <th>{% trans "Icon" %}</th>
-                                <th>{% trans "Name" %}</th>
-                                <th>{% trans "Description" %}</th>
-                                <th>{% trans "Task Templates" %}</th>
-                                <th>{% trans "Actions" %}</th>
+                                <th><i class="fas fa-icons me-1"></i> {% trans "Icon" %}</th>
+                                <th><i class="fas fa-tag me-1"></i> {% trans "Name" %}</th>
+                                <th><i class="fas fa-align-left me-1"></i> {% trans "Description" %}</th>
+                                <th><i class="fas fa-tasks me-1"></i> {% trans "Task Templates" %}</th>
+                                <th class="text-center"><i class="fas fa-cogs me-1"></i> {% trans "Actions" %}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for category in categories %}
                                 <tr>
-                                    <td><i class="{{ category.icon_class }} fa-lg text-secondary"></i></td>
-                                    <td>{{ category.get_name_display }}</td>
+                                    <td><i class="{{ category.icon_class }} fa-lg text-primary"></i></td>
+                                    <td class="fw-bold">{{ category.get_name_display }}</td>
                                     <td>{{ category.description|truncatechars:80 }}</td>
                                     <td>
-                                        <span class="badge bg-info text-dark">{{ category.template_count }}</span>
+                                        <span class="badge bg-info">{{ category.template_count }}</span>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <div class="btn-group">
-                                            <a href="{% url 'cases:threat_category_detail' category.id %}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i> {% trans "View" %}
+                                            <a href="{% url 'cases:threat_category_detail' category.id %}" class="btn btn-sm btn-outline-primary" title="{% trans 'View' %}">
+                                                <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{% url 'cases:threat_category_update' category.id %}" class="btn btn-sm btn-outline-secondary">
-                                                <i class="fas fa-edit"></i> {% trans "Edit" %}
+                                            <a href="{% url 'cases:threat_category_update' category.id %}" class="btn btn-sm btn-outline-warning" title="{% trans 'Edit' %}">
+                                                <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="{% url 'cases:task_template_create' %}?category={{ category.id }}" class="btn btn-sm btn-outline-success">
-                                                <i class="fas fa-plus"></i> {% trans "Add Template" %}
+                                            <a href="{% url 'cases:task_template_create' %}?category={{ category.id }}" class="btn btn-sm btn-outline-success" title="{% trans 'Add Template' %}">
+                                                <i class="fas fa-plus"></i>
                                             </a>
                                         </div>
                                     </td>
@@ -54,11 +126,11 @@
                     </table>
                 </div>
             {% else %}
-                <div class="text-center py-4">
-                    <i class="fas fa-exclamation-circle fa-3x text-muted mb-3"></i>
-                    <h5>{% trans "No threat categories found" %}</h5>
+                <div class="text-center py-4 empty-state">
+                    <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
+                    <h5 class="fw-bold">{% trans "No threat categories found" %}</h5>
                     <p class="text-muted">{% trans "Create your first threat category to start managing task templates." %}</p>
-                    <a href="{% url 'cases:threat_category_create' %}" class="btn btn-primary">
+                    <a href="{% url 'cases:threat_category_create' %}" class="btn btn-primary mt-2">
                         <i class="fas fa-plus me-2"></i> {% trans "Add Category" %}
                     </a>
                 </div>

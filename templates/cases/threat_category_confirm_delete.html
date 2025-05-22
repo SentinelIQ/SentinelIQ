@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Confirm Delete" %} | {{ category.get_name_display }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .border-danger {
+        border-color: rgba(220, 53, 69, 0.3) !important;
+    }
+    
+    .alert-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-color: rgba(255, 193, 7, 0.2);
+        color: var(--text-primary);
+    }
+    
+    .confirm-message {
+        background-color: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.2);
+        border-radius: var(--border-radius);
+        padding: 1rem;
+    }
+    
+    .btn-secondary {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-trash text-danger me-2"></i> {% trans "Confirm Delete" %}</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> {% trans "Home" %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cases:case_list' %}"><i class="fas fa-briefcase me-1"></i> {% trans "Cases" %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cases:threat_category_list' %}"><i class="fas fa-shield-alt me-1"></i> {% trans "Threat Categories" %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cases:threat_category_detail' category.id %}">{{ category.get_name_display }}</a></li>
+                <li class="breadcrumb-item active">{% trans "Delete" %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-danger">
+            <div class="card-header">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-exclamation-triangle text-danger me-2"></i> {% trans "Confirm Delete" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-trash-alt fa-5x text-danger mb-3"></i>
+                    <h4 class="fw-bold">{% trans "Are you sure you want to delete this threat category?" %}</h4>
+                    <p class="lead"><strong>"{{ category.get_name_display }}"</strong></p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i> {% trans "This action cannot be undone. All task templates associated with this category will also be deleted." %}
+                    </div>
+                </div>
+                
+                <div class="confirm-message mb-4">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><i class="{{ category.icon_class }} me-1"></i> <strong>{% trans "Icon:" %}</strong></p>
+                            <p>{{ category.icon_class }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><i class="fas fa-tasks me-1"></i> <strong>{% trans "Task Templates:" %}</strong></p>
+                            <p>{{ templates_count|default:"0" }} {% trans "template(s)" %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="mb-1"><i class="fas fa-align-left me-1"></i> <strong>{% trans "Description:" %}</strong></p>
+                            <p>{{ category.description|truncatechars:200 }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center">
+                        <a href="{% url 'cases:threat_category_detail' category.id %}" class="btn btn-secondary me-2">
+                            <i class="fas fa-times me-1"></i> {% trans "Cancel" %}
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i> {% trans "Confirm Delete" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

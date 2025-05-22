@@ -4,40 +4,121 @@
 
 {% block title %}{% trans "MITRE ATT&CK Framework" %}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .list-group-item {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .list-group-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .list-group-item.active {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+    }
+    
+    .list-group-item h5 {
+        color: var(--text-primary);
+    }
+    
+    .list-group-item p {
+        color: var(--text-secondary);
+    }
+    
+    .list-group-item.active h5,
+    .list-group-item.active p,
+    .list-group-item.active small {
+        color: #fff;
+    }
+    
+    .primary-header {
+        border-left: 4px solid var(--primary);
+    }
+    
+    .success-header {
+        border-left: 4px solid var(--success);
+    }
+    
+    .info-header {
+        border-left: 4px solid var(--info);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid p-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="h3">{% trans "MITRE ATT&CK Framework" %}</h1>
-            </div>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold">
+                <i class="fas fa-shield-alt text-primary me-2"></i> {% trans "MITRE ATT&CK Framework" %}
+            </h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> {% trans "Home" %}</a></li>
+                    <li class="breadcrumb-item active">{% trans "MITRE ATT&CK" %}</li>
+                </ol>
+            </nav>
             <p class="text-muted">
                 {% trans "Visualize and manage MITRE ATT&CK tactics, techniques, and sub-techniques." %}
             </p>
+        </div>
+        <div>
+            <a href="{% url 'core:mitre_attack_group_list' %}" class="btn btn-primary shadow-sm">
+                <i class="fas fa-users me-2"></i> {% trans "View Groups" %}
+            </a>
         </div>
     </div>
 
     <div class="row">
         <!-- Tactics Column -->
         <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">{% trans "Tactics (TA)" %}</h5>
+            <div class="card shadow-sm h-100">
+                <div class="card-header primary-header">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-chess me-2 text-primary"></i> {% trans "Tactics (TA)" %}</h5>
                 </div>
-                <div class="card-body">
-                    <div class="list-group">
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
                         {% for tactic in tactics %}
                         <a href="?tactic={{ tactic.id }}" 
                            class="list-group-item list-group-item-action {% if selected_tactic and selected_tactic.id == tactic.id %}active{% endif %}">
                             <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1">{{ tactic.tactic_id }}</h5>
+                                <h5 class="mb-1 fw-bold">{{ tactic.tactic_id }}</h5>
                             </div>
                             <p class="mb-1">{{ tactic.name }}</p>
-                            <small>{% if tactic.url %}<a href="{{ tactic.url }}" target="_blank" class="text-info">{% trans "View in ATT&CK" %}</a>{% endif %}</small>
+                            <small>{% if tactic.url %}<a href="{{ tactic.url }}" target="_blank" class="{% if selected_tactic and selected_tactic.id == tactic.id %}text-white{% else %}text-info{% endif %}"><i class="fas fa-external-link-alt me-1"></i> {% trans "View in ATT&CK" %}</a>{% endif %}</small>
                         </a>
                         {% empty %}
                         <div class="list-group-item">
-                            <p class="mb-0 text-muted">{% trans "No tactics found." %}</p>
+                            <p class="mb-0 text-muted"><i class="fas fa-info-circle me-2"></i> {% trans "No tactics found." %}</p>
                         </div>
                         {% endfor %}
                     </div>
@@ -47,29 +128,30 @@
 
         <!-- Techniques Column -->
         <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        {% trans "Techniques (T)" %}
+            <div class="card shadow-sm h-100">
+                <div class="card-header success-header">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-tools me-2 text-success"></i> {% trans "Techniques (T)" %}
                         {% if selected_tactic %}
-                            {% trans "for" %} {{ selected_tactic.name }}
+                            <span class="badge bg-primary ms-2">{{ selected_tactic.tactic_id }}</span>
                         {% endif %}
                     </h5>
                 </div>
-                <div class="card-body">
-                    <div class="list-group">
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
                         {% for technique in techniques %}
                         <a href="?{% if selected_tactic %}tactic={{ selected_tactic.id }}&{% endif %}technique={{ technique.id }}" 
                            class="list-group-item list-group-item-action {% if selected_technique and selected_technique.id == technique.id %}active{% endif %}">
                             <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1">{{ technique.technique_id }}</h5>
+                                <h5 class="mb-1 fw-bold">{{ technique.technique_id }}</h5>
                             </div>
                             <p class="mb-1">{{ technique.name }}</p>
-                            <small>{% if technique.url %}<a href="{{ technique.url }}" target="_blank" class="text-info">{% trans "View in ATT&CK" %}</a>{% endif %}</small>
+                            <small>{% if technique.url %}<a href="{{ technique.url }}" target="_blank" class="{% if selected_technique and selected_technique.id == technique.id %}text-white{% else %}text-info{% endif %}"><i class="fas fa-external-link-alt me-1"></i> {% trans "View in ATT&CK" %}</a>{% endif %}</small>
                         </a>
                         {% empty %}
                         <div class="list-group-item">
                             <p class="mb-0 text-muted">
+                                <i class="fas fa-info-circle me-2"></i>
                                 {% if selected_tactic %}
                                     {% trans "No techniques found for this tactic." %}
                                 {% else %}
@@ -85,28 +167,29 @@
 
         <!-- Sub-techniques Column -->
         <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">
-                        {% trans "Sub-techniques" %}
+            <div class="card shadow-sm h-100">
+                <div class="card-header info-header">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-code-branch me-2 text-info"></i> {% trans "Sub-techniques" %}
                         {% if selected_technique %}
-                            {% trans "for" %} {{ selected_technique.name }}
+                            <span class="badge bg-success ms-2">{{ selected_technique.technique_id }}</span>
                         {% endif %}
                     </h5>
                 </div>
-                <div class="card-body">
-                    <div class="list-group">
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
                         {% for subtechnique in subtechniques %}
                         <div class="list-group-item">
                             <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1">{{ subtechnique.sub_technique_id }}</h5>
+                                <h5 class="mb-1 fw-bold">{{ subtechnique.sub_technique_id }}</h5>
                             </div>
                             <p class="mb-1">{{ subtechnique.name }}</p>
-                            <small>{% if subtechnique.url %}<a href="{{ subtechnique.url }}" target="_blank" class="text-info">{% trans "View in ATT&CK" %}</a>{% endif %}</small>
+                            <small>{% if subtechnique.url %}<a href="{{ subtechnique.url }}" target="_blank" class="text-info"><i class="fas fa-external-link-alt me-1"></i> {% trans "View in ATT&CK" %}</a>{% endif %}</small>
                         </div>
                         {% empty %}
                         <div class="list-group-item">
                             <p class="mb-0 text-muted">
+                                <i class="fas fa-info-circle me-2"></i>
                                 {% if selected_technique %}
                                     {% trans "No sub-techniques found for this technique." %}
                                 {% else %}

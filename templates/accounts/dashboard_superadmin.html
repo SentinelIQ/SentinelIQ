@@ -116,6 +116,7 @@
     
     .table {
         margin-bottom: 0;
+        color: var(--text-primary);
     }
     
     .table thead th {
@@ -133,10 +134,20 @@
     .table tbody tr:last-child td {
         border-bottom: none;
     }
+
+    .table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
     
     .card-header {
-        background-color: rgba(255,255,255,0.05);
+        background-color: var(--bg-sidebar);
         border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
     }
     
     .action-btn {
@@ -152,6 +163,19 @@
     .badge {
         padding: 0.5em 0.75em;
         font-weight: 500;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
     }
 </style>
 {% endblock %}
@@ -169,7 +193,7 @@
         </div>
         <nav aria-label="breadcrumb" class="mb-3">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
                 <li class="breadcrumb-item active">Dashboard</li>
             </ol>
         </nav>
@@ -306,14 +330,14 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Nome</th>
-                            <th>Status</th>
-                            <th>Usuários</th>
-                            <th>Data de Criação</th>
-                            <th>Ações</th>
+                            <th><i class="fas fa-building me-1"></i> Nome</th>
+                            <th><i class="fas fa-tag me-1"></i> Status</th>
+                            <th><i class="fas fa-users me-1"></i> Usuários</th>
+                            <th><i class="fas fa-calendar-alt me-1"></i> Data de Criação</th>
+                            <th><i class="fas fa-cogs me-1"></i> Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -323,13 +347,17 @@
                                     <td class="fw-bold">{{ org.name }}</td>
                                     <td>
                                         {% if org.is_active %}
-                                            <span class="badge bg-success">Ativo</span>
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i> Ativo
+                                            </span>
                                         {% else %}
-                                            <span class="badge bg-danger">Inativo</span>
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times-circle me-1"></i> Inativo
+                                            </span>
                                         {% endif %}
                                     </td>
                                     <td><span class="badge bg-primary">{{ org.user_count }}</span></td>
-                                    <td><small class="text-muted">{{ org.created_at|date:"d/m/Y H:i" }}</small></td>
+                                    <td><small class="text-muted"><i class="fas fa-clock me-1"></i> {{ org.created_at|date:"d/m/Y H:i" }}</small></td>
                                     <td>
                                         <div class="btn-group">
                                             <a href="{% url 'organizations:organization_detail' org.id %}" class="btn btn-sm btn-primary action-btn me-1" title="Visualizar">

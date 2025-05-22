@@ -3,23 +3,140 @@
 
 {% block title %}{% trans "Task Templates" %} | {{ block.super }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .table {
+        color: var(--text-primary);
+    }
+    
+    .table thead th {
+        border-bottom-color: var(--border-color);
+    }
+    
+    .table td, .table th {
+        border-color: var(--border-color);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .form-control, .form-select {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(58, 134, 255, 0.15);
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+    }
+    
+    .form-label {
+        color: var(--text-primary);
+    }
+    
+    .btn-outline-primary, .btn-outline-secondary, .btn-outline-success, .btn-outline-danger, .btn-outline-warning {
+        color: var(--text-primary);
+        border-color: currentColor;
+    }
+    
+    .btn-outline-primary:hover, .btn-outline-secondary:hover, .btn-outline-success:hover, .btn-outline-danger:hover, .btn-outline-warning:hover {
+        color: var(--bg-body);
+    }
+    
+    .empty-state {
+        background-color: rgba(255, 255, 255, 0.02);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+    }
+    
+    .pagination .page-link {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .pagination .page-link:hover {
+        background-color: var(--primary);
+        color: #fff;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+    
+    .pagination .page-item.disabled .page-link {
+        background-color: var(--bg-sidebar);
+        color: var(--text-secondary);
+    }
+    
+    a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    a:hover {
+        color: var(--primary);
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">{% trans "Task Templates" %}</h1>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
-            <a href="{% url 'cases:task_template_bulk_create' %}" class="btn btn-success me-2">
+            <h2 class="mb-1 fw-bold"><i class="fas fa-tasks text-primary me-2"></i> {% trans "Task Templates" %}</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> {% trans "Home" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'cases:case_list' %}"><i class="fas fa-briefcase me-1"></i> {% trans "Cases" %}</a></li>
+                    <li class="breadcrumb-item active">{% trans "Task Templates" %}</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{% url 'cases:task_template_bulk_create' %}" class="btn btn-success me-2 shadow-sm">
                 <i class="fas fa-copy me-2"></i> {% trans "Bulk Create" %}
             </a>
-            <a href="{% url 'cases:task_template_create' %}" class="btn btn-primary">
+            <a href="{% url 'cases:task_template_create' %}" class="btn btn-primary shadow-sm">
                 <i class="fas fa-plus me-2"></i> {% trans "Add Template" %}
             </a>
         </div>
     </div>
     
-    <div class="card shadow mb-4">
-        <div class="card-header bg-light py-3">
-            <h5 class="mb-0">{% trans "Filter Templates" %}</h5>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-filter me-2"></i> {% trans "Filter Templates" %}</h5>
         </div>
         <div class="card-body">
             <form method="get" class="row g-3">
@@ -44,26 +161,29 @@
         </div>
     </div>
     
-    <div class="card shadow">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i> {% trans "Task Templates" %}</h5>
+        </div>
         <div class="card-body">
             {% if templates %}
                 <div class="table-responsive">
                     <table class="table table-hover">
-                        <thead>
+                        <thead class="table-dark">
                             <tr>
-                                <th>{% trans "Title" %}</th>
-                                <th>{% trans "Category" %}</th>
-                                <th>{% trans "Priority" %}</th>
-                                <th>{% trans "Order" %}</th>
-                                <th>{% trans "Due Days" %}</th>
-                                <th>{% trans "Status" %}</th>
-                                <th class="text-end">{% trans "Actions" %}</th>
+                                <th><i class="fas fa-clipboard-list me-1"></i> {% trans "Title" %}</th>
+                                <th><i class="fas fa-shield-alt me-1"></i> {% trans "Category" %}</th>
+                                <th><i class="fas fa-exclamation-triangle me-1"></i> {% trans "Priority" %}</th>
+                                <th><i class="fas fa-sort-numeric-down me-1"></i> {% trans "Order" %}</th>
+                                <th><i class="fas fa-calendar-day me-1"></i> {% trans "Due Days" %}</th>
+                                <th><i class="fas fa-toggle-on me-1"></i> {% trans "Status" %}</th>
+                                <th class="text-center"><i class="fas fa-cogs me-1"></i> {% trans "Actions" %}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for template in templates %}
                                 <tr>
-                                    <td>{{ template.title }}</td>
+                                    <td class="fw-bold">{{ template.title }}</td>
                                     <td>
                                         <a href="{% url 'cases:threat_category_detail' template.threat_category.id %}">
                                             <i class="{{ template.threat_category.icon_class }} me-1"></i>
@@ -72,40 +192,49 @@
                                     </td>
                                     <td>
                                         {% if template.priority == 'high' %}
-                                            <span class="badge bg-danger">{% trans "High" %}</span>
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-exclamation-circle me-1"></i> {% trans "High" %}
+                                            </span>
                                         {% elif template.priority == 'medium' %}
-                                            <span class="badge bg-warning text-dark">{% trans "Medium" %}</span>
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-exclamation-triangle me-1"></i> {% trans "Medium" %}
+                                            </span>
                                         {% else %}
-                                            <span class="badge bg-info text-dark">{% trans "Low" %}</span>
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-info-circle me-1"></i> {% trans "Low" %}
+                                            </span>
                                         {% endif %}
                                     </td>
                                     <td>{{ template.order }}</td>
                                     <td>{{ template.due_days }}</td>
                                     <td>
                                         {% if template.is_active %}
-                                            <span class="badge bg-success">{% trans "Active" %}</span>
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i> {% trans "Active" %}
+                                            </span>
                                         {% else %}
-                                            <span class="badge bg-secondary">{% trans "Inactive" %}</span>
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-times-circle me-1"></i> {% trans "Inactive" %}
+                                            </span>
                                         {% endif %}
                                     </td>
-                                    <td class="text-end">
+                                    <td class="text-center">
                                         <div class="btn-group">
-                                            <a href="{% url 'cases:task_template_update' template.id %}" class="btn btn-sm btn-outline-secondary">
-                                                <i class="fas fa-edit"></i> {% trans "Edit" %}
+                                            <a href="{% url 'cases:task_template_update' template.id %}" class="btn btn-sm btn-outline-warning" title="{% trans 'Edit' %}">
+                                                <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="{% url 'cases:task_template_clone' template.id %}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-copy"></i> {% trans "Clone" %}
+                                            <a href="{% url 'cases:task_template_clone' template.id %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Clone' %}">
+                                                <i class="fas fa-copy"></i>
                                             </a>
                                             <form method="post" action="{% url 'cases:task_template_toggle_status' template.id %}" class="d-inline">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="next" value="{% url 'cases:task_template_list' %}">
-                                                <button type="submit" class="btn btn-sm btn-outline-{% if template.is_active %}warning{% else %}success{% endif %}">
+                                                <button type="submit" class="btn btn-sm btn-outline-{% if template.is_active %}warning{% else %}success{% endif %}" title="{% if template.is_active %}{% trans 'Deactivate' %}{% else %}{% trans 'Activate' %}{% endif %}">
                                                     <i class="fas {% if template.is_active %}fa-toggle-off{% else %}fa-toggle-on{% endif %}"></i>
-                                                    {% if template.is_active %}{% trans "Deactivate" %}{% else %}{% trans "Activate" %}{% endif %}
                                                 </button>
                                             </form>
-                                            <a href="{% url 'cases:task_template_delete' template.id %}" class="btn btn-sm btn-outline-danger">
-                                                <i class="fas fa-trash"></i> {% trans "Delete" %}
+                                            <a href="{% url 'cases:task_template_delete' template.id %}" class="btn btn-sm btn-outline-danger" title="{% trans 'Delete' %}">
+                                                <i class="fas fa-trash"></i>
                                             </a>
                                         </div>
                                     </td>
@@ -118,9 +247,9 @@
                 {% include 'pagination.html' with page_obj=page_obj %}
                 
             {% else %}
-                <div class="text-center py-5">
+                <div class="text-center py-5 empty-state">
                     <i class="fas fa-clipboard-list fa-4x text-muted mb-3"></i>
-                    <h4>{% trans "No task templates found" %}</h4>
+                    <h4 class="fw-bold">{% trans "No task templates found" %}</h4>
                     <p class="text-muted mb-4">{% trans "Create your first task template to automate case handling." %}</p>
                     <div>
                         <a href="{% url 'cases:task_template_create' %}" class="btn btn-primary me-2">

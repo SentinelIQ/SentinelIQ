@@ -9,13 +9,113 @@
     {% endif %} | {{ block.super }}
 {% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .form-control, .form-select {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: var(--bg-body);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        color: var(--text-primary);
+    }
+    
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .form-text {
+        color: var(--text-secondary);
+    }
+    
+    .form-check-label {
+        color: var(--text-primary);
+    }
+    
+    .form-check-input {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+    
+    hr {
+        border-color: var(--border-color);
+        opacity: 0.3;
+    }
+    
+    .btn-outline-secondary {
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+        border-color: rgba(220, 53, 69, 0.2);
+        color: var(--text-primary);
+    }
+    
+    .alert-success {
+        background-color: rgba(25, 135, 84, 0.1);
+        border-color: rgba(25, 135, 84, 0.2);
+        color: var(--text-primary);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid px-4">
-    <div class="row mb-4">
-        <div class="col">
+<div class="container-fluid p-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold">
+                {% if form.instance.pk %}
+                    <i class="fas fa-edit text-primary me-2"></i> {% trans "Edit MISP Instance" %}: {{ form.instance.name }}
+                {% else %}
+                    <i class="fas fa-plus-circle text-primary me-2"></i> {% trans "Add MISP Instance" %}
+                {% endif %}
+            </h2>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'vision:feed_list' %}">{% trans "Feeds" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> {% trans "Home" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'vision:feed_list' %}"><i class="fas fa-satellite-dish me-1"></i> {% trans "Feeds" %}</a></li>
                     <li class="breadcrumb-item active">
                         {% if form.instance.pk %}
                             {% trans "Edit MISP Instance" %}
@@ -25,13 +125,6 @@
                     </li>
                 </ol>
             </nav>
-            <h1 class="h3 mb-0">
-                {% if form.instance.pk %}
-                    <i class="fas fa-edit me-2"></i> {% trans "Edit MISP Instance" %}: {{ form.instance.name }}
-                {% else %}
-                    <i class="fas fa-plus-circle me-2"></i> {% trans "Add MISP Instance" %}
-                {% endif %}
-            </h1>
         </div>
     </div>
 
@@ -45,15 +138,15 @@
 
             <div class="card shadow-sm mb-4">
                 <div class="card-header">
-                    <i class="fas fa-plug me-1"></i> {% trans "MISP Configuration" %}
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-plug text-primary me-2"></i> {% trans "MISP Configuration" %}</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form method="post" class="needs-validation" novalidate id="mispForm">
                         {% csrf_token %}
                         
                         {% if form.errors %}
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <h5><i class="fas fa-exclamation-triangle me-2"></i> {% trans "There were errors in your form" %}</h5>
+                            <h5 class="fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> {% trans "There were errors in your form" %}</h5>
                             {% for field in form %}
                                 {% for error in field.errors %}
                                     <p>{{ field.label }}: {{ error }}</p>
@@ -63,24 +156,28 @@
                         </div>
                         {% endif %}
                         
-                        <div class="row mb-3">
+                        <div class="row mb-4">
                             <div class="col-md-6">
-                                <h5>{% trans "Basic Information" %}</h5>
+                                <h5 class="fw-bold text-primary"><i class="fas fa-info-circle me-2"></i> {% trans "Basic Information" %}</h5>
                                 <hr>
                                 <div class="mb-3">
-                                    <label for="{{ form.name.id_for_label }}" class="form-label">{% trans "Name" %} *</label>
+                                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                                        <i class="fas fa-signature me-1"></i> {% trans "Name" %} <span class="text-danger">*</span>
+                                    </label>
                                     {{ form.name }}
                                     <div class="form-text">{% trans "A meaningful name for this MISP instance." %}</div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="{{ form.description.id_for_label }}" class="form-label">{% trans "Description" %}</label>
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                                        <i class="fas fa-align-left me-1"></i> {% trans "Description" %}
+                                    </label>
                                     {{ form.description }}
                                 </div>
                                 <div class="mb-3">
                                     <div class="form-check form-switch">
                                         {{ form.is_public }}
                                         <label class="form-check-label" for="{{ form.is_public.id_for_label }}">
-                                            {% trans "Public Feed" %}
+                                            <i class="fas fa-globe me-1"></i> {% trans "Public Feed" %}
                                         </label>
                                     </div>
                                     <div class="form-text">{% trans "If enabled, all organizations will have access to this feed." %}</div>
@@ -88,15 +185,19 @@
                             </div>
                             
                             <div class="col-md-6">
-                                <h5>{% trans "Connection Settings" %} </h5>
+                                <h5 class="fw-bold text-primary"><i class="fas fa-network-wired me-2"></i> {% trans "Connection Settings" %} </h5>
                                 <hr>
                                 <div class="mb-3">
-                                    <label for="{{ form.url.id_for_label }}" class="form-label">{% trans "MISP URL" %} *</label>
+                                    <label for="{{ form.url.id_for_label }}" class="form-label">
+                                        <i class="fas fa-link me-1"></i> {% trans "MISP URL" %} <span class="text-danger">*</span>
+                                    </label>
                                     {{ form.url }}
                                     <div class="form-text">{% trans "The URL of the MISP instance (e.g. https://misp.example.org)." %}</div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="{{ form.api_key.id_for_label }}" class="form-label">{% trans "API Key" %} *</label>
+                                    <label for="{{ form.api_key.id_for_label }}" class="form-label">
+                                        <i class="fas fa-key me-1"></i> {% trans "API Key" %} <span class="text-danger">*</span>
+                                    </label>
                                     {{ form.api_key }}
                                     <div class="form-text">{{ form.api_key.help_text }}</div>
                                 </div>
@@ -104,7 +205,7 @@
                                     <div class="form-check form-switch">
                                         {{ form.verify_ssl }}
                                         <label class="form-check-label" for="{{ form.verify_ssl.id_for_label }}">
-                                            {% trans "Verify SSL Certificate" %}
+                                            <i class="fas fa-lock me-1"></i> {% trans "Verify SSL Certificate" %}
                                         </label>
                                     </div>
                                     <div class="form-text">{% trans "Disable this if you have self-signed certificates." %}</div>
@@ -122,7 +223,7 @@
                         
                         <div class="row">
                             <div class="col-12">
-                                <h5>{% trans "Synchronization Settings" %}</h5>
+                                <h5 class="fw-bold text-primary"><i class="fas fa-sync-alt me-2"></i> {% trans "Synchronization Settings" %}</h5>
                                 <hr>
                             </div>
                             
@@ -131,7 +232,7 @@
                                     <div class="form-check form-switch">
                                         {{ form.import_events }}
                                         <label class="form-check-label" for="{{ form.import_events.id_for_label }}">
-                                            {% trans "Import Events" %}
+                                            <i class="fas fa-calendar-week me-1"></i> {% trans "Import Events" %}
                                         </label>
                                     </div>
                                     <div class="form-text">{% trans "Import events from this MISP instance." %}</div>
@@ -140,7 +241,7 @@
                                     <div class="form-check form-switch">
                                         {{ form.import_attributes }}
                                         <label class="form-check-label" for="{{ form.import_attributes.id_for_label }}">
-                                            {% trans "Import Attributes" %}
+                                            <i class="fas fa-fingerprint me-1"></i> {% trans "Import Attributes" %}
                                         </label>
                                     </div>
                                     <div class="form-text">{% trans "Import attributes (IOCs) from this MISP instance." %}</div>
@@ -149,7 +250,7 @@
                                     <div class="form-check form-switch">
                                         {{ form.import_tags }}
                                         <label class="form-check-label" for="{{ form.import_tags.id_for_label }}">
-                                            {% trans "Import Tags" %}
+                                            <i class="fas fa-tags me-1"></i> {% trans "Import Tags" %}
                                         </label>
                                     </div>
                                     <div class="form-text">{% trans "Import all tag definitions from the MISP instance." %}</div>
@@ -158,13 +259,15 @@
                                     <div class="form-check form-switch">
                                         {{ form.import_galaxies }}
                                         <label class="form-check-label" for="{{ form.import_galaxies.id_for_label }}">
-                                            {% trans "Import Galaxies/Clusters" %}
+                                            <i class="fas fa-globe me-1"></i> {% trans "Import Galaxies/Clusters" %}
                                         </label>
                                     </div>
                                     <div class="form-text">{% trans "Import all galaxy and cluster information from the MISP instance." %}</div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="{{ form.import_from_days.id_for_label }}" class="form-label">{% trans "Import from last X days" %}</label>
+                                    <label for="{{ form.import_from_days.id_for_label }}" class="form-label">
+                                        <i class="fas fa-calendar-alt me-1"></i> {% trans "Import from last X days" %}
+                                    </label>
                                     {{ form.import_from_days }}
                                     <div class="form-text">{{ form.import_from_days.help_text }}</div>
                                 </div>
@@ -172,17 +275,23 @@
                             
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="{{ form.sync_frequency.id_for_label }}" class="form-label">{% trans "Sync Frequency (minutes)" %}</label>
+                                    <label for="{{ form.sync_frequency.id_for_label }}" class="form-label">
+                                        <i class="fas fa-clock me-1"></i> {% trans "Sync Frequency (minutes)" %}
+                                    </label>
                                     {{ form.sync_frequency }}
                                     <div class="form-text">{{ form.sync_frequency.help_text }}</div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="{{ form.tags_to_include.id_for_label }}" class="form-label">{% trans "Tags to Include" %}</label>
+                                    <label for="{{ form.tags_to_include.id_for_label }}" class="form-label">
+                                        <i class="fas fa-tag me-1"></i> {% trans "Tags to Include" %}
+                                    </label>
                                     {{ form.tags_to_include }}
                                     <div class="form-text">{% trans "Only import events/attributes with these tags." %}</div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="{{ form.tags_to_exclude.id_for_label }}" class="form-label">{% trans "Tags to Exclude" %}</label>
+                                    <label for="{{ form.tags_to_exclude.id_for_label }}" class="form-label">
+                                        <i class="fas fa-ban me-1"></i> {% trans "Tags to Exclude" %}
+                                    </label>
                                     {{ form.tags_to_exclude }}
                                     <div class="form-text">{% trans "Exclude events/attributes with these tags." %}</div>
                                 </div>
@@ -195,7 +304,7 @@
                             <a href="{% url 'vision:feed_list' %}" class="btn btn-outline-secondary">
                                 <i class="fas fa-times me-1"></i> {% trans "Cancel" %}
                             </a>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save me-1"></i>
                                 {% if form.instance.pk %}
                                     {% trans "Update" %}

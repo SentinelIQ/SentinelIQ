@@ -4,97 +4,262 @@
 
 {% block title %}{{ title }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .form-control, .form-select {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: var(--bg-body);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        color: var(--text-primary);
+    }
+    
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .form-text {
+        color: var(--text-secondary);
+    }
+    
+    .select2-container--default .select2-selection--multiple {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+    }
+    
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+    }
+    
+    .btn-secondary {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .btn-outline-secondary {
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .text-danger {
+        color: var(--danger) !important;
+    }
+    
+    .primary-header {
+        border-left: 4px solid var(--primary);
+    }
+    
+    .select2-dropdown {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .select2-container--default .select2-results__option {
+        color: var(--text-primary);
+    }
+    
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--primary);
+        color: #fff;
+    }
+    
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .required-asterisk {
+        color: #dc3545;
+        margin-left: 3px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container p-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="h3">{{ title }}</h1>
-                <a href="{% url 'core:mitre_attack_group_list' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> {% trans "Back to Groups" %}
-                </a>
-            </div>
+<div class="container-fluid p-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold">
+                <i class="fas fa-layer-group text-primary me-2"></i> {{ title }}
+            </h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> {% trans "Home" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:mitre_attack_list' %}"><i class="fas fa-shield-alt me-1"></i> {% trans "MITRE ATT&CK" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:mitre_attack_group_list' %}"><i class="fas fa-users me-1"></i> {% trans "Groups" %}</a></li>
+                    <li class="breadcrumb-item active">{{ title }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{% url 'core:mitre_attack_group_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> {% trans "Back to Groups" %}
+            </a>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">{% trans "Group Information" %}</h5>
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header primary-header">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-edit text-primary me-2"></i> {% trans "Group Information" %}</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form method="post">
                         {% csrf_token %}
                         
-                        <div class="mb-3">
-                            <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                        <div class="mb-4">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                <i class="fas fa-signature me-1"></i> {{ form.name.label }}<span class="required-asterisk">*</span>
+                            </label>
                             {{ form.name }}
                             {% if form.name.errors %}
-                            <div class="text-danger">
+                            <div class="text-danger mt-1">
                                 {{ form.name.errors }}
                             </div>
                             {% endif %}
+                            <div class="form-text">{% trans "Enter a descriptive name for this attack group or pattern." %}</div>
                         </div>
                         
-                        <div class="mb-3">
-                            <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                        <div class="mb-4">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                <i class="fas fa-align-left me-1"></i> {{ form.description.label }}<span class="required-asterisk">*</span>
+                            </label>
                             {{ form.description }}
                             {% if form.description.errors %}
-                            <div class="text-danger">
+                            <div class="text-danger mt-1">
                                 {{ form.description.errors }}
                             </div>
                             {% endif %}
                             <div class="form-text">{% trans "Describe the attack pattern or methodology this group represents." %}</div>
                         </div>
                         
-                        <div class="row">
+                        <div class="row mt-5">
                             <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.tactics.id_for_label }}" class="form-label">{{ form.tactics.label }}</label>
+                                <div class="mb-4">
+                                    <label for="{{ form.tactics.id_for_label }}" class="form-label">
+                                        <i class="fas fa-chess me-1"></i> {{ form.tactics.label }}
+                                    </label>
                                     {{ form.tactics }}
                                     {% if form.tactics.errors %}
-                                    <div class="text-danger">
+                                    <div class="text-danger mt-1">
                                         {{ form.tactics.errors }}
                                     </div>
                                     {% endif %}
+                                    <div class="form-text">{% trans "Select the relevant tactics." %}</div>
                                 </div>
                             </div>
                             
                             <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.techniques.id_for_label }}" class="form-label">{{ form.techniques.label }}</label>
+                                <div class="mb-4">
+                                    <label for="{{ form.techniques.id_for_label }}" class="form-label">
+                                        <i class="fas fa-tools me-1"></i> {{ form.techniques.label }}
+                                    </label>
                                     {{ form.techniques }}
                                     {% if form.techniques.errors %}
-                                    <div class="text-danger">
+                                    <div class="text-danger mt-1">
                                         {{ form.techniques.errors }}
                                     </div>
                                     {% endif %}
+                                    <div class="form-text">{% trans "Select associated techniques." %}</div>
                                 </div>
                             </div>
                             
                             <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.subtechniques.id_for_label }}" class="form-label">{{ form.subtechniques.label }}</label>
+                                <div class="mb-4">
+                                    <label for="{{ form.subtechniques.id_for_label }}" class="form-label">
+                                        <i class="fas fa-code-branch me-1"></i> {{ form.subtechniques.label }}
+                                    </label>
                                     {{ form.subtechniques }}
                                     {% if form.subtechniques.errors %}
-                                    <div class="text-danger">
+                                    <div class="text-danger mt-1">
                                         {{ form.subtechniques.errors }}
                                     </div>
                                     {% endif %}
+                                    <div class="form-text">{% trans "Select specific sub-techniques." %}</div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="d-flex justify-content-end mt-4">
-                            <a href="{% url 'core:mitre_attack_group_list' %}" class="btn btn-outline-secondary me-2">
-                                {% trans "Cancel" %}
+                        <div class="d-flex justify-content-between mt-5 pt-3 border-top border-dark">
+                            <a href="{% url 'core:mitre_attack_group_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i> {% trans "Cancel" %}
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {% trans "Save Group" %}
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i> {% trans "Save Group" %}
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header primary-header">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-info-circle text-info me-2"></i> {% trans "Help & Information" %}</h5>
+                </div>
+                <div class="card-body p-4">
+                    <h6 class="fw-bold"><i class="fas fa-lightbulb text-warning me-2"></i> {% trans "How to use MITRE ATT&CK Groups" %}</h6>
+                    <p class="text-muted mb-4">{% trans "MITRE ATT&CK Groups are collections of tactics, techniques, and sub-techniques that represent specific attack patterns or methodologies." %}</p>
+                    
+                    <h6 class="fw-bold"><i class="fas fa-chess-board text-primary me-2"></i> {% trans "Selection Tips" %}</h6>
+                    <ul class="text-muted mb-4">
+                        <li>{% trans "First select Tactics - this will filter available Techniques" %}</li>
+                        <li>{% trans "Then select Techniques - this will filter available Sub-techniques" %}</li>
+                        <li>{% trans "You can use Ctrl+Click (or Cmd+Click on Mac) to select multiple items" %}</li>
+                    </ul>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> 
+                        {% trans "After creating this group, you can associate it with cases and alerts to quickly apply these MITRE ATT&CK elements." %}
+                    </div>
                 </div>
             </div>
         </div>

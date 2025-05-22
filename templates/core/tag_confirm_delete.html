@@ -3,14 +3,73 @@
 
 {% block title %}Excluir Tag{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .border-danger {
+        border-color: rgba(220, 53, 69, 0.3) !important;
+    }
+    
+    .alert-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-color: rgba(255, 193, 7, 0.2);
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .tag-details-row {
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .tag-details-row:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1"><i class="fas fa-trash text-danger me-2"></i> Excluir Tag</h2>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-trash text-danger me-2"></i> Excluir Tag</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'core:tag_list' %}">Tags</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:tag_list' %}"><i class="fas fa-tags me-1"></i> Tags</a></li>
                 <li class="breadcrumb-item active">Excluir {{ object.name }}</li>
             </ol>
         </nav>
@@ -20,23 +79,30 @@
 <div class="row">
     <div class="col-lg-6">
         <div class="card shadow-sm border-danger">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Confirmação de Exclusão</h5>
+            <div class="card-header">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-exclamation-triangle text-danger me-2"></i> Confirmação de Exclusão</h5>
             </div>
-            <div class="card-body">
-                <p class="lead">Você tem certeza que deseja excluir a tag <strong>"{{ object.name }}"</strong>?</p>
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <i class="fas fa-trash-alt text-danger fa-5x mb-3"></i>
+                    <h4 class="fw-bold">Confirme a Exclusão</h4>
+                    <p class="lead">Você tem certeza que deseja excluir a tag <strong>"{{ object.name }}"</strong>?</p>
+                    <div class="py-2">
+                        <span class="badge bg-{{ object.color }} p-2 fs-6">{{ object.name }}</span>
+                    </div>
+                </div>
                 
-                <div class="alert alert-warning">
+                <div class="alert alert-warning mb-4">
                     <i class="fas fa-exclamation-circle me-2"></i> Esta ação não pode ser desfeita.
                 </div>
                 
-                <div class="mt-3">
-                    <p>Esta tag está associada a:</p>
+                <div class="mt-3 p-3" style="background-color: rgba(255, 255, 255, 0.05); border-radius: var(--border-radius);">
+                    <h6 class="fw-bold">Esta tag está associada a:</h6>
                     <ul>
                         <li><strong>{{ object.alerts.count }}</strong> Alertas</li>
                         <li><strong>{{ object.cases.count }}</strong> Casos</li>
                     </ul>
-                    <p class="text-danger">A exclusão da tag removerá estas associações.</p>
+                    <p class="text-danger mb-0"><i class="fas fa-exclamation-circle me-1"></i> A exclusão da tag removerá estas associações.</p>
                 </div>
                 
                 <form method="post" class="mt-4">
@@ -56,23 +122,35 @@
     
     <div class="col-lg-6">
         <div class="card shadow-sm">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Detalhes da Tag</h5>
+            <div class="card-header">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-info-circle text-info me-2"></i> Detalhes da Tag</h5>
             </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-sm-4 text-muted">Nome:</div>
-                    <div class="col-sm-8">{{ object.name }}</div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 text-muted">Cor:</div>
-                    <div class="col-sm-8">
-                        <span class="badge bg-{{ object.color }}">{{ object.name }}</span>
+            <div class="card-body p-0">
+                <div class="tag-details-row">
+                    <div class="row align-items-center m-0">
+                        <div class="col-sm-4 text-muted">Nome:</div>
+                        <div class="col-sm-8 fw-bold">{{ object.name }}</div>
                     </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-sm-4 text-muted">ID:</div>
-                    <div class="col-sm-8">{{ object.id }}</div>
+                <div class="tag-details-row">
+                    <div class="row align-items-center m-0">
+                        <div class="col-sm-4 text-muted">Cor:</div>
+                        <div class="col-sm-8">
+                            <span class="badge bg-{{ object.color }} p-2">{{ object.name }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tag-details-row">
+                    <div class="row align-items-center m-0">
+                        <div class="col-sm-4 text-muted">ID:</div>
+                        <div class="col-sm-8">{{ object.id }}</div>
+                    </div>
+                </div>
+                <div class="tag-details-row">
+                    <div class="row align-items-center m-0">
+                        <div class="col-sm-4 text-muted">Criada em:</div>
+                        <div class="col-sm-8">{{ object.created_at|date:"d/m/Y H:i" }}</div>
+                    </div>
                 </div>
             </div>
         </div>

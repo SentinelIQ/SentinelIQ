@@ -8,8 +8,10 @@
     .form-card {
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
         border-radius: var(--border-radius);
-        border: none;
+        border-color: var(--border-color);
+        background-color: var(--bg-card);
     }
+    
     .form-heading {
         background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
         color: white;
@@ -17,17 +19,109 @@
         border-top-right-radius: var(--border-radius);
         padding: 1.5rem;
     }
+    
+    .form-control, .form-select {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(58, 134, 255, 0.15);
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+    }
+    
+    /* Fix dropdown options appearance */
+    select.form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23adb5bd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+    
+    /* Fix dropdown option text color */
+    select.form-select option {
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+    }
+    
+    /* Custom styling for dropdown menu items */
+    select.form-select optgroup {
+        background-color: var(--bg-body);
+        color: var(--text-secondary);
+        font-weight: bold;
+    }
+    
+    .form-label {
+        color: var(--text-primary);
+    }
+    
+    .form-text {
+        color: var(--text-secondary);
+    }
+    
+    .form-check-label {
+        color: var(--text-primary);
+    }
+    
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+        border-color: rgba(220, 53, 69, 0.2);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .section-card {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: var(--border-color);
+    }
+    
+    .btn-secondary {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1"><i class="fas fa-eye text-primary me-2"></i> {{ title }}</h2>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-eye text-primary me-2"></i> {{ title }}</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'core:observable_list' %}">Observables</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:observable_list' %}"><i class="fas fa-search me-1"></i> Observables</a></li>
                 <li class="breadcrumb-item active">{{ title }}</li>
             </ol>
         </nav>
@@ -36,9 +130,9 @@
 
 <div class="row justify-content-center">
     <div class="col-lg-10">
-        <div class="card form-card">
+        <div class="card form-card shadow-sm">
             <div class="form-heading">
-                <h4 class="mb-0">
+                <h4 class="mb-0 fw-bold">
                     <i class="fas fa-{% if observable %}edit{% else %}plus-circle{% endif %} me-2"></i>
                     {{ title }}
                 </h4>
@@ -47,7 +141,7 @@
                 <!-- Form errors alert -->
                 {% if form.errors %}
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <h5 class="alert-heading">Erros no formulário:</h5>
+                    <h5 class="alert-heading fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> Erros no formulário:</h5>
                     <ul class="mb-0">
                         {% for field in form %}
                             {% for error in field.errors %}
@@ -67,29 +161,29 @@
                     
                     <div class="row mb-3">
                         <div class="col-md-8">
-                            <label for="{{ form.value.id_for_label }}" class="form-label">Valor do Observable</label>
+                            <label for="{{ form.value.id_for_label }}" class="form-label fw-bold">Valor do Observable</label>
                             {{ form.value }}
                             <div class="form-text">Digite o valor exato do indicador de compromisso.</div>
                         </div>
                         <div class="col-md-4">
-                            <label for="{{ form.type.id_for_label }}" class="form-label">Tipo</label>
+                            <label for="{{ form.type.id_for_label }}" class="form-label fw-bold">Tipo</label>
                             {{ form.type }}
                         </div>
                     </div>
                     
                     <div class="row mb-3">
                         <div class="col-md-8">
-                            <label for="{{ form.description.id_for_label }}" class="form-label">Descrição</label>
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">Descrição</label>
                             {{ form.description }}
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="{{ form.confidence.id_for_label }}" class="form-label">Nível de Confiança</label>
+                                <label for="{{ form.confidence.id_for_label }}" class="form-label fw-bold">Nível de Confiança</label>
                                 {{ form.confidence }}
                             </div>
                             
                             <div class="mb-3">
-                                <label for="{{ form.pap.id_for_label }}" class="form-label">PAP Level</label>
+                                <label for="{{ form.pap.id_for_label }}" class="form-label fw-bold">PAP Level</label>
                                 {{ form.pap }}
                                 <div class="form-text">Permissible Actions Protocol: Define como este indicador pode ser compartilhado.</div>
                             </div>
@@ -97,28 +191,28 @@
                             <div class="form-check mb-3">
                                 {{ form.is_malicious }}
                                 <label class="form-check-label" for="{{ form.is_malicious.id_for_label }}">
-                                    Marcar como Malicioso
+                                    <i class="fas fa-exclamation-triangle text-danger me-1"></i> Marcar como Malicioso
                                 </label>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Associação a Alertas e Casos -->
-                    <div class="card mb-3 bg-light">
-                        <div class="card-header bg-secondary text-white">
-                            <h5 class="mb-0"><i class="fas fa-link me-2"></i> Associar a Alerta ou Caso</h5>
+                    <div class="card section-card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-link me-2"></i> Associar a Alerta ou Caso</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="{{ form.alert.id_for_label }}" class="form-label">
+                                    <label for="{{ form.alert.id_for_label }}" class="form-label fw-bold">
                                         <i class="fas fa-bell me-1"></i> Associar a um Alerta
                                     </label>
                                     {{ form.alert }}
                                     <div class="form-text">Selecione um alerta para associar este observable.</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="{{ form.case.id_for_label }}" class="form-label">
+                                    <label for="{{ form.case.id_for_label }}" class="form-label fw-bold">
                                         <i class="fas fa-folder me-1"></i> Associar a um Caso
                                     </label>
                                     {{ form.case }}
@@ -142,4 +236,119 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all select elements
+        const selectElements = document.querySelectorAll('select.form-select');
+        
+        // Replace each select with a Bootstrap custom select
+        selectElements.forEach(function(select) {
+            // Create a wrapper div
+            const wrapper = document.createElement('div');
+            wrapper.className = 'dropdown custom-select-wrapper';
+            wrapper.style.width = '100%';
+            
+            // Get the current selected option
+            const selectedOption = select.options[select.selectedIndex];
+            const selectedText = selectedOption ? selectedOption.textContent : 'Selecione uma opção';
+            
+            // Create the button that will replace the select
+            const button = document.createElement('button');
+            button.className = 'form-select dropdown-toggle';
+            button.type = 'button';
+            button.setAttribute('data-bs-toggle', 'dropdown');
+            button.setAttribute('aria-expanded', 'false');
+            button.innerHTML = selectedText;
+            button.style.textAlign = 'left';
+            button.style.width = '100%';
+            button.style.backgroundColor = 'var(--bg-card)';
+            button.style.color = 'var(--text-primary)';
+            button.style.borderColor = 'var(--border-color)';
+            
+            // Create the dropdown menu
+            const dropdownMenu = document.createElement('ul');
+            dropdownMenu.className = 'dropdown-menu w-100';
+            dropdownMenu.style.backgroundColor = 'var(--bg-card)';
+            dropdownMenu.style.borderColor = 'var(--border-color)';
+            dropdownMenu.style.maxHeight = '300px';
+            dropdownMenu.style.overflowY = 'auto';
+            dropdownMenu.style.boxShadow = '0 0.5rem 1rem rgba(0, 0, 0, 0.3)';
+            dropdownMenu.style.padding = '0.5rem 0';
+            
+            // Add options to dropdown menu
+            for (let i = 0; i < select.options.length; i++) {
+                const option = select.options[i];
+                
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.className = 'dropdown-item';
+                a.href = '#';
+                a.textContent = option.textContent;
+                a.setAttribute('data-value', option.value);
+                a.style.color = 'var(--text-primary)';
+                a.style.padding = '0.5rem 1rem';
+                a.style.backgroundColor = 'var(--bg-card)';
+                
+                // Highlight selected option
+                if (option.selected) {
+                    a.style.backgroundColor = 'rgba(var(--primary-rgb), 0.2)';
+                    a.style.fontWeight = 'bold';
+                }
+                
+                // Handle click event
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Update the hidden select value
+                    select.value = this.getAttribute('data-value');
+                    
+                    // Trigger change event
+                    const event = new Event('change', { bubbles: true });
+                    select.dispatchEvent(event);
+                    
+                    // Update button text
+                    button.textContent = this.textContent;
+                    
+                    // Update highlighted option
+                    dropdownMenu.querySelectorAll('a.dropdown-item').forEach(item => {
+                        item.style.backgroundColor = 'var(--bg-card)';
+                        item.style.fontWeight = 'normal';
+                    });
+                    this.style.backgroundColor = 'rgba(var(--primary-rgb), 0.2)';
+                    this.style.fontWeight = 'bold';
+                });
+                
+                // Add hover effect
+                a.addEventListener('mouseover', function() {
+                    if (!option.selected) {
+                        this.style.backgroundColor = 'var(--bg-sidebar)';
+                    }
+                });
+                a.addEventListener('mouseout', function() {
+                    if (!option.selected) {
+                        this.style.backgroundColor = 'var(--bg-card)';
+                    } else {
+                        this.style.backgroundColor = 'rgba(var(--primary-rgb), 0.2)';
+                    }
+                });
+                
+                li.appendChild(a);
+                dropdownMenu.appendChild(li);
+            }
+            
+            // Add elements to wrapper
+            wrapper.appendChild(button);
+            wrapper.appendChild(dropdownMenu);
+            
+            // Hide the original select
+            select.style.display = 'none';
+            
+            // Insert the custom select after the original
+            select.parentNode.insertBefore(wrapper, select.nextSibling);
+        });
+    });
+</script>
 {% endblock %} 

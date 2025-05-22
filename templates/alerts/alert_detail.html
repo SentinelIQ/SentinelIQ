@@ -112,16 +112,38 @@
     }
     
     .table-hover tbody tr:hover {
-        background-color: rgba(255, 255, 255, 0.03);
+        background-color: rgba(255, 255, 255, 0.05);
     }
     
     .table th {
-        background-color: rgba(255, 255, 255, 0.05);
+        font-weight: 600;
         border-color: var(--border-color);
     }
     
     .table td {
         border-color: var(--border-color);
+        padding: 0.75rem;
+    }
+    
+    /* Improved table styling */
+    .table tr {
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .table tr:last-child {
+        border-bottom: none;
+    }
+    
+    .table tbody tr:nth-child(odd) td {
+        background-color: rgba(255, 255, 255, 0.01);
+    }
+    
+    .badge.bg-warning.text-dark {
+        color: #212529 !important;
+    }
+    
+    .badge.bg-info.text-dark {
+        color: #212529 !important;
     }
     
     .bg-light {

@@ -45,11 +45,6 @@
                                         <a href="{% url 'alerts:alert_detail' related.id %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Visualizar">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{% url 'alerts:alert_delete_relation' alert.id related.id %}" class="btn btn-danger" 
-                                           onclick="return confirm('Tem certeza que deseja remover esta relação?');"
-                                           data-bs-toggle="tooltip" title="Remover relação">
-                                            <i class="fas fa-unlink"></i>
-                                        </a>
                                     </div>
                                 </td>
                             </tr>

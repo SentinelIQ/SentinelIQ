@@ -5,21 +5,83 @@
 
 {% block extra_css %}
 <style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
     .info-card {
         transition: all 0.3s ease;
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
     }
     .info-card:hover {
         transform: translateY(-5px);
     }
     .related-item {
         transition: all 0.2s ease;
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
     }
     .related-item:hover {
         transform: translateX(5px);
+        background-color: rgba(255, 255, 255, 0.05);
     }
     .badge-large {
         font-size: 1rem;
         padding: 0.5rem 0.75rem;
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .list-group-item {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .alert-info {
+        background-color: rgba(13, 202, 240, 0.15);
+        border-color: rgba(13, 202, 240, 0.4);
+        color: var(--text-primary);
+    }
+    
+    .bg-light {
+        background-color: var(--bg-sidebar) !important;
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+    
+    code {
+        background-color: rgba(0, 0, 0, 0.2);
+        color: var(--text-primary);
+        padding: 3px 5px;
+        border-radius: 3px;
+        font-size: 0.9em;
+    }
+    
+    .text-dark {
+        color: var(--text-primary) !important;
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    strong {
+        color: var(--text-primary);
+    }
+    
+    .border-bottom {
+        border-bottom-color: var(--border-color) !important;
     }
 </style>
 {% endblock %}
@@ -27,11 +89,11 @@
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1"><i class="fas fa-eye text-primary me-2"></i> Detalhes do Observable</h2>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-eye text-primary me-2"></i> Detalhes do Observable</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'core:observable_list' %}">Observables</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:observable_list' %}"><i class="fas fa-eye me-1"></i> Observables</a></li>
                 <li class="breadcrumb-item active">{{ observable.value }}</li>
             </ol>
         </nav>
@@ -52,7 +114,7 @@
         <div class="card shadow-sm mb-4">
             <div class="card-header {% if observable.is_malicious %}bg-danger{% else %}bg-primary{% endif %} text-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
+                    <h5 class="mb-0 fw-bold">
                         <i class="fas {% if observable.is_malicious %}fa-bug{% else %}fa-eye{% endif %} me-2"></i> 
                         {{ observable.get_type_display }}
                     </h5>
@@ -195,7 +257,7 @@
         <!-- Related Alerts Card -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0"><i class="fas fa-bell me-2"></i> Alertas Relacionados</h5>
+                <h5 class="mb-0 fw-bold"><i class="fas fa-bell me-2"></i> Alertas Relacionados</h5>
             </div>
             <div class="card-body">
                 {% if related_alerts %}
@@ -234,7 +296,7 @@
         <!-- Related Cases Card -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i> Casos Relacionados</h5>
+                <h5 class="mb-0 fw-bold"><i class="fas fa-briefcase me-2"></i> Casos Relacionados</h5>
             </div>
             <div class="card-body">
                 {% if related_cases %}

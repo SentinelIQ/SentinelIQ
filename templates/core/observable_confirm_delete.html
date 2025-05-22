@@ -3,14 +3,78 @@
 
 {% block title %}Excluir Observable{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .border-danger {
+        border-color: rgba(220, 53, 69, 0.3) !important;
+    }
+    
+    .alert-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-color: rgba(255, 193, 7, 0.2);
+        color: var(--text-primary);
+    }
+    
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+        border-color: rgba(220, 53, 69, 0.2);
+        color: var(--text-primary);
+    }
+    
+    code {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: var(--primary);
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.2rem;
+    }
+    
+    .btn-secondary {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1"><i class="fas fa-trash text-danger me-2"></i> Excluir Observable</h2>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-trash text-danger me-2"></i> Excluir Observable</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'core:observable_list' %}">Observables</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:observable_list' %}"><i class="fas fa-search me-1"></i> Observables</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:observable_detail' observable.id %}">{{ observable.value|truncatechars:30 }}</a></li>
                 <li class="breadcrumb-item active">Excluir</li>
             </ol>
         </nav>
@@ -19,21 +83,31 @@
 
 <div class="row justify-content-center">
     <div class="col-lg-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Confirmação</h5>
+        <div class="card shadow-sm border-danger">
+            <div class="card-header">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-exclamation-triangle text-danger me-2"></i> Confirmação de Exclusão</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <i class="fas fa-trash-alt text-danger fa-5x mb-3"></i>
+                    <h4 class="fw-bold">Confirme a Exclusão</h4>
+                    <p class="lead">Você está prestes a excluir o observable:</p>
+                    <div class="py-3">
+                        <h5><code>{{ observable.value }}</code></h5>
+                        <p class="mb-0 text-muted">Tipo: {{ observable.get_type_display }}</p>
+                    </div>
+                </div>
+                
                 <div class="alert alert-warning mb-4">
                     <p class="mb-0">
                         <i class="fas fa-exclamation-circle me-2"></i>
-                        Você está prestes a excluir permanentemente o observable <code>{{ observable.value }}</code> ({{ observable.get_type_display }}). Esta ação não pode ser desfeita!
+                        Esta ação não pode ser desfeita! Todos os relacionamentos deste observable serão removidos.
                     </p>
                 </div>
                 
                 {% if observable.alerts.exists or observable.cases.exists %}
                 <div class="alert alert-danger mb-4">
-                    <h5 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i> Atenção!</h5>
+                    <h5 class="alert-heading fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> Atenção!</h5>
                     <p>Este observable está associado a:</p>
                     <ul class="mb-0">
                         {% if observable.alerts.exists %}
@@ -52,7 +126,7 @@
                     {% csrf_token %}
                     <div class="d-flex justify-content-between mt-4">
                         <a href="{% url 'core:observable_detail' observable.id %}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-2"></i> Cancelar
+                            <i class="fas fa-times me-2"></i> Cancelar
                         </a>
                         <button type="submit" class="btn btn-danger">
                             <i class="fas fa-trash me-2"></i> Confirmar Exclusão

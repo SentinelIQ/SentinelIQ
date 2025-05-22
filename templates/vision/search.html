@@ -4,58 +4,248 @@
 
 {% block title %}{% trans "Threat Intelligence Search" %} | {{ block.super }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .table {
+        color: var(--text-primary);
+    }
+    
+    .table thead th {
+        border-bottom-color: var(--border-color);
+    }
+    
+    .table td, .table th {
+        border-color: var(--border-color);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+    }
+    
+    .form-control, .form-select {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: var(--bg-body);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        color: var(--text-primary);
+    }
+    
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .form-text {
+        color: var(--text-secondary);
+    }
+    
+    .btn-outline-primary, 
+    .btn-outline-secondary,
+    .btn-outline-info,
+    .btn-outline-danger {
+        color: var(--text-primary);
+    }
+    
+    .btn-outline-primary:hover,
+    .btn-outline-info:hover,
+    .btn-outline-danger:hover {
+        color: #fff;
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .modal-content {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .modal-header {
+        border-bottom-color: var(--border-color);
+    }
+    
+    .modal-footer {
+        border-top-color: var(--border-color);
+    }
+    
+    .alert-info {
+        background-color: rgba(13, 202, 240, 0.1);
+        border-color: rgba(13, 202, 240, 0.2);
+        color: var(--text-primary);
+    }
+    
+    .border {
+        border-color: var(--border-color) !important;
+    }
+    
+    .bg-light {
+        background-color: var(--bg-body) !important;
+        color: var(--text-primary);
+    }
+    
+    pre {
+        color: var(--text-primary);
+    }
+    
+    .dropdown-menu {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .dropdown-item {
+        color: var(--text-primary);
+    }
+    
+    .dropdown-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+    }
+    
+    .dropdown-divider {
+        border-top-color: var(--border-color);
+    }
+    
+    .sortable {
+        cursor: pointer;
+        text-decoration: none;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+    }
+    
+    .sortable:hover {
+        color: var(--primary);
+    }
+    
+    .sort-icon {
+        margin-left: 5px;
+        font-size: 0.8em;
+    }
+    
+    .asc .sort-icon::after {
+        content: "\f0de";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+    
+    .desc .sort-icon::after {
+        content: "\f0dd";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+    }
+    
+    .nosort .sort-icon::after {
+        content: "\f0dc";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid px-4">
-    <div class="row mb-4">
-        <div class="col">
+<div class="container-fluid p-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold">
+                <i class="fas fa-search text-primary me-2"></i> {% trans "Threat Intelligence Search" %}
+            </h2>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'vision:feed_list' %}">{% trans "Feeds" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> {% trans "Home" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'vision:feed_list' %}"><i class="fas fa-satellite-dish me-1"></i> {% trans "Feeds" %}</a></li>
                     <li class="breadcrumb-item active">{% trans "Search" %}</li>
                 </ol>
             </nav>
-            <h1 class="h3 mb-0">
-                <i class="fas fa-search me-2"></i> {% trans "Threat Intelligence Search" %}
-            </h1>
         </div>
     </div>
     
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                    <i class="fas fa-filter me-1"></i> {% trans "Search Filters" %}
+                <div class="card-header">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-filter text-primary me-2"></i> {% trans "Search Filters" %}</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form method="get" class="needs-validation" novalidate>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="{{ form.search_term.id_for_label }}" class="form-label">{% trans "Search Term" %}</label>
+                                <label for="{{ form.search_term.id_for_label }}" class="form-label">
+                                    <i class="fas fa-search me-1"></i> {% trans "Search Term" %}
+                                </label>
                                 {{ form.search_term }}
                                 <div class="form-text">{% trans "Enter IP, domain, URL, hash or other indicator to search." %}</div>
                             </div>
                             
                             <div class="col-md-3">
-                                <label for="{{ form.item_type.id_for_label }}" class="form-label">{% trans "Type" %}</label>
+                                <label for="{{ form.item_type.id_for_label }}" class="form-label">
+                                    <i class="fas fa-tag me-1"></i> {% trans "Type" %}
+                                </label>
                                 {{ form.item_type }}
                             </div>
                             
                             <div class="col-md-3">
-                                <label for="{{ form.confidence.id_for_label }}" class="form-label">{% trans "Confidence" %}</label>
+                                <label for="{{ form.confidence.id_for_label }}" class="form-label">
+                                    <i class="fas fa-shield-alt me-1"></i> {% trans "Confidence" %}
+                                </label>
                                 {{ form.confidence }}
                             </div>
                             
                             <div class="col-md-3">
-                                <label for="{{ form.is_malicious.id_for_label }}" class="form-label">{% trans "Malicious" %}</label>
+                                <label for="{{ form.is_malicious.id_for_label }}" class="form-label">
+                                    <i class="fas fa-bug me-1"></i> {% trans "Malicious" %}
+                                </label>
                                 {{ form.is_malicious }}
                             </div>
                             
                             <div class="col-md-3">
-                                <label for="{{ form.tlp.id_for_label }}" class="form-label">{% trans "TLP" %}</label>
+                                <label for="{{ form.tlp.id_for_label }}" class="form-label">
+                                    <i class="fas fa-traffic-light me-1"></i> {% trans "TLP" %}
+                                </label>
                                 {{ form.tlp }}
                             </div>
                             
                             <div class="col-md-6 d-flex align-items-end justify-content-end">
+                                <!-- Hidden sort fields to preserve current sort when searching -->
+                                {% if request.GET.sort_by %}
+                                <input type="hidden" name="sort_by" value="{{ request.GET.sort_by }}">
+                                <input type="hidden" name="sort_order" value="{{ request.GET.sort_order }}">
+                                {% endif %}
+                                
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-search me-1"></i> {% trans "Search" %}
                                 </button>
@@ -75,24 +265,58 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="fas fa-list me-1"></i> {% trans "Results" %}
-                    </div>
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-list text-primary me-2"></i> {% trans "Results" %}</h5>
                     <span class="badge bg-secondary">{{ paginator.count }} {% trans "items found" %}</span>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     {% if items %}
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark">
                                     <tr>
-                                        <th>{% trans "Type" %}</th>
-                                        <th>{% trans "Value" %}</th>
-                                        <th>{% trans "Source" %}</th>
-                                        <th>{% trans "Creator" %}</th>
-                                        <th>{% trans "#Attr." %}</th>
-                                        <th>{% trans "TLP" %}</th>
-                                        <th>{% trans "Actions" %}</th>
+                                        <th>
+                                            <a href="?{% if request.GET.search_term %}search_term={{ request.GET.search_term }}&{% endif %}{% if request.GET.item_type %}item_type={{ request.GET.item_type }}&{% endif %}{% if request.GET.confidence %}confidence={{ request.GET.confidence }}&{% endif %}{% if request.GET.is_malicious %}is_malicious={{ request.GET.is_malicious }}&{% endif %}{% if request.GET.tlp %}tlp={{ request.GET.tlp }}&{% endif %}sort_by=item_type&sort_order={% if request.GET.sort_by == 'item_type' and request.GET.sort_order == 'asc' %}desc{% else %}asc{% endif %}" 
+                                               class="sortable {% if request.GET.sort_by == 'item_type' %}{% if request.GET.sort_order == 'asc' %}asc{% else %}desc{% endif %}{% else %}nosort{% endif %}">
+                                                <i class="fas fa-tag me-1"></i> {% trans "Type" %}
+                                                <span class="sort-icon"></span>
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a href="?{% if request.GET.search_term %}search_term={{ request.GET.search_term }}&{% endif %}{% if request.GET.item_type %}item_type={{ request.GET.item_type }}&{% endif %}{% if request.GET.confidence %}confidence={{ request.GET.confidence }}&{% endif %}{% if request.GET.is_malicious %}is_malicious={{ request.GET.is_malicious }}&{% endif %}{% if request.GET.tlp %}tlp={{ request.GET.tlp }}&{% endif %}sort_by=value&sort_order={% if request.GET.sort_by == 'value' and request.GET.sort_order == 'asc' %}desc{% else %}asc{% endif %}" 
+                                               class="sortable {% if request.GET.sort_by == 'value' %}{% if request.GET.sort_order == 'asc' %}asc{% else %}desc{% endif %}{% else %}nosort{% endif %}">
+                                                <i class="fas fa-fingerprint me-1"></i> {% trans "Value" %}
+                                                <span class="sort-icon"></span>
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a href="?{% if request.GET.search_term %}search_term={{ request.GET.search_term }}&{% endif %}{% if request.GET.item_type %}item_type={{ request.GET.item_type }}&{% endif %}{% if request.GET.confidence %}confidence={{ request.GET.confidence }}&{% endif %}{% if request.GET.is_malicious %}is_malicious={{ request.GET.is_malicious }}&{% endif %}{% if request.GET.tlp %}tlp={{ request.GET.tlp }}&{% endif %}sort_by=feed&sort_order={% if request.GET.sort_by == 'feed' and request.GET.sort_order == 'asc' %}desc{% else %}asc{% endif %}" 
+                                               class="sortable {% if request.GET.sort_by == 'feed' %}{% if request.GET.sort_order == 'asc' %}asc{% else %}desc{% endif %}{% else %}nosort{% endif %}">
+                                                <i class="fas fa-satellite-dish me-1"></i> {% trans "Source" %}
+                                                <span class="sort-icon"></span>
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a href="?{% if request.GET.search_term %}search_term={{ request.GET.search_term }}&{% endif %}{% if request.GET.item_type %}item_type={{ request.GET.item_type }}&{% endif %}{% if request.GET.confidence %}confidence={{ request.GET.confidence }}&{% endif %}{% if request.GET.is_malicious %}is_malicious={{ request.GET.is_malicious }}&{% endif %}{% if request.GET.tlp %}tlp={{ request.GET.tlp }}&{% endif %}sort_by=creator_org&sort_order={% if request.GET.sort_by == 'creator_org' and request.GET.sort_order == 'asc' %}desc{% else %}asc{% endif %}" 
+                                               class="sortable {% if request.GET.sort_by == 'creator_org' %}{% if request.GET.sort_order == 'asc' %}asc{% else %}desc{% endif %}{% else %}nosort{% endif %}">
+                                                <i class="fas fa-user-shield me-1"></i> {% trans "Creator" %}
+                                                <span class="sort-icon"></span>
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a href="?{% if request.GET.search_term %}search_term={{ request.GET.search_term }}&{% endif %}{% if request.GET.item_type %}item_type={{ request.GET.item_type }}&{% endif %}{% if request.GET.confidence %}confidence={{ request.GET.confidence }}&{% endif %}{% if request.GET.is_malicious %}is_malicious={{ request.GET.is_malicious }}&{% endif %}{% if request.GET.tlp %}tlp={{ request.GET.tlp }}&{% endif %}sort_by=attribute_count&sort_order={% if request.GET.sort_by == 'attribute_count' and request.GET.sort_order == 'asc' %}desc{% else %}asc{% endif %}" 
+                                               class="sortable {% if request.GET.sort_by == 'attribute_count' %}{% if request.GET.sort_order == 'asc' %}asc{% else %}desc{% endif %}{% else %}nosort{% endif %}">
+                                                <i class="fas fa-list-ol me-1"></i> {% trans "#Attr." %}
+                                                <span class="sort-icon"></span>
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a href="?{% if request.GET.search_term %}search_term={{ request.GET.search_term }}&{% endif %}{% if request.GET.item_type %}item_type={{ request.GET.item_type }}&{% endif %}{% if request.GET.confidence %}confidence={{ request.GET.confidence }}&{% endif %}{% if request.GET.is_malicious %}is_malicious={{ request.GET.is_malicious }}&{% endif %}{% if request.GET.tlp %}tlp={{ request.GET.tlp }}&{% endif %}sort_by=tlp&sort_order={% if request.GET.sort_by == 'tlp' and request.GET.sort_order == 'asc' %}desc{% else %}asc{% endif %}" 
+                                               class="sortable {% if request.GET.sort_by == 'tlp' %}{% if request.GET.sort_order == 'asc' %}asc{% else %}desc{% endif %}{% else %}nosort{% endif %}">
+                                                <i class="fas fa-traffic-light me-1"></i> {% trans "TLP" %}
+                                                <span class="sort-icon"></span>
+                                            </a>
+                                        </th>
+                                        <th class="text-center"><i class="fas fa-cogs me-1"></i> {% trans "Actions" %}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -123,7 +347,7 @@
                                             {% endif %}
                                         </td>
                                         <td>{{ item.tlp|tlp_badge }}</td>
-                                        <td>
+                                        <td class="text-center">
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="actionMenu{{ item.id }}" data-bs-toggle="dropdown" aria-expanded="false">
                                                     <i class="fas fa-ellipsis-v"></i>
@@ -154,31 +378,33 @@
                                                 <div class="modal-dialog modal-lg">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title" id="modalDetailsLabel{{ item.id }}">{% trans "Threat Intelligence Details" %}</h5>
+                                                            <h5 class="modal-title fw-bold" id="modalDetailsLabel{{ item.id }}">
+                                                                <i class="fas fa-info-circle text-primary me-2"></i> {% trans "Threat Intelligence Details" %}
+                                                            </h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
                                                             <div class="row">
                                                                 <div class="col-md-6">
-                                                                    <h6>{% trans "Type" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-tag me-1"></i> {% trans "Type" %}</h6>
                                                                     <p><span class="badge bg-secondary">{{ item.get_item_type_display }}</span></p>
                                                                     
-                                                                    <h6>{% trans "Value" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-fingerprint me-1"></i> {% trans "Value" %}</h6>
                                                                     <p>{{ item.value }}</p>
                                                                     
-                                                                    <h6>{% trans "Source" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-satellite-dish me-1"></i> {% trans "Source" %}</h6>
                                                                     <p>{{ item.feed.name }}</p>
 
-                                                                    <h6>{% trans "Creator Organization" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-building me-1"></i> {% trans "Creator Organization" %}</h6>
                                                                     <p>{{ item.creator_org|default:"Not specified" }}</p>
                                                                     
-                                                                    <h6>{% trans "Owner Organization" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-city me-1"></i> {% trans "Owner Organization" %}</h6>
                                                                     <p>{{ item.owner_org|default:"Not specified" }}</p>
 
-                                                                    <h6>{% trans "Creator User" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-user me-1"></i> {% trans "Creator User" %}</h6>
                                                                     <p>{{ item.creator_user|default:"Not specified" }}</p>
                                                                     
-                                                                    <h6>{% trans "Is Malicious" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-bug me-1"></i> {% trans "Is Malicious" %}</h6>
                                                                     <p>
                                                                         {% if item.is_malicious %}
                                                                             <span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i> {% trans "Yes" %}</span>
@@ -188,33 +414,33 @@
                                                                     </p>
                                                                 </div>
                                                                 <div class="col-md-6">
-                                                                    <h6>{% trans "Number of Attributes" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-list-ol me-1"></i> {% trans "Number of Attributes" %}</h6>
                                                                     <p>{{ item.attribute_count|default:"0" }}</p>
                                                                     
-                                                                    <h6>{% trans "Number of Correlations" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-project-diagram me-1"></i> {% trans "Number of Correlations" %}</h6>
                                                                     <p>{{ item.correlation_count|default:"0" }}</p>
                                                                     
-                                                                    <h6>{% trans "Distribution" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-share-alt me-1"></i> {% trans "Distribution" %}</h6>
                                                                     <p>{{ item.distribution|default:"Not specified" }}</p>
                                                                     
-                                                                    <h6>{% trans "Confidence" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-check-double me-1"></i> {% trans "Confidence" %}</h6>
                                                                     <p>{{ item.confidence|confidence_badge }}</p>
                                                                     
-                                                                    <h6>{% trans "TLP" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-traffic-light me-1"></i> {% trans "TLP" %}</h6>
                                                                     <p>{{ item.tlp|tlp_badge }}</p>
 
-                                                                    <h6>{% trans "Event Date" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-calendar-day me-1"></i> {% trans "Event Date" %}</h6>
                                                                     <p>{% if item.event_date %}{{ item.event_date|date:"d/m/Y" }}{% else %}{% trans "Not specified" %}{% endif %}</p>
                                                                     
-                                                                    <h6>{% trans "First Seen" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-calendar-plus me-1"></i> {% trans "First Seen" %}</h6>
                                                                     <p>{{ item.first_seen|date:"d/m/Y H:i" }}</p>
                                                                     
-                                                                    <h6>{% trans "Last Seen" %}</h6>
+                                                                    <h6 class="fw-bold text-primary"><i class="fas fa-calendar-check me-1"></i> {% trans "Last Seen" %}</h6>
                                                                     <p>{{ item.last_seen|date:"d/m/Y H:i" }}</p>
                                                                 </div>
                                                             </div>
                                                             
-                                                            <h6>{% trans "Tags" %}</h6>
+                                                            <h6 class="fw-bold text-primary"><i class="fas fa-tags me-1"></i> {% trans "Tags" %}</h6>
                                                             <p>
                                                                 {% if item.tags %}
                                                                     {% with tags=item.tags|split:"," %}
@@ -223,17 +449,17 @@
                                                                         {% endfor %}
                                                                     {% endwith %}
                                                                 {% else %}
-                                                                    <em>{% trans "No tags" %}</em>
+                                                                    <em class="text-muted">{% trans "No tags" %}</em>
                                                                 {% endif %}
                                                             </p>
                                                             
-                                                            <h6>{% trans "Description" %}</h6>
+                                                            <h6 class="fw-bold text-primary"><i class="fas fa-align-left me-1"></i> {% trans "Description" %}</h6>
                                                             <div class="border rounded p-3 bg-light">
                                                                 <pre class="mb-0" style="white-space: pre-wrap;">{{ item.description|default:"No description" }}</pre>
                                                             </div>
                                                             
                                                             {% if item.external_url %}
-                                                                <h6 class="mt-3">{% trans "External Link" %}</h6>
+                                                                <h6 class="fw-bold text-primary mt-3"><i class="fas fa-external-link-alt me-1"></i> {% trans "External Link" %}</h6>
                                                                 <p>
                                                                     <a href="{{ item.external_url }}" target="_blank" rel="noopener noreferrer">
                                                                         {{ item.external_url }} <i class="fas fa-external-link-alt"></i>
@@ -242,7 +468,9 @@
                                                             {% endif %}
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                <i class="fas fa-times me-1"></i> {% trans "Close" %}
+                                                            </button>
                                                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCreateCase{{ item.id }}">
                                                                 <i class="fas fa-folder-plus me-1"></i> {% trans "Create Case" %}
                                                             </button>
@@ -256,7 +484,9 @@
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title" id="modalCreateCaseLabel{{ item.id }}">{% trans "Create Case from Threat Intelligence" %}</h5>
+                                                            <h5 class="modal-title fw-bold" id="modalCreateCaseLabel{{ item.id }}">
+                                                                <i class="fas fa-folder-plus text-primary me-2"></i> {% trans "Create Case from Threat Intelligence" %}
+                                                            </h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <form action="{% url 'vision:create_case_from_intel' item.id %}" method="post">
@@ -272,7 +502,9 @@
                                                                 </div>
                                                                 
                                                                 <div class="mb-3">
-                                                                    <label for="title{{ item.id }}" class="form-label">{% trans "Case Title" %}</label>
+                                                                    <label for="title{{ item.id }}" class="form-label">
+                                                                        <i class="fas fa-heading me-1"></i> {% trans "Case Title" %}
+                                                                    </label>
                                                                     <input type="text" class="form-control" id="title{{ item.id }}" name="title" value="Threat Intelligence: {{ item.value|truncatechars:30 }}">
                                                                 </div>
                                                                 
@@ -281,8 +513,10 @@
                                                                 </p>
                                                             </div>
                                                             <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
-                                                                <button type="submit" class="btn btn-primary">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                    <i class="fas fa-times me-1"></i> {% trans "Cancel" %}
+                                                                </button>
+                                                                <button type="submit" class="btn btn-success">
                                                                     <i class="fas fa-folder-plus me-1"></i> {% trans "Create Case" %}
                                                                 </button>
                                                             </div>
@@ -302,7 +536,7 @@
                     {% else %}
                         <div class="text-center py-5">
                             <i class="fas fa-search fa-4x text-muted mb-3"></i>
-                            <h4>{% trans "No threat intelligence items found" %}</h4>
+                            <h4 class="fw-bold">{% trans "No threat intelligence items found" %}</h4>
                             <p class="text-muted mb-4">{% trans "Try adjusting your search criteria or sync your threat feeds." %}</p>
                             <div>
                                 <a href="{% url 'vision:feed_list' %}" class="btn btn-primary me-2">

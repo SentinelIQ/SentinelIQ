@@ -9,7 +9,7 @@
         border-top: 4px solid var(--primary);
     }
     .form-section {
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--border-color);
         padding-bottom: 1.5rem;
         margin-bottom: 1.5rem;
     }
@@ -25,10 +25,23 @@
     .focused label {
         color: var(--primary);
     }
+    .form-control, .form-select {
+        background-color: var(--bg-sidebar);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
     .form-control:focus, .form-select:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 0.2rem rgba(58, 134, 255, 0.15);
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        background-color: var(--bg-sidebar);
+        color: var(--text-primary);
     }
+    
+    textarea.form-control {
+        min-height: 120px;
+    }
+    
     .form-floating > .form-control:focus ~ label,
     .form-floating > .form-control:not(:placeholder-shown) ~ label {
         color: var(--primary);
@@ -45,13 +58,26 @@
     .severity-low {
         color: var(--success);
     }
+    
+    .form-text {
+        color: var(--text-secondary);
+    }
+    
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .form-floating > label {
+        color: var(--text-secondary);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1">
+        <h2 class="mb-1 fw-bold">
             <i class="fas fa-{% if form.instance.id %}edit text-warning{% else %}plus-circle text-primary{% endif %} me-2"></i> 
             {% if form.instance.id %}
                 Editar Alerta
@@ -61,8 +87,8 @@
         </h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_list' %}">Alertas</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}" class="text-decoration-none"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_list' %}" class="text-decoration-none"><i class="fas fa-bell me-1"></i> Alertas</a></li>
                 <li class="breadcrumb-item active">
                     {% if form.instance.id %}
                         Editar {{ form.instance.title }}
@@ -76,8 +102,8 @@
 </div>
 
 <div class="card shadow-sm form-card">
-    <div class="card-header bg-white">
-        <h4 class="mb-0">
+    <div class="card-header">
+        <h4 class="mb-0 fw-bold">
             {% if form.instance.id %}
                 <span class="text-warning">
                     <i class="fas fa-edit me-2"></i> Editar Alerta: {{ form.instance.title }}
@@ -212,9 +238,9 @@
                         {% endif %}
                         <div class="form-text small">
                             <ul class="mb-0 ps-3">
-                                <li><strong style="color: red;">TLP:RED</strong> - Não compartilhar, apenas para destinatários específicos</li>
-                                <li><strong style="color: orange;">TLP:AMBER</strong> - Compartilhamento limitado dentro da organização</li>
-                                <li><strong style="color: green;">TLP:GREEN</strong> - Compartilhamento limitado a uma comunidade</li>
+                                <li><strong style="color: #FF3B30;">TLP:RED</strong> - Não compartilhar, apenas para destinatários específicos</li>
+                                <li><strong style="color: #FF9500;">TLP:AMBER</strong> - Compartilhamento limitado dentro da organização</li>
+                                <li><strong style="color: #28CD41;">TLP:GREEN</strong> - Compartilhamento limitado a uma comunidade</li>
                                 <li><strong>TLP:WHITE</strong> - Compartilhamento irrestrito</li>
                             </ul>
                         </div>
@@ -230,9 +256,9 @@
                         {% endif %}
                         <div class="form-text small">
                             <ul class="mb-0 ps-3">
-                                <li><strong style="color: red;">PAP:RED</strong> - Nenhuma ação permitida além de alertas</li>
-                                <li><strong style="color: orange;">PAP:AMBER</strong> - Ações limitadas aprovadas pelo proprietário</li>
-                                <li><strong style="color: green;">PAP:GREEN</strong> - Ações coordenadas permitidas</li>
+                                <li><strong style="color: #FF3B30;">PAP:RED</strong> - Nenhuma ação permitida além de alertas</li>
+                                <li><strong style="color: #FF9500;">PAP:AMBER</strong> - Ações limitadas aprovadas pelo proprietário</li>
+                                <li><strong style="color: #28CD41;">PAP:GREEN</strong> - Ações coordenadas permitidas</li>
                                 <li><strong>PAP:WHITE</strong> - Uso irrestrito da informação</li>
                             </ul>
                         </div>

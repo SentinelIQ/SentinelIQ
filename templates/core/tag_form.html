@@ -5,6 +5,47 @@
 
 {% block extra_css %}
 <style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control, .form-select {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(58, 134, 255, 0.15);
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+    }
+    
+    .form-label {
+        color: var(--text-primary);
+    }
+    
+    .form-text {
+        color: var(--text-secondary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
     .color-preview {
         width: 25px;
         height: 25px;
@@ -13,16 +54,37 @@
         margin-right: 5px;
         vertical-align: middle;
     }
+    
     .tag-preview {
         display: block;
         margin-top: 20px;
         padding: 10px;
         border-radius: 5px;
-        background-color: #f8f9fa;
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-color);
     }
+    
     .required-asterisk {
-        color: red;
+        color: #dc3545;
         margin-left: 3px;
+    }
+    
+    .alert-info {
+        background-color: rgba(13, 202, 240, 0.1);
+        border-color: rgba(13, 202, 240, 0.2);
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        color: var(--text-primary);
     }
 </style>
 {% endblock %}
@@ -30,14 +92,14 @@
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1">
+        <h2 class="mb-1 fw-bold">
             <i class="fas fa-tag text-primary me-2"></i> 
             {% if object.id %}Editar Tag{% else %}Nova Tag{% endif %}
         </h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'core:tag_list' %}">Tags</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:tag_list' %}"><i class="fas fa-tags me-1"></i> Tags</a></li>
                 <li class="breadcrumb-item active">
                     {% if object.id %}{{ object.name }}{% else %}Nova Tag{% endif %}
                 </li>
@@ -49,17 +111,17 @@
 <div class="row">
     <div class="col-lg-6">
         <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-tag me-2"></i> 
+            <div class="card-header">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-tag text-primary me-2"></i> 
                     {% if object.id %}Editar Tag{% else %}Nova Tag{% endif %}
                 </h5>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                        <label for="{{ form.name.id_for_label }}" class="form-label fw-bold">
                             <i class="fas fa-font me-1"></i> Nome da Tag<span class="required-asterisk">*</span>
                         </label>
                         {{ form.name }}
@@ -72,7 +134,7 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="{{ form.color.id_for_label }}" class="form-label">
+                        <label for="{{ form.color.id_for_label }}" class="form-label fw-bold">
                             <i class="fas fa-palette me-1"></i> Cor da Tag<span class="required-asterisk">*</span>
                         </label>
                         {{ form.color }}
@@ -86,7 +148,7 @@
                     
                     <!-- Campos para associar tag a alerta ou caso -->
                     <div class="mb-3">
-                        <label for="{{ form.alert.id_for_label }}" class="form-label">
+                        <label for="{{ form.alert.id_for_label }}" class="form-label fw-bold">
                             <i class="fas fa-bell me-1"></i> Associar a um Alerta
                         </label>
                         {{ form.alert }}
@@ -99,7 +161,7 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="{{ form.case.id_for_label }}" class="form-label">
+                        <label for="{{ form.case.id_for_label }}" class="form-label fw-bold">
                             <i class="fas fa-briefcase me-1"></i> Associar a um Caso
                         </label>
                         {{ form.case }}
@@ -116,13 +178,13 @@
                     </div>
                     
                     <div class="tag-preview">
-                        <h6>Prévia:</h6>
+                        <h6 class="mb-2 fw-bold">Prévia:</h6>
                         <span id="tagPreview" class="badge bg-primary">Tag Exemplo</span>
                     </div>
                     
                     <div class="mt-4 d-flex justify-content-between">
                         <a href="{% url 'core:tag_list' %}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i> Voltar
+                            <i class="fas fa-times me-1"></i> Cancelar
                         </a>
                         <button type="submit" class="btn btn-success">
                             <i class="fas fa-save me-1"></i> Salvar
@@ -135,10 +197,10 @@
     
     <div class="col-lg-6">
         <div class="card shadow-sm">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Sobre Tags</h5>
+            <div class="card-header">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-info-circle text-info me-2"></i> Sobre Tags</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <p>As tags ajudam a categorizar e organizar seus alertas e casos. Utilize tags para:</p>
                 <ul>
                     <li>Agrupar alertas e casos relacionados</li>

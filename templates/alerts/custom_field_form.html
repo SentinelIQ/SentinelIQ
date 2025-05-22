@@ -5,19 +5,77 @@
 
 {% block extra_css %}
 <style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
     .field-preview {
         padding: 15px;
-        border: 1px solid #ddd;
+        border: 1px solid var(--border-color);
         border-radius: 5px;
-        background-color: #f8f9fa;
+        background-color: rgba(255, 255, 255, 0.05);
         margin-top: 20px;
     }
     
     .field-type-info {
         margin-top: 10px;
         padding: 10px;
-        border-left: 3px solid #007bff;
-        background-color: #f0f7ff;
+        border-left: 3px solid var(--primary);
+        background-color: rgba(13, 110, 253, 0.15);
+        color: var(--text-primary);
+    }
+    
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .form-text {
+        color: var(--text-secondary);
+    }
+    
+    .form-control, .form-select {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: var(--bg-sidebar);
+        border-color: var(--primary);
+        color: var(--text-primary);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .form-check-input {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+    }
+    
+    .form-check-label {
+        color: var(--text-primary);
+    }
+    
+    .alert-warning {
+        background-color: rgba(255, 193, 7, 0.15);
+        border-color: rgba(255, 193, 7, 0.4);
+        color: var(--text-primary);
+    }
+    
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.15);
+        border-color: rgba(220, 53, 69, 0.4);
+        color: var(--text-primary);
     }
 </style>
 {% endblock %}
@@ -81,15 +139,15 @@
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1">
+        <h2 class="mb-1 fw-bold">
             <i class="fas fa-cog text-primary me-2"></i> 
             {% if object %}Editar{% else %}Novo{% endif %} Campo Personalizado
         </h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_list' %}">Alertas</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_custom_field_list' %}">Campos Personalizados</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_list' %}"><i class="fas fa-bell me-1"></i> Alertas</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_custom_field_list' %}"><i class="fas fa-cogs me-1"></i> Campos Personalizados</a></li>
                 <li class="breadcrumb-item active">{% if object %}Editar{% else %}Novo{% endif %} Campo</li>
             </ol>
         </nav>
@@ -105,7 +163,7 @@
     <div class="col-lg-8">
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
+                <h5 class="mb-0 fw-bold">
                     <i class="fas fa-edit me-2"></i> 
                     {% if object %}Editar{% else %}Novo{% endif %} Campo Personalizado
                 </h5>
@@ -212,7 +270,7 @@
     <div class="col-lg-4">
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-info text-white">
-                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Informações</h5>
+                <h5 class="mb-0 fw-bold"><i class="fas fa-info-circle me-2"></i> Informações</h5>
             </div>
             <div class="card-body">
                 <p>Campos personalizados permitem que você colete informações adicionais específicas para a sua organização em cada alerta.</p>

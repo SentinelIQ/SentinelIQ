@@ -11,7 +11,7 @@
     .nav-tabs .nav-link {
         border: none;
         border-bottom: 3px solid transparent;
-        color: var(--dark);
+        color: var(--text-primary);
         font-weight: 600;
     }
     .nav-tabs .nav-link.active {
@@ -20,8 +20,77 @@
         color: var(--primary);
     }
     .existing-observable:hover {
-        background-color: rgba(0, 123, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.05);
         cursor: pointer;
+    }
+    
+    /* Form control styling for dark theme */
+    .form-control, .form-select {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(58, 134, 255, 0.15);
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+    }
+    
+    /* Fix dropdown options appearance */
+    select.form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23adb5bd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+    
+    /* Fix dropdown option text color */
+    select.form-select option {
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+    }
+    
+    /* Custom styling for dropdown menu items */
+    select.form-select optgroup {
+        background-color: var(--bg-body);
+        color: var(--text-secondary);
+        font-weight: bold;
+    }
+    
+    /* Fix text secondary color */
+    .form-text {
+        color: var(--text-secondary);
+    }
+    
+    /* Table styling for dark theme */
+    .table {
+        color: var(--text-primary);
+    }
+    
+    .table thead th {
+        border-bottom-color: var(--border-color);
+        color: var(--text-secondary);
+    }
+    
+    .table-light {
+        background-color: var(--bg-sidebar) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .table td, .table th {
+        border-color: var(--border-color);
+    }
+    
+    code {
+        background-color: rgba(0, 0, 0, 0.2);
+        color: var(--text-primary);
+        padding: 3px 5px;
+        border-radius: 3px;
     }
 </style>
 {% endblock %}
@@ -195,4 +264,119 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all select elements
+        const selectElements = document.querySelectorAll('select.form-select');
+        
+        // Replace each select with a Bootstrap custom select
+        selectElements.forEach(function(select) {
+            // Create a wrapper div
+            const wrapper = document.createElement('div');
+            wrapper.className = 'dropdown custom-select-wrapper';
+            wrapper.style.width = '100%';
+            
+            // Get the current selected option
+            const selectedOption = select.options[select.selectedIndex];
+            const selectedText = selectedOption ? selectedOption.textContent : 'Selecione uma opção';
+            
+            // Create the button that will replace the select
+            const button = document.createElement('button');
+            button.className = 'form-select dropdown-toggle';
+            button.type = 'button';
+            button.setAttribute('data-bs-toggle', 'dropdown');
+            button.setAttribute('aria-expanded', 'false');
+            button.innerHTML = selectedText;
+            button.style.textAlign = 'left';
+            button.style.width = '100%';
+            button.style.backgroundColor = 'var(--bg-card)';
+            button.style.color = 'var(--text-primary)';
+            button.style.borderColor = 'var(--border-color)';
+            
+            // Create the dropdown menu
+            const dropdownMenu = document.createElement('ul');
+            dropdownMenu.className = 'dropdown-menu w-100';
+            dropdownMenu.style.backgroundColor = 'var(--bg-card)';
+            dropdownMenu.style.borderColor = 'var(--border-color)';
+            dropdownMenu.style.maxHeight = '300px';
+            dropdownMenu.style.overflowY = 'auto';
+            dropdownMenu.style.boxShadow = '0 0.5rem 1rem rgba(0, 0, 0, 0.3)';
+            dropdownMenu.style.padding = '0.5rem 0';
+            
+            // Add options to dropdown menu
+            for (let i = 0; i < select.options.length; i++) {
+                const option = select.options[i];
+                
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.className = 'dropdown-item';
+                a.href = '#';
+                a.textContent = option.textContent;
+                a.setAttribute('data-value', option.value);
+                a.style.color = 'var(--text-primary)';
+                a.style.padding = '0.5rem 1rem';
+                a.style.backgroundColor = 'var(--bg-card)';
+                
+                // Highlight selected option
+                if (option.selected) {
+                    a.style.backgroundColor = 'rgba(var(--primary-rgb), 0.2)';
+                    a.style.fontWeight = 'bold';
+                }
+                
+                // Handle click event
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Update the hidden select value
+                    select.value = this.getAttribute('data-value');
+                    
+                    // Trigger change event
+                    const event = new Event('change', { bubbles: true });
+                    select.dispatchEvent(event);
+                    
+                    // Update button text
+                    button.textContent = this.textContent;
+                    
+                    // Update highlighted option
+                    dropdownMenu.querySelectorAll('a.dropdown-item').forEach(item => {
+                        item.style.backgroundColor = 'var(--bg-card)';
+                        item.style.fontWeight = 'normal';
+                    });
+                    this.style.backgroundColor = 'rgba(var(--primary-rgb), 0.2)';
+                    this.style.fontWeight = 'bold';
+                });
+                
+                // Add hover effect
+                a.addEventListener('mouseover', function() {
+                    if (!option.selected) {
+                        this.style.backgroundColor = 'var(--bg-sidebar)';
+                    }
+                });
+                a.addEventListener('mouseout', function() {
+                    if (!option.selected) {
+                        this.style.backgroundColor = 'var(--bg-card)';
+                    } else {
+                        this.style.backgroundColor = 'rgba(var(--primary-rgb), 0.2)';
+                    }
+                });
+                
+                li.appendChild(a);
+                dropdownMenu.appendChild(li);
+            }
+            
+            // Add elements to wrapper
+            wrapper.appendChild(button);
+            wrapper.appendChild(dropdownMenu);
+            
+            // Hide the original select
+            select.style.display = 'none';
+            
+            // Insert the custom select after the original
+            select.parentNode.insertBefore(wrapper, select.nextSibling);
+        });
+    });
+</script>
 {% endblock %} 

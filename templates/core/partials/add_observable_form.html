@@ -1,37 +1,131 @@
-<div class="row mb-3">
+{% load i18n %}
+
+<style>
+    .form-control, .form-select {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: var(--bg-body);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        color: var(--text-primary);
+    }
+    
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .form-text {
+        color: var(--text-secondary);
+    }
+    
+    .form-check-label {
+        color: var(--text-primary);
+    }
+    
+    .form-check-input {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+    
+    .required-asterisk {
+        color: #dc3545;
+        margin-left: 3px;
+    }
+</style>
+
+<div class="row mb-4">
     <div class="col-md-8">
-        <label for="{{ form.value.id_for_label }}" class="form-label">Valor do Observable</label>
-        {{ form.value }}
-        <div class="form-text">Digite o valor exato do indicador de compromisso.</div>
+        <div class="mb-3">
+            <label for="{{ form.value.id_for_label }}" class="form-label">
+                <i class="fas fa-fingerprint me-1"></i> {% trans "Valor do Observable" %}<span class="required-asterisk">*</span>
+            </label>
+            {{ form.value }}
+            {% if form.value.errors %}
+            <div class="invalid-feedback d-block">
+                {{ form.value.errors }}
+            </div>
+            {% endif %}
+            <div class="form-text">{% trans "Digite o valor exato do indicador de compromisso." %}</div>
+        </div>
     </div>
     <div class="col-md-4">
-        <label for="{{ form.type.id_for_label }}" class="form-label">Tipo</label>
-        {{ form.type }}
+        <div class="mb-3">
+            <label for="{{ form.type.id_for_label }}" class="form-label">
+                <i class="fas fa-tag me-1"></i> {% trans "Tipo" %}<span class="required-asterisk">*</span>
+            </label>
+            {{ form.type }}
+            {% if form.type.errors %}
+            <div class="invalid-feedback d-block">
+                {{ form.type.errors }}
+            </div>
+            {% endif %}
+            <div class="form-text">{% trans "Selecione a categoria deste observable." %}</div>
+        </div>
     </div>
 </div>
 
-<div class="row mb-3">
+<div class="row mb-4">
     <div class="col-md-8">
-        <label for="{{ form.description.id_for_label }}" class="form-label">Descrição</label>
-        {{ form.description }}
+        <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label">
+                <i class="fas fa-align-left me-1"></i> {% trans "Descrição" %}
+            </label>
+            {{ form.description }}
+            {% if form.description.errors %}
+            <div class="invalid-feedback d-block">
+                {{ form.description.errors }}
+            </div>
+            {% endif %}
+            <div class="form-text">{% trans "Forneça detalhes sobre este observable e seu significado." %}</div>
+        </div>
     </div>
     <div class="col-md-4">
-        <div class="mb-3">
-            <label for="{{ form.confidence.id_for_label }}" class="form-label">Nível de Confiança</label>
+        <div class="mb-4">
+            <label for="{{ form.confidence.id_for_label }}" class="form-label">
+                <i class="fas fa-chart-bar me-1"></i> {% trans "Nível de Confiança" %}
+            </label>
             {{ form.confidence }}
+            {% if form.confidence.errors %}
+            <div class="invalid-feedback d-block">
+                {{ form.confidence.errors }}
+            </div>
+            {% endif %}
+            <div class="form-text">{% trans "Qual o grau de confiança neste indicador." %}</div>
         </div>
         
-        <div class="mb-3">
-            <label for="{{ form.pap.id_for_label }}" class="form-label">PAP Level</label>
+        <div class="mb-4">
+            <label for="{{ form.pap.id_for_label }}" class="form-label">
+                <i class="fas fa-shield-alt me-1"></i> {% trans "PAP Level" %}
+            </label>
             {{ form.pap }}
-            <div class="form-text">Permissible Actions Protocol: Define como este indicador pode ser compartilhado.</div>
+            {% if form.pap.errors %}
+            <div class="invalid-feedback d-block">
+                {{ form.pap.errors }}
+            </div>
+            {% endif %}
+            <div class="form-text">{% trans "Permissible Actions Protocol: Define como este indicador pode ser compartilhado." %}</div>
         </div>
         
         <div class="form-check mb-3">
             {{ form.is_malicious }}
             <label class="form-check-label" for="{{ form.is_malicious.id_for_label }}">
-                Marcar como Malicioso
+                <i class="fas fa-bug me-1 text-danger"></i> {% trans "Marcar como Malicioso" %}
             </label>
+            {% if form.is_malicious.errors %}
+            <div class="invalid-feedback d-block">
+                {{ form.is_malicious.errors }}
+            </div>
+            {% endif %}
         </div>
     </div>
 </div> 

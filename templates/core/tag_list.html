@@ -14,16 +14,98 @@
     .tag-sample {
         min-width: 80px;
     }
+    
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header.bg-light {
+        background-color: var(--bg-sidebar) !important;
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .form-control {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus {
+        background-color: var(--bg-sidebar);
+        border-color: var(--primary);
+        color: var(--text-primary);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .table {
+        color: var(--text-primary);
+    }
+    
+    .table thead th {
+        border-bottom-color: var(--border-color);
+    }
+    
+    .table td, .table th {
+        border-color: var(--border-color);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .text-dark {
+        color: var(--text-primary) !important;
+    }
+    
+    .bg-light.text-dark {
+        background-color: var(--bg-sidebar) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color);
+    }
+    
+    .page-link {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--primary);
+    }
+    
+    .page-link:hover {
+        background-color: rgba(13, 110, 253, 0.1);
+        border-color: var(--border-color);
+        color: var(--primary);
+    }
+    
+    .page-item.disabled .page-link {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+        color: var(--text-secondary);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1"><i class="fas fa-tags text-primary me-2"></i> Gerenciar Tags</h2>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-tags text-primary me-2"></i> Gerenciar Tags</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> Home</a></li>
                 <li class="breadcrumb-item active">Tags</li>
             </ol>
         </nav>
@@ -39,7 +121,7 @@
     <div class="col-lg-12">
         <div class="card shadow-sm">
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-search me-2"></i> Buscar Tags</h5>
+                <h5 class="mb-0 fw-bold"><i class="fas fa-search me-2"></i> Buscar Tags</h5>
             </div>
             <div class="card-body">
                 <form method="get" class="row g-3">
@@ -62,7 +144,7 @@
 
 <div class="card shadow-sm">
     <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="fas fa-list me-2"></i> Tags</h5>
+        <h5 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i> Tags</h5>
         <span class="badge bg-primary">{{ tags|length }} tags encontradas</span>
     </div>
     <div class="card-body p-0">

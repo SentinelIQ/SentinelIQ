@@ -4,36 +4,169 @@
 
 {% block title %}{% trans "MITRE ATT&CK Group" %}: {{ group.name }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+    
+    .card-header {
+        background-color: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .card-footer {
+        background-color: rgba(255, 255, 255, 0.02);
+        border-top-color: var(--border-color);
+        color: var(--text-secondary);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+    
+    .text-muted {
+        color: var(--text-secondary) !important;
+    }
+    
+    .list-group-item {
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .list-group-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .list-group-item-action {
+        color: var(--text-primary);
+    }
+    
+    .list-group-item-action:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .btn-outline-secondary {
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: var(--border-color);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .primary-header {
+        border-left: 4px solid var(--primary);
+    }
+    
+    .success-header {
+        border-left: 4px solid var(--success);
+    }
+    
+    .info-header {
+        border-left: 4px solid var(--info);
+    }
+    
+    .warning-header {
+        border-left: 4px solid var(--warning);
+    }
+    
+    .danger-header {
+        border-left: 4px solid var(--danger);
+    }
+    
+    .mitre-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        margin-right: 0.5rem;
+        font-weight: bold;
+    }
+    
+    .tactic-badge {
+        background-color: rgba(13, 110, 253, 0.2);
+        color: var(--primary);
+        border: 1px solid rgba(13, 110, 253, 0.3);
+    }
+    
+    .technique-badge {
+        background-color: rgba(25, 135, 84, 0.2);
+        color: var(--success);
+        border: 1px solid rgba(25, 135, 84, 0.3);
+    }
+    
+    .subtechnique-badge {
+        background-color: rgba(13, 202, 240, 0.2);
+        color: var(--info);
+        border: 1px solid rgba(13, 202, 240, 0.3);
+    }
+</style>
+<link rel="stylesheet" href="{% static 'css/mitre_attack.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container p-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="h3">{{ group.name }}</h1>
-                <div>
-                    <a href="{% url 'core:mitre_attack_group_edit' group.id %}" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> {% trans "Edit Group" %}
-                    </a>
-                    <a href="{% url 'core:mitre_attack_group_list' %}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> {% trans "Back to Groups" %}
-                    </a>
-                </div>
-            </div>
+<div class="container-fluid p-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold">
+                <i class="fas fa-layer-group text-primary me-2"></i> {{ group.name }}
+            </h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}"><i class="fas fa-home me-1"></i> {% trans "Home" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:mitre_attack_list' %}"><i class="fas fa-shield-alt me-1"></i> {% trans "MITRE ATT&CK" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:mitre_attack_group_list' %}"><i class="fas fa-users me-1"></i> {% trans "Groups" %}</a></li>
+                    <li class="breadcrumb-item active">{{ group.name }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{% url 'core:mitre_attack_group_edit' group.id %}" class="btn btn-primary me-2">
+                <i class="fas fa-edit me-1"></i> {% trans "Edit Group" %}
+            </a>
+            <a href="{% url 'core:mitre_attack_group_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> {% trans "Back to Groups" %}
+            </a>
         </div>
     </div>
 
     <div class="row">
         <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">{% trans "Group Details" %}</h5>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header primary-header">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-info-circle text-primary me-2"></i> {% trans "Group Details" %}</h5>
                 </div>
                 <div class="card-body">
                     <p class="mb-0">{{ group.description }}</p>
                 </div>
-                <div class="card-footer bg-light">
-                    <small class="text-muted">{% trans "Created" %}: {{ group.created_at|date:"d/m/Y H:i" }}</small>
-                    <small class="text-muted float-end">{% trans "Last updated" %}: {{ group.updated_at|date:"d/m/Y H:i" }}</small>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted"><i class="fas fa-calendar-alt me-1"></i> {% trans "Created" %}: {{ group.created_at|date:"d/m/Y H:i" }}</small>
+                        <small class="text-muted"><i class="fas fa-clock me-1"></i> {% trans "Last updated" %}: {{ group.updated_at|date:"d/m/Y H:i" }}</small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -41,13 +174,16 @@
 
     <div class="row">
         <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">{% trans "Tactics" %} ({{ tactics.count }})</h5>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header primary-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold"><i class="fas fa-chess text-primary me-2"></i> {% trans "Tactics" %}</h5>
+                        <span class="badge bg-primary">{{ tactics.count }}</span>
+                    </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     {% if tactics %}
-                    <div class="list-group">
+                    <div class="list-group list-group-flush">
                         {% for tactic in tactics %}
                         <div class="list-group-item">
                             <span class="mitre-badge tactic-badge" 
@@ -60,20 +196,25 @@
                         {% endfor %}
                     </div>
                     {% else %}
-                    <p class="text-muted">{% trans "No tactics in this group." %}</p>
+                    <div class="p-3">
+                        <p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i> {% trans "No tactics in this group." %}</p>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">{% trans "Techniques" %} ({{ techniques.count }})</h5>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header success-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold"><i class="fas fa-tools text-success me-2"></i> {% trans "Techniques" %}</h5>
+                        <span class="badge bg-success">{{ techniques.count }}</span>
+                    </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     {% if techniques %}
-                    <div class="list-group">
+                    <div class="list-group list-group-flush">
                         {% for technique in techniques %}
                         <div class="list-group-item">
                             <span class="mitre-badge technique-badge" 
@@ -86,20 +227,25 @@
                         {% endfor %}
                     </div>
                     {% else %}
-                    <p class="text-muted">{% trans "No techniques in this group." %}</p>
+                    <div class="p-3">
+                        <p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i> {% trans "No techniques in this group." %}</p>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">{% trans "Sub-techniques" %} ({{ subtechniques.count }})</h5>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header info-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold"><i class="fas fa-code-branch text-info me-2"></i> {% trans "Sub-techniques" %}</h5>
+                        <span class="badge bg-info">{{ subtechniques.count }}</span>
+                    </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     {% if subtechniques %}
-                    <div class="list-group">
+                    <div class="list-group list-group-flush">
                         {% for subtechnique in subtechniques %}
                         <div class="list-group-item">
                             <span class="mitre-badge subtechnique-badge" 
@@ -112,7 +258,9 @@
                         {% endfor %}
                     </div>
                     {% else %}
-                    <p class="text-muted">{% trans "No sub-techniques in this group." %}</p>
+                    <div class="p-3">
+                        <p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i> {% trans "No sub-techniques in this group." %}</p>
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -121,74 +269,84 @@
 
     <div class="row">
         <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header bg-warning text-dark">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header warning-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">{% trans "Related Cases" %}</h5>
+                        <h5 class="mb-0 fw-bold"><i class="fas fa-briefcase text-warning me-2"></i> {% trans "Related Cases" %}</h5>
                         <span class="badge bg-warning text-dark">{{ group.cases.count }}</span>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     {% if cases %}
-                    <div class="list-group">
+                    <div class="list-group list-group-flush">
                         {% for case in cases %}
                         <a href="{% url 'cases:case_detail' case.id %}" class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ case.title }}</h6>
-                                <small>{{ case.get_status_display }}</small>
+                                <h6 class="mb-1 fw-bold">{{ case.title }}</h6>
+                                <span class="badge bg-secondary">{{ case.get_status_display }}</span>
                             </div>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-alt me-1"></i> {{ case.created_at|date:"d/m/Y" }}
+                            </small>
                         </a>
                         {% endfor %}
                     </div>
                     {% if group.cases.count > 5 %}
-                    <div class="text-center mt-3">
-                        <a href="#" class="btn btn-sm btn-outline-secondary">{% trans "View all" %} {{ group.cases.count }} {% trans "cases" %}</a>
+                    <div class="text-center p-3">
+                        <a href="#" class="btn btn-outline-secondary">
+                            <i class="fas fa-eye me-1"></i> {% trans "View all" %} {{ group.cases.count }} {% trans "cases" %}
+                        </a>
                     </div>
                     {% endif %}
                     {% else %}
-                    <p class="text-muted">{% trans "No cases are using this group yet." %}</p>
+                    <div class="p-3">
+                        <p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i> {% trans "No cases are using this group yet." %}</p>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
 
         <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header bg-danger text-white">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header danger-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">{% trans "Related Alerts" %}</h5>
-                        <span class="badge bg-danger text-white">{{ group.alerts.count }}</span>
+                        <h5 class="mb-0 fw-bold"><i class="fas fa-bell text-danger me-2"></i> {% trans "Related Alerts" %}</h5>
+                        <span class="badge bg-danger">{{ group.alerts.count }}</span>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     {% if alerts %}
-                    <div class="list-group">
+                    <div class="list-group list-group-flush">
                         {% for alert in alerts %}
                         <a href="{% url 'alerts:alert_detail' alert.id %}" class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ alert.title }}</h6>
-                                <small>{{ alert.get_severity_display }}</small>
+                                <h6 class="mb-1 fw-bold">{{ alert.title }}</h6>
+                                <span class="badge bg-{{ alert.get_severity_color }}">{{ alert.get_severity_display }}</span>
                             </div>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-alt me-1"></i> {{ alert.created_at|date:"d/m/Y" }}
+                            </small>
                         </a>
                         {% endfor %}
                     </div>
                     {% if group.alerts.count > 5 %}
-                    <div class="text-center mt-3">
-                        <a href="#" class="btn btn-sm btn-outline-secondary">{% trans "View all" %} {{ group.alerts.count }} {% trans "alerts" %}</a>
+                    <div class="text-center p-3">
+                        <a href="#" class="btn btn-outline-secondary">
+                            <i class="fas fa-eye me-1"></i> {% trans "View all" %} {{ group.alerts.count }} {% trans "alerts" %}
+                        </a>
                     </div>
                     {% endif %}
                     {% else %}
-                    <p class="text-muted">{% trans "No alerts are using this group yet." %}</p>
+                    <div class="p-3">
+                        <p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i> {% trans "No alerts are using this group yet." %}</p>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/mitre_attack.css' %}">
 {% endblock %}
 
 {% block extra_js %}
