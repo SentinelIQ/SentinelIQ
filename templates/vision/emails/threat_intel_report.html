@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Threat Intelligence Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #0d47a1;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+        .footer {
+            background-color: #e0e0e0;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-radius: 0 0 5px 5px;
+            border: 1px solid #ddd;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .section-title {
+            color: #0d47a1;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .stat-box {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .stat-highlight {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0d47a1;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .malicious {
+            color: #c62828;
+        }
+        .benign {
+            color: #2e7d32;
+        }
+        .tag-pill {
+            display: inline-block;
+            background-color: #e0e0e0;
+            border-radius: 12px;
+            padding: 2px 8px;
+            margin: 2px;
+            font-size: 12px;
+        }
+        .tag-count {
+            font-weight: bold;
+            margin-left: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Weekly Threat Intelligence Report</h1>
+            <div>{{ report_period_start|date:"F j, Y" }} - {{ report_period_end|date:"F j, Y" }}</div>
+        </div>
+        
+        <div class="content">
+            <h2>Threat Intelligence Report for {{ organization }}</h2>
+            <p>This report summarizes threat intelligence activity from the past week, including new threats, trending indicators, and system status.</p>
+            
+            <div class="section">
+                <h3 class="section-title">SUMMARY</h3>
+                <div class="stat-box">
+                    <div class="stat-highlight">{{ stats.org_new_items }}</div>
+                    <div class="stat-label">New intelligence items relevant to your organization</div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between;">
+                    <div class="stat-box" style="width: 45%;">
+                        <div class="stat-highlight malicious">{{ stats.malicious_count }}</div>
+                        <div class="stat-label">Malicious indicators</div>
+                    </div>
+                    <div class="stat-box" style="width: 45%;">
+                        <div class="stat-highlight benign">{{ stats.benign_count }}</div>
+                        <div class="stat-label">Non-malicious indicators</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3 class="section-title">BREAKDOWN BY TYPE</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in stats.type_breakdown %}
+                        <tr>
+                            <td>{{ item.item_type }}</td>
+                            <td>{{ item.count }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No data available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="section">
+                <h3 class="section-title">TOP TAGS</h3>
+                <div>
+                    {% for tag_item in stats.top_tags %}
+                    <span class="tag-pill">{{ tag_item.tag }} <span class="tag-count">{{ tag_item.count }}</span></span>
+                    {% empty %}
+                    <p>No tags found in recent data</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3 class="section-title">MISP INSTANCE STATUS</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Last Sync</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for instance in stats.misp_instances %}
+                        <tr>
+                            <td>{{ instance.name }}</td>
+                            <td>{{ instance.status }}</td>
+                            <td>{{ instance.last_sync|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">No MISP instances configured</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div>
+                <p>Access the full threat intelligence dashboard at:</p>
+                <p><a href="{{ base_url }}vision/search/">{{ base_url }}vision/search/</a></p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This report was automatically generated by SentinelIQ Threat Intelligence system.</p>
+            <p>© {% now "Y" %} SentinelIQ. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html> 

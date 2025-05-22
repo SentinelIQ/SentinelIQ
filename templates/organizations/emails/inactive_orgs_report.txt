@@ -1,0 +1,30 @@
+INACTIVE ORGANIZATIONS REPORT
+
+Hello Administrator,
+
+This is an automated report to inform you about organizations that have shown no activity in the last {{ cutoff_days }} days.
+
+INACTIVE ORGANIZATIONS ({{ inactive_orgs|length }})
+------------------------
+{% if inactive_orgs %}
+{% for org in inactive_orgs %}
+- {{ org.name }}
+  Days Inactive: {{ org.days_inactive }}
+  User Count: {{ org.user_count }}
+{% endfor %}
+
+These organizations may require your attention to determine if they should be:
+* Contacted to encourage activity
+* Evaluated for continued platform use
+* Considered for deactivation if no longer needed
+{% else %}
+No inactive organizations found.
+{% endif %}
+
+Please review these organizations and take appropriate action as needed.
+
+Review Organizations: {{ base_url }}
+
+---
+This is an automated email from SentinelIQ. Please do not reply to this message.
+© {% now "Y" %} SentinelIQ. All rights reserved. 

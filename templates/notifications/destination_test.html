@@ -1,0 +1,71 @@
+{% extends 'notifications/base_notifications.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Test Destination" %} | {{ destination.name }}{% endblock %}
+
+{% block sidebar_destinations_active %}active{% endblock %}
+
+{% block notification_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-paper-plane me-2"></i> {% trans "Test Notification Destination" %}</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info mb-4">
+            <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i> {% trans "Information" %}</h5>
+            <p>{% trans "You are about to send a test notification to the following destination:" %}</p>
+            <p class="fs-5 fw-bold">{{ destination.name }} ({{ destination.get_type_display }})</p>
+            
+            <p class="mb-0">
+                {% trans "A test notification with a standard subject and body will be sent to verify the configuration is working correctly." %}
+            </p>
+        </div>
+        
+        <div class="mb-4">
+            <h6>{% trans "Destination details:" %}</h6>
+            <dl class="row mb-0">
+                <dt class="col-sm-3">{% trans "Type" %}</dt>
+                <dd class="col-sm-9">{{ destination.get_type_display }}</dd>
+                
+                {% if destination.type == 'email' %}
+                    <dt class="col-sm-3">{% trans "Recipients" %}</dt>
+                    <dd class="col-sm-9">
+                        {% for recipient in destination.config.recipients %}
+                            <span class="badge bg-light text-dark mb-1">{{ recipient }}</span>
+                        {% endfor %}
+                    </dd>
+                {% elif destination.type == 'webhook' or destination.type == 'custom_http' %}
+                    <dt class="col-sm-3">{% trans "URL" %}</dt>
+                    <dd class="col-sm-9">{{ destination.config.url }}</dd>
+                {% elif destination.type == 'slack' or destination.type == 'mattermost' %}
+                    <dt class="col-sm-3">{% trans "Webhook URL" %}</dt>
+                    <dd class="col-sm-9">{{ destination.config.webhook_url|truncatechars:50 }}</dd>
+                {% endif %}
+                
+                <dt class="col-sm-3">{% trans "Status" %}</dt>
+                <dd class="col-sm-9">
+                    {% if destination.is_active %}
+                        <span class="badge bg-success">{% trans "Active" %}</span>
+                    {% else %}
+                        <span class="badge bg-danger">{% trans "Inactive" %}</span>
+                        <small class="text-danger">{% trans "(Inactive destinations may not receive notifications)" %}</small>
+                    {% endif %}
+                </dd>
+            </dl>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'notifications:destination_detail' destination.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> {% trans "Cancel" %}
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-1"></i> {% trans "Send Test Notification" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

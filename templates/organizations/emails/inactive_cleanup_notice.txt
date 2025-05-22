@@ -1,0 +1,29 @@
+INACTIVE ORGANIZATIONS CLEANUP NOTICE
+
+Hello Administrator,
+
+We have identified {{ count }} organization(s) that have been marked as inactive for over {{ inactive_days }} days. These organizations may be candidates for data archiving or cleanup.
+
+INACTIVE ORGANIZATIONS
+---------------------
+{% if orgs %}
+{% for org in orgs %}
+- Organization ID: {{ org.id }}
+  Organization Name: {{ org.name }}
+{% endfor %}
+
+Suggested actions:
+* Review these organizations to confirm they are no longer active
+* Archive any important data before cleanup
+* Consider permanently removing these organizations if they will no longer be used
+{% else %}
+No inactive organizations found requiring cleanup.
+{% endif %}
+
+Please review these organizations and determine appropriate action.
+
+Review Organizations: {{ base_url }}
+
+---
+This is an automated email from SentinelIQ. Please do not reply to this message.
+© {% now "Y" %} SentinelIQ. All rights reserved. 

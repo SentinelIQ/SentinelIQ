@@ -1,0 +1,25 @@
+DATA INTEGRITY ISSUES REPORT
+
+Hello Administrator,
+
+{% if issue_count > 0 %}
+ACTION REQUIRED: We have detected {{ issue_count }} data integrity issue(s) that require your attention.
+
+DETECTED ISSUES
+--------------
+{% for issue in issues %}
+{{ forloop.counter }}. {{ issue }}
+{% endfor %}
+
+These issues may indicate data corruption, missing relationships, or system configuration problems. Please review and resolve these issues to maintain system integrity.
+
+For guidance on resolving these issues, please refer to the system documentation or contact technical support.
+{% else %}
+Our data integrity check has not found any issues with your organizational data at this time.
+{% endif %}
+
+Access System: {{ base_url }}
+
+---
+This is an automated email from SentinelIQ. Please do not reply to this message.
+© {% now "Y" %} SentinelIQ. All rights reserved. 

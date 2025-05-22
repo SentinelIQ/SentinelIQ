@@ -1,0 +1,22 @@
+ACCOUNT DEACTIVATED
+
+Hello {{ user.first_name|default:user.username }},
+
+Your SentinelIQ account has been automatically deactivated due to inactivity. You have not logged in for {{ days_inactive }} days.
+
+ACCOUNT DETAILS
+--------------
+Username: {{ user.username }}
+Email: {{ user.email }}
+{% if organization %}Organization: {{ organization }}{% endif %}
+Last Login: {{ user.last_login }}
+
+As part of our security policy, accounts that remain inactive for 90 days or more are automatically deactivated. If you need to regain access to your account, please contact your organization administrator.
+
+If you no longer need this account, no further action is required.
+
+If you believe this deactivation was in error, please contact support.
+
+---
+This is an automated email from SentinelIQ. Please do not reply to this message.
+© {% now "Y" %} SentinelIQ. All rights reserved. 

@@ -1,0 +1,411 @@
+{% extends 'notifications/base_notifications.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}
+    {% if object %}
+        {% trans "Edit Notification Rule" %}
+    {% else %}
+        {% trans "Add Notification Rule" %}
+    {% endif %}
+{% endblock %}
+
+{% block sidebar_rules_active %}active{% endblock %}
+
+{% block notification_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            {% if object %}
+                <i class="fas fa-edit text-primary me-2"></i> {% trans "Edit Notification Rule" %}
+            {% else %}
+                <i class="fas fa-plus-circle text-primary me-2"></i> {% trans "Add Notification Rule" %}
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <h5 class="alert-heading">{% trans "Please correct the errors below:" %}</h5>
+                    <ul class="mb-0">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                        <i class="fas fa-tag me-1"></i> {% trans "Name" %}*
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.name.errors }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">{% trans "A name to identify this notification rule." %}</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.is_active.id_for_label }}" class="form-label">
+                        <i class="fas fa-toggle-on me-1"></i> {% trans "Status" %}
+                    </label>
+                    <div>
+                        <div class="form-check">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                {% trans "Active" %}
+                            </label>
+                        </div>
+                    </div>
+                    {% if form.is_active.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.is_active.errors }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">{% trans "Disable to prevent this rule from triggering notifications." %}</div>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                        <i class="fas fa-align-left me-1"></i> {% trans "Description" %}
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.description.errors }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">{% trans "Optional description for this rule." %}</div>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.source.id_for_label }}" class="form-label">
+                        <i class="fas fa-table me-1"></i> {% trans "Event Source" %}*
+                    </label>
+                    {{ form.source }}
+                    {% if form.source.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.source.errors }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">{% trans "The source of events that can trigger this rule." %}</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.event_type.id_for_label }}" class="form-label">
+                        <i class="fas fa-bolt me-1"></i> {% trans "Event Type" %}*
+                    </label>
+                    {{ form.event_type }}
+                    {% if form.event_type.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.event_type.errors }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">{% trans "The specific event that will trigger this rule." %}</div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-12">
+                    <label for="{{ form.conditions_json.id_for_label }}" class="form-label">
+                        <i class="fas fa-filter me-1"></i> {% trans "Conditions (JSON)" %}
+                    </label>
+                    {{ form.conditions_json }}
+                    {% if form.conditions_json.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.conditions_json.errors }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">
+                        {% trans "Optional JSON conditions to further filter when the rule should trigger. Leave empty to trigger on all events of the selected type." %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label for="{{ form.destinations.id_for_label }}" class="form-label">
+                        <i class="fas fa-paper-plane me-1"></i> {% trans "Destinations" %}*
+                    </label>
+                    {{ form.destinations }}
+                    {% if form.destinations.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.destinations.errors }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">
+                        {% trans "Select one or more destinations where notifications will be sent. Hold Ctrl/Cmd to select multiple options." %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label for="{{ form.template_subject.id_for_label }}" class="form-label">
+                        <i class="fas fa-heading me-1"></i> {% trans "Notification Subject Template" %}
+                    </label>
+                    {{ form.template_subject }}
+                    {% if form.template_subject.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.template_subject.errors }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">
+                        {% trans "Template for the notification subject. You can use variables like {{case.title}}." %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-12">
+                    <label for="{{ form.template_body.id_for_label }}" class="form-label">
+                        <i class="fas fa-paragraph me-1"></i> {% trans "Notification Body Template" %}
+                    </label>
+                    {{ form.template_body }}
+                    {% if form.template_body.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.template_body.errors }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">
+                        {% trans "Template for the notification body. You can use variables like {{case.description}}." %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'notifications:rule_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> {% trans "Cancel" %}
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> {% trans "Save Rule" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Template Examples -->
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> {% trans "Template Examples" %}</h5>
+    </div>
+    <div class="card-body">
+        <ul class="nav nav-tabs" id="templateTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="case-tab" data-bs-toggle="tab" data-bs-target="#case-templates" type="button" role="tab">
+                    <i class="fas fa-folder me-1"></i> {% trans "Case" %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="alert-tab" data-bs-toggle="tab" data-bs-target="#alert-templates" type="button" role="tab">
+                    <i class="fas fa-bell me-1"></i> {% trans "Alert" %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="task-tab" data-bs-toggle="tab" data-bs-target="#task-templates" type="button" role="tab">
+                    <i class="fas fa-tasks me-1"></i> {% trans "Task" %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="condition-tab" data-bs-toggle="tab" data-bs-target="#condition-examples" type="button" role="tab">
+                    <i class="fas fa-filter me-1"></i> {% trans "Conditions" %}
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content p-3 border border-top-0 rounded-bottom">
+            <div class="tab-pane fade show active" id="case-templates" role="tabpanel">
+                <h6 class="mb-3">{% trans "Case Templates" %}</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>{% trans "Subject Examples:" %}</h6>
+                        <ul class="small">
+                            <li><code>New Case: {{ '{{case.title}}' }}</code></li>
+                            <li><code>Case #{{ '{{case.id}}' }} status changed to {{ '{{new_value}}' }}</code></li>
+                            <li><code>{{ '{{case.title}}' }} priority changed to {{ '{{new_value}}' }}</code></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>{% trans "Body Examples:" %}</h6>
+                        <ul class="small">
+                            <li><code>A new case has been created: {{ '{{case.title}}' }}</code></li>
+                            <li><code>{{ '{{user}}' }} changed the status of case "{{ '{{case.title}}' }}" from {{ '{{old_value}}' }} to {{ '{{new_value}}' }}.</code></li>
+                            <li><code>{{ '{{user}}' }} added a comment to case #{{ '{{case.id}}' }}: {{ '{{event_description}}' }}</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <h6 class="mt-3">{% trans "Available Variables:" %}</h6>
+                <ul class="small row">
+                    <li class="col-md-3"><code>case.id</code></li>
+                    <li class="col-md-3"><code>case.title</code></li>
+                    <li class="col-md-3"><code>case.description</code></li>
+                    <li class="col-md-3"><code>case.status</code></li>
+                    <li class="col-md-3"><code>case.priority</code></li>
+                    <li class="col-md-3"><code>event_type</code></li>
+                    <li class="col-md-3"><code>event_title</code></li>
+                    <li class="col-md-3"><code>user</code></li>
+                    <li class="col-md-3"><code>created_at</code></li>
+                    <li class="col-md-3"><code>old_value</code></li>
+                    <li class="col-md-3"><code>new_value</code></li>
+                </ul>
+            </div>
+            <div class="tab-pane fade" id="alert-templates" role="tabpanel">
+                <h6 class="mb-3">{% trans "Alert Templates" %}</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>{% trans "Subject Examples:" %}</h6>
+                        <ul class="small">
+                            <li><code>New Alert: {{ '{{alert.title}}' }}</code></li>
+                            <li><code>Alert #{{ '{{alert.id}}' }} severity changed to {{ '{{new_value}}' }}</code></li>
+                            <li><code>Alert escalated to case #{{ '{{metadata.case_id}}' }}</code></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>{% trans "Body Examples:" %}</h6>
+                        <ul class="small">
+                            <li><code>A new alert has been created: {{ '{{alert.title}}' }}</code></li>
+                            <li><code>{{ '{{user}}' }} changed the severity of alert "{{ '{{alert.title}}' }}" from {{ '{{old_value}}' }} to {{ '{{new_value}}' }}.</code></li>
+                            <li><code>Alert #{{ '{{alert.id}}' }} has been escalated to a case.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <h6 class="mt-3">{% trans "Available Variables:" %}</h6>
+                <ul class="small row">
+                    <li class="col-md-3"><code>alert.id</code></li>
+                    <li class="col-md-3"><code>alert.title</code></li>
+                    <li class="col-md-3"><code>alert.description</code></li>
+                    <li class="col-md-3"><code>alert.status</code></li>
+                    <li class="col-md-3"><code>alert.severity</code></li>
+                    <li class="col-md-3"><code>event_type</code></li>
+                    <li class="col-md-3"><code>event_title</code></li>
+                    <li class="col-md-3"><code>user</code></li>
+                    <li class="col-md-3"><code>created_at</code></li>
+                    <li class="col-md-3"><code>old_value</code></li>
+                    <li class="col-md-3"><code>new_value</code></li>
+                </ul>
+            </div>
+            <div class="tab-pane fade" id="task-templates" role="tabpanel">
+                <h6 class="mb-3">{% trans "Task Templates" %}</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>{% trans "Subject Examples:" %}</h6>
+                        <ul class="small">
+                            <li><code>Task completed: {{ '{{task.title}}' }}</code></li>
+                            <li><code>Task overdue: {{ '{{task.title}}' }}</code></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>{% trans "Body Examples:" %}</h6>
+                        <ul class="small">
+                            <li><code>{{ '{{completed_by}}' }} has completed task "{{ '{{task.title}}' }}" for case "{{ '{{case.title}}' }}".</code></li>
+                            <li><code>Task "{{ '{{task.title}}' }}" for case "{{ '{{case.title}}' }}" is now overdue.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <h6 class="mt-3">{% trans "Available Variables:" %}</h6>
+                <ul class="small row">
+                    <li class="col-md-3"><code>task.id</code></li>
+                    <li class="col-md-3"><code>task.title</code></li>
+                    <li class="col-md-3"><code>case.id</code></li>
+                    <li class="col-md-3"><code>case.title</code></li>
+                    <li class="col-md-3"><code>completed_by</code></li>
+                    <li class="col-md-3"><code>completed_at</code></li>
+                    <li class="col-md-3"><code>event_type</code></li>
+                    <li class="col-md-3"><code>created_at</code></li>
+                </ul>
+            </div>
+            <div class="tab-pane fade" id="condition-examples" role="tabpanel">
+                <h6 class="mb-3">{% trans "Condition Examples" %}</h6>
+                <p class="text-muted small mb-3">{% trans "Conditions are optional filters that determine when a rule should trigger. Here are some examples:" %}</p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>{% trans "Trigger for high priority cases:" %}</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "priority": "high"
+}</code></pre>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>{% trans "Trigger for multiple severities:" %}</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "severity": ["high", "critical"]
+}</code></pre>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6>{% trans "Trigger for status change to 'resolved':" %}</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "new_value": "resolved"
+}</code></pre>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>{% trans "Trigger for nested properties:" %}</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "metadata.case_type": "incident"
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show appropriate template examples based on selected source
+    const sourceSelect = document.getElementById('{{ form.source.id_for_label }}');
+    
+    // Function to switch tab based on selected source
+    function updateTemplateTab() {
+        const selectedSource = sourceSelect.value;
+        let tabId;
+        
+        // Choose the tab based on the selected source
+        switch(selectedSource) {
+            case 'case':
+                tabId = 'case-tab';
+                break;
+            case 'alert':
+                tabId = 'alert-tab';
+                break;
+            case 'task':
+                tabId = 'task-tab';
+                break;
+            default:
+                tabId = 'case-tab';
+        }
+        
+        // Activate the tab
+        const tab = document.getElementById(tabId);
+        if (tab) {
+            const bsTab = new bootstrap.Tab(tab);
+            bsTab.show();
+        }
+    }
+    
+    // Update on change
+    sourceSelect.addEventListener('change', updateTemplateTab);
+    
+    // Update on page load
+    updateTemplateTab();
+});
+</script>
+{% endblock %} 

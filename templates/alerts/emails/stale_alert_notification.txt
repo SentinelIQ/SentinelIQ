@@ -1,0 +1,31 @@
+UNACKNOWLEDGED ALERT REMINDER
+
+Hello,
+
+This is a reminder that the following alert has been unacknowledged for {{ days_stale }} day(s) and requires your attention:
+
+ALERT DETAILS
+------------
+Alert ID: #{{ alert.id }}
+Title: {{ alert.title }}
+Severity: {{ alert.get_severity_display }}
+Status: {{ alert.get_status_display }}
+Created: {{ alert.created_at }}
+Organization: {{ alert.organization.name }}
+
+Description:
+{{ alert.description }}
+
+Please review this alert and take appropriate action as soon as possible. Alerts that remain unacknowledged may indicate security issues that need to be addressed.
+
+Possible actions:
+- Acknowledge the alert
+- Change the alert status to "In Progress"
+- Escalate the alert to a case
+- Close the alert if it's a false positive
+
+View Alert: {{ alert_url }}
+
+---
+This is an automated notification from SentinelIQ. Please do not reply to this email.
+© {% now "Y" %} SentinelIQ. All rights reserved. 

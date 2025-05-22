@@ -1,0 +1,170 @@
+{% extends 'notifications/base_notifications.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Notification Log" %} #{{ log.id }}{% endblock %}
+
+{% block sidebar_logs_active %}active{% endblock %}
+
+{% block notification_content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-2 text-white">
+            <i class="fas fa-list-alt text-primary me-2"></i> {% trans "Notification Log Details" %}
+        </h1>
+        <p class="text-muted">
+            {% trans "Tracking ID:" %} <code class="bg-darker text-info">{{ log.tracking_id }}</code>
+            <span class="ms-3">
+                {% if log.status == 'success' %}
+                    <span class="badge bg-success">{% trans "Success" %}</span>
+                {% elif log.status == 'failed' %}
+                    <span class="badge bg-danger">{% trans "Failed" %}</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">{% trans "Pending" %}</span>
+                {% endif %}
+            </span>
+        </p>
+    </div>
+    <div class="col-md-4 text-end">
+        {% if log.status == 'failed' %}
+            <a href="{% url 'notifications:log_retry' log.id %}" class="btn btn-warning">
+                <i class="fas fa-redo me-1"></i> {% trans "Retry Notification" %}
+            </a>
+        {% endif %}
+        <a href="{% url 'notifications:log_list' %}" class="btn btn-outline-light ms-2">
+            <i class="fas fa-arrow-left me-1"></i> {% trans "Back to List" %}
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Log details -->
+    <div class="col-md-6">
+        <div class="card bg-dark border-secondary shadow-sm mb-4">
+            <div class="card-header bg-gradient-dark border-bottom border-secondary">
+                <h5 class="mb-0 text-white"><i class="fas fa-info-circle me-2"></i> {% trans "Log Information" %}</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-light">{% trans "Created At" %}</dt>
+                    <dd class="col-sm-8 text-light">{{ log.created_at|date:"d/m/Y H:i:s" }}</dd>
+                    
+                    {% if log.sent_at %}
+                        <dt class="col-sm-4 text-light">{% trans "Sent At" %}</dt>
+                        <dd class="col-sm-8 text-light">{{ log.sent_at|date:"d/m/Y H:i:s" }}</dd>
+                    {% endif %}
+                    
+                    <dt class="col-sm-4 text-light">{% trans "Status" %}</dt>
+                    <dd class="col-sm-8">
+                        {% if log.status == 'success' %}
+                            <span class="badge bg-success">{% trans "Success" %}</span>
+                        {% elif log.status == 'failed' %}
+                            <span class="badge bg-danger">{% trans "Failed" %}</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">{% trans "Pending" %}</span>
+                        {% endif %}
+                    </dd>
+                    
+                    {% if log.rule %}
+                        <dt class="col-sm-4 text-light">{% trans "Rule" %}</dt>
+                        <dd class="col-sm-8">
+                            <a href="{% url 'notifications:rule_detail' log.rule.id %}" class="text-info">{{ log.rule.name }}</a>
+                            <br>
+                            <small class="text-muted">
+                                {{ log.rule.get_source_display }} / {{ log.rule.get_event_type_display }}
+                            </small>
+                        </dd>
+                    {% else %}
+                        <dt class="col-sm-4 text-light">{% trans "Rule" %}</dt>
+                        <dd class="col-sm-8">
+                            <span class="text-muted">{% trans "Test notification" %}</span>
+                        </dd>
+                    {% endif %}
+                    
+                    {% if log.destination %}
+                        <dt class="col-sm-4 text-light">{% trans "Destination" %}</dt>
+                        <dd class="col-sm-8">
+                            <a href="{% url 'notifications:destination_detail' log.destination.id %}" class="text-info">{{ log.destination.name }}</a>
+                            <br>
+                            <span class="badge {% if log.destination.type == 'email' %}bg-primary{% elif log.destination.type == 'webhook' %}bg-success{% elif log.destination.type == 'slack' %}bg-info{% elif log.destination.type == 'mattermost' %}bg-secondary{% elif log.destination.type == 'custom_http' %}bg-warning text-dark{% endif %} me-1">
+                                {% if log.destination.type == 'email' %}
+                                    <i class="fas fa-envelope me-1"></i>
+                                {% elif log.destination.type == 'webhook' %}
+                                    <i class="fas fa-link me-1"></i>
+                                {% elif log.destination.type == 'slack' %}
+                                    <i class="fab fa-slack me-1"></i>
+                                {% elif log.destination.type == 'mattermost' %}
+                                    <i class="fas fa-comments me-1"></i>
+                                {% elif log.destination.type == 'custom_http' %}
+                                    <i class="fas fa-code me-1"></i>
+                                {% endif %}
+                                {{ log.destination.get_type_display }}
+                            </span>
+                        </dd>
+                    {% else %}
+                        <dt class="col-sm-4 text-light">{% trans "Destination" %}</dt>
+                        <dd class="col-sm-8">
+                            <span class="text-muted">{% trans "Deleted destination" %}</span>
+                        </dd>
+                    {% endif %}
+                </dl>
+                
+                {% if log.status == 'failed' and log.error_message %}
+                    <hr class="border-secondary">
+                    <h6 class="text-danger mb-2">{% trans "Error Message" %}</h6>
+                    <pre class="bg-darker p-3 rounded text-danger"><code>{{ log.error_message }}</code></pre>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification content -->
+    <div class="col-md-6">
+        <div class="card bg-dark border-secondary shadow-sm mb-4">
+            <div class="card-header bg-gradient-dark border-bottom border-secondary">
+                <h5 class="mb-0 text-white"><i class="fas fa-envelope me-2"></i> {% trans "Notification Content" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h6 class="text-light">{% trans "Subject" %}</h6>
+                    <div class="p-3 bg-darker rounded border border-secondary text-light">{{ log.subject }}</div>
+                </div>
+                
+                <div>
+                    <h6 class="text-light">{% trans "Body" %}</h6>
+                    <div class="p-3 bg-darker rounded border border-secondary text-light" style="white-space: pre-line;">{{ log.body }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Event data -->
+        {% if event_data_json %}
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header bg-gradient-dark border-bottom border-secondary">
+                    <h5 class="mb-0 text-white"><i class="fas fa-code me-2"></i> {% trans "Event Data" %}</h5>
+                </div>
+                <div class="card-body">
+                    <pre class="bg-darker p-3 rounded border border-secondary mb-0"><code>{{ event_data_json }}</code></pre>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Format JSON data if present
+        try {
+            const eventData = document.querySelector('.card pre code');
+            if (eventData) {
+                const eventJson = JSON.parse(eventData.textContent);
+                eventData.textContent = JSON.stringify(eventJson, null, 2);
+            }
+        } catch(e) {
+            console.error('Error formatting JSON:', e);
+        }
+    });
+</script>
+{% endblock %} 

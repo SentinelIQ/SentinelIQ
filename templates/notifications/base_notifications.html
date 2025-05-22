@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Notifications" %}{% endblock %}
+
+{% block sidebar_notification_active %}active{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card bg-dark border-0 shadow">
+                <div class="card-header bg-gradient-primary-dark">
+                    <h5 class="mb-0 text-white"><i class="fas fa-bell me-2"></i> {% trans "Notifications" %}</h5>
+                </div>
+                <div class="list-group list-group-flush bg-dark">
+                    <a href="{% url 'notifications:dashboard' %}" class="list-group-item list-group-item-action bg-dark text-light border-secondary {% block sidebar_dashboard_active %}{% endblock %}">
+                        <i class="fas fa-chart-bar me-2"></i> {% trans "Dashboard" %}
+                    </a>
+                    <a href="{% url 'notifications:destination_list' %}" class="list-group-item list-group-item-action bg-dark text-light border-secondary {% block sidebar_destinations_active %}{% endblock %}">
+                        <i class="fas fa-paper-plane me-2"></i> {% trans "Destinations" %}
+                    </a>
+                    <a href="{% url 'notifications:rule_list' %}" class="list-group-item list-group-item-action bg-dark text-light border-secondary {% block sidebar_rules_active %}{% endblock %}">
+                        <i class="fas fa-cogs me-2"></i> {% trans "Rules" %}
+                    </a>
+                    <a href="{% url 'notifications:log_list' %}" class="list-group-item list-group-item-action bg-dark text-light border-secondary {% block sidebar_logs_active %}{% endblock %}">
+                        <i class="fas fa-list-alt me-2"></i> {% trans "Logs" %}
+                    </a>
+                </div>
+            </div>
+            
+            {% block sidebar_extra %}{% endblock %}
+        </div>
+        
+        <div class="col-md-9">
+            {% block notification_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Notification module specific styles - SentinelIQ dark theme */
+    :root {
+        --sentinel-dark-bg: #121212;
+        --sentinel-dark-card: #212529;
+        --sentinel-darker: #1a1a1a;
+        --sentinel-border: rgba(255, 255, 255, 0.1);
+        --sentinel-primary: #0d6efd;
+        --sentinel-primary-dark: #0a3d87;
+        --sentinel-text-light: #e2e2e2;
+        --sentinel-text-muted: #a0a0a0;
+        --sentinel-success: #198754;
+        --sentinel-danger: #dc3545;
+        --sentinel-warning: #ffc107;
+        --sentinel-info: #0dcaf0;
+        --sentinel-card-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.5);
+    }
+    
+    /* Backgrounds and gradients */
+    .bg-gradient-primary-dark {
+        background: linear-gradient(40deg, var(--sentinel-primary-dark), var(--sentinel-primary));
+    }
+    
+    .bg-gradient-dark {
+        background: linear-gradient(180deg, #2c3136, #212529);
+    }
+    
+    .bg-darker {
+        background-color: var(--sentinel-darker) !important;
+    }
+    
+    /* List group item active state */
+    .list-group-item.active {
+        background-color: rgba(13, 110, 253, 0.2) !important;
+        border-left: 4px solid var(--sentinel-primary);
+    }
+    
+    /* Tables */
+    .table {
+        --bs-table-color: var(--sentinel-text-light);
+        --bs-table-bg: transparent;
+        --bs-table-border-color: var(--sentinel-border);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    
+    /* Card styling */
+    .card {
+        --bs-card-bg: var(--sentinel-dark-card);
+        --bs-card-border-color: var(--sentinel-border);
+        box-shadow: var(--sentinel-card-shadow);
+    }
+    
+    /* Form controls */
+    .form-control, .form-select {
+        background-color: var(--sentinel-darker);
+        border-color: var(--sentinel-border);
+        color: var(--sentinel-text-light);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: var(--sentinel-darker);
+        color: var(--sentinel-text-light);
+        border-color: var(--sentinel-primary);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Links and buttons */
+    a.text-info {
+        color: var(--sentinel-info) !important;
+        text-decoration: none;
+    }
+    
+    a.text-info:hover {
+        color: #8be9fd !important;
+        text-decoration: underline;
+    }
+    
+    /* Code blocks for JSON */
+    pre {
+        background-color: var(--sentinel-darker) !important;
+        color: var(--sentinel-text-light) !important;
+        border: 1px solid var(--sentinel-border);
+    }
+    
+    code {
+        color: #8be9fd !important;
+    }
+    
+    /* Badge hover effects */
+    .badge {
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .badge:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Consistent button styles */
+    .btn-outline-info {
+        border-color: var(--sentinel-info);
+        color: var(--sentinel-info);
+    }
+    
+    .btn-outline-info:hover {
+        background-color: var(--sentinel-info);
+        color: #000;
+    }
+    
+    /* Tooltip dark styling */
+    .tooltip .tooltip-inner {
+        background-color: var(--sentinel-dark-bg);
+        border: 1px solid var(--sentinel-border);
+        box-shadow: var(--sentinel-card-shadow);
+    }
+    
+    .tooltip.bs-tooltip-top .tooltip-arrow::before {
+        border-top-color: var(--sentinel-dark-bg);
+    }
+    
+    .tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+        border-bottom-color: var(--sentinel-dark-bg);
+    }
+    
+    .tooltip.bs-tooltip-start .tooltip-arrow::before {
+        border-left-color: var(--sentinel-dark-bg);
+    }
+    
+    .tooltip.bs-tooltip-end .tooltip-arrow::before {
+        border-right-color: var(--sentinel-dark-bg);
+    }
+</style>
+{% endblock %} 

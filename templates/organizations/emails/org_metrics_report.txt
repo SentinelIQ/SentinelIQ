@@ -1,0 +1,39 @@
+MONTHLY ORGANIZATION METRICS REPORT
+
+Hello Administrator,
+
+Here is the monthly metrics report for all organizations in the SentinelIQ platform.
+
+REPORTING PERIOD: {{ report_start|date:"M d, Y" }} to {{ report_end|date:"M d, Y" }}
+
+{% for org in org_metrics %}
+=================================================================
+ORGANIZATION: {{ org.name }}
+=================================================================
+
+USER METRICS
+-----------
+Total Users: {{ org.total_users }}
+Active Users: {{ org.active_users }} ({{ org.activity_rate }}% active in the last 30 days)
+
+ALERT METRICS
+-----------
+Total Alerts: {{ org.total_alerts }}
+New Alerts (Last 30 days): {{ org.new_alerts }}
+Resolved Alerts (Last 30 days): {{ org.resolved_alerts }}
+Resolution Rate: {{ org.alert_resolution_rate }}%
+
+CASE METRICS
+-----------
+Total Cases: {{ org.total_cases }}
+New Cases (Last 30 days): {{ org.new_cases }}
+Closed Cases (Last 30 days): {{ org.closed_cases }}
+Case Closure Rate: {{ org.case_closure_rate }}%
+
+{% endfor %}
+
+For detailed metrics and analytics, please visit the administration dashboard: {{ base_url }}
+
+---
+This is an automated report from SentinelIQ. Please do not reply to this message.
+© {% now "Y" %} SentinelIQ. All rights reserved. 

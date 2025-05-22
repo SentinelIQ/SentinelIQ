@@ -1,6 +1,6 @@
 # SentinelIQ
 
-SentinelIQ é um sistema de gerenciamento de alertas e organizações desenvolvido em Django.
+A platform designed to be an essential asset for Security Operations Centers (SOCs), Computer Security Incident Response Teams (CSIRTs), and Computer Emergency Response Teams (CERTs), empowering them with the tools and intelligence needed to detect, investigate, and respond to cyber threats efficiently and effectively.
 
 ## Funcionalidades
 
