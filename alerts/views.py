@@ -654,7 +654,7 @@ class AlertCustomFieldCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, Crea
     """Create view for alert custom fields"""
     model = AlertCustomField
     form_class = AlertCustomFieldForm
-    template_name = 'alerts/alert_custom_field_form.html'
+    template_name = 'alerts/custom_field_form.html'
     success_url = reverse_lazy('alerts:alert_custom_field_list')
     
     def form_valid(self, form):
@@ -668,7 +668,7 @@ class AlertCustomFieldUpdateView(LoginRequiredMixin, OrgAdminRequiredMixin, Upda
     """Update view for alert custom fields"""
     model = AlertCustomField
     form_class = AlertCustomFieldForm
-    template_name = 'alerts/alert_custom_field_form.html'
+    template_name = 'alerts/custom_field_form.html'
     success_url = reverse_lazy('alerts:alert_custom_field_list')
     
     def get_queryset(self):
@@ -685,7 +685,7 @@ class AlertCustomFieldUpdateView(LoginRequiredMixin, OrgAdminRequiredMixin, Upda
 class AlertCustomFieldDeleteView(LoginRequiredMixin, OrgAdminRequiredMixin, DeleteView):
     """Delete view for alert custom fields"""
     model = AlertCustomField
-    template_name = 'alerts/alert_custom_field_confirm_delete.html'
+    template_name = 'alerts/custom_field_confirm_delete.html'
     success_url = reverse_lazy('alerts:alert_custom_field_list')
     
     def get_queryset(self):

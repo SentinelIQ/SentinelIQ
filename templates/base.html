@@ -6,321 +6,501 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SentinelIQ{% endblock %}</title>
     
-    <!-- Fontes -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Base CSS -->
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --primary-dark: #0b5ed7;
+            --primary-light: #3d8bfd;
+            --secondary: #6c757d;
+            --success: #198754;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #0dcaf0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --bg-dark: #121212;
+            --bg-sidebar: #1a1a1a;
+            --bg-card: #1e1e1e;
+            --bg-modal: #252525;
+            --border-color: #2a2a2a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --border-radius: 0.375rem;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+        }
+        
+        a {
+            text-decoration: none;
+            color: var(--primary-light);
+            transition: color 0.2s ease;
+        }
+        
+        a:hover {
+            color: var(--primary);
+        }
+        
+        /* Layout Components */
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            bottom: 0;
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            padding-top: 1rem;
+        }
+        
+        .sidebar-collapsed {
+            width: 70px;
+        }
+        
+        .content {
+            margin-left: 260px;
+            margin-top: 56px;
+            padding: 1.5rem;
+            flex: 1;
+            transition: all 0.3s ease;
+            min-height: calc(100vh - 56px);
+        }
+        
+        .content-expanded {
+            margin-left: 70px;
+        }
+        
+        .navbar {
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text-primary) !important;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand img {
+            margin-right: 0.5rem;
+            max-height: 30px;
+        }
+        
+        /* Cards */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .card-header {
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(255,255,255,0.05);
+        }
+        
+        .card-footer {
+            border-top: 1px solid var(--border-color);
+            background-color: rgba(255,255,255,0.05);
+        }
+        
+        /* Sidebar Navigation */
+        .nav-link {
+            color: var(--text-secondary);
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            border-radius: 0.25rem;
+            margin: 0.125rem 0.75rem;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--text-primary);
+            background-color: rgba(255,255,255,0.05);
+        }
+        
+        .nav-link.active {
+            color: var(--text-primary);
+            background-color: var(--primary);
+        }
+        
+        .nav-link i {
+            width: 24px;
+            text-align: center;
+            margin-right: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        /* Forms */
+        .form-control, .form-select {
+            background-color: #2c2c2c;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #2c2c2c;
+            color: var(--text-primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        
+        /* Tables */
+        .table {
+            color: var(--text-primary);
+        }
+        
+        .table-dark {
+            --bs-table-bg: #2c2c2c;
+            --bs-table-striped-bg: #343434;
+            --bs-table-striped-color: var(--text-primary);
+            --bs-table-active-bg: #3c3c3c;
+            --bs-table-active-color: var(--text-primary);
+            --bs-table-hover-bg: #383838;
+            --bs-table-hover-color: var(--text-primary);
+            color: var(--text-primary);
+        }
+        
+        /* Misc UI Elements */
+        .dropdown-menu {
+            background-color: var(--bg-modal);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .dropdown-item {
+            color: var(--text-secondary);
+        }
+        
+        .dropdown-item:hover {
+            background-color: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+        }
+        
+        .alert {
+            border: 1px solid transparent;
+        }
+        
+        .badge {
+            font-weight: 500;
+        }
+        
+        /* Buttons */
+        .btn {
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--bg-sidebar);
+            color: var(--text-secondary);
+            padding: 1rem 0;
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 0;
+                padding: 0;
+            }
+            
+            .content {
+                margin-left: 0;
+            }
+            
+            .sidebar.show {
+                width: 260px;
+                padding-top: 1rem;
+            }
+        }
+    </style>
     
     {% block extra_css %}{% endblock %}
 </head>
-<body class="d-flex flex-column min-vh-100 m-0 p-0">
-    {% if user.is_authenticated %}
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'core:dashboard' %}">
-                <i class="fas fa-shield-alt me-2"></i> SentinelIQ
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+<body>
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <button class="btn btn-link text-light me-3 d-lg-none" type="button" id="mobile-sidebar-toggle">
+                <i class="fas fa-bars"></i>
             </button>
+            <a class="navbar-brand" href="{% url 'core:dashboard' %}">
+                <i class="fas fa-shield-alt text-primary me-2"></i>
+                SentinelIQ
+            </a>
+            <button class="btn btn-link text-light d-none d-lg-block" id="sidebar-toggle" type="button">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <!-- Navbar Right Side -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'core:dashboard' %}">
-                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'alerts:alert_list' %}">
-                            <i class="fas fa-bell me-1"></i> Alertas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'cases:case_list' %}">
-                            <i class="fas fa-briefcase me-1"></i> Casos
-                        </a>
-                    </li>
-                    {% if user.is_superadmin or user.is_org_admin %}
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" 
-                           id="templatesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-clipboard-list me-1"></i> Templates
+                        <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                3
+                            </span>
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="templatesDropdown">
-                            <li>
-                                <a class="dropdown-item" href="{% url 'cases:threat_category_list' %}">
-                                    <i class="fas fa-shield-alt me-2"></i> Categorias de Ameaças
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'cases:task_template_list' %}">
-                                    <i class="fas fa-tasks me-2"></i> Templates de Tarefas
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'cases:task_template_bulk_create' %}">
-                                    <i class="fas fa-copy me-2"></i> Criação em Massa
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'core:observable_list' %}">
-                            <i class="fas fa-eye me-1"></i> Observables
-                        </a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                            <h6 class="dropdown-header">Notificações</h6>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <div class="me-3">
+                                    <i class="fas fa-bell-exclamation text-warning"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0 fw-bold">Novo alerta crítico</p>
+                                    <small class="text-muted">Há 2 minutos</small>
+                                </div>
+                            </a>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <div class="me-3">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0 fw-bold">Caso #12345 resolvido</p>
+                                    <small class="text-muted">Há 15 minutos</small>
+                                </div>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-center small" href="#">Ver todas as notificações</a>
+                        </div>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" 
-                           id="visionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-satellite-dish me-1"></i> Vision
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="visionDropdown">
-                            <li>
-                                <a class="dropdown-item" href="{% url 'vision:feed_list' %}">
-                                    <i class="fas fa-rss me-2"></i> Feeds
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'vision:search' %}">
-                                    <i class="fas fa-search me-2"></i> Busca de IOCs
-                                </a>
-                            </li>
-                            {% if user.is_superadmin or user.is_org_admin %}
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'vision:misp_create' %}">
-                                    <i class="fas fa-plus-circle me-2"></i> Nova Instância MISP
-                                </a>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </li>
-                    {% if user.is_superadmin or user.is_org_admin %}
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'core:tag_list' %}">
-                            <i class="fas fa-tags me-1"></i> Tags
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'accounts:user_list' %}">
-                            <i class="fas fa-users me-1"></i> Usuários
-                        </a>
-                    </li>
-                    {% endif %}
-                    {% if user.is_superadmin %}
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'organizations:organization_list' %}">
-                            <i class="fas fa-building me-1"></i> Organizações
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" 
-                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle me-2"></i>
-                            <span>{{ user.username }}</span>
-                            {% if user.organization %}
-                            <span class="badge bg-primary ms-2">{{ user.organization.name }}</span>
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            {% if user.is_authenticated %}
+                                {{ user.get_full_name|default:user.username }}
+                            {% else %}
+                                Usuário
                             {% endif %}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center" href="{% url 'admin:index' %}">
-                                    <i class="fas fa-cog me-2"></i> Admin
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <h6 class="dropdown-header">Perfil de Usuário</h6>
+                            {% if user.is_authenticated %}
+                                {% if user.organization %}
+                                    <div class="dropdown-item text-muted small">
+                                        <i class="fas fa-building me-1"></i> {{ user.organization.name }}
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                {% endif %}
+                                <a class="dropdown-item" href="#"><i class="fas fa-user-cog me-2"></i> Preferências</a>
+                                <a class="dropdown-item" href="#"><i class="fas fa-key me-2"></i> Alterar Senha</a>
+                                <div class="dropdown-divider"></div>
+                                <form method="post" action="{% url 'accounts:logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-2"></i> Sair
+                                    </button>
+                                </form>
+                            {% else %}
+                                <a class="dropdown-item" href="{% url 'accounts:login' %}">
+                                    <i class="fas fa-sign-in-alt me-2"></i> Login
                                 </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center" href="{% url 'accounts:logout' %}">
-                                    <i class="fas fa-sign-out-alt me-2"></i> Sair
-                                </a>
-                            </li>
-                        </ul>
+                            {% endif %}
+                        </div>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
-    {% endif %}
 
-    <!-- Main Content -->
-    <div class="container mt-4 flex-grow-1">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-        
-        <div class="fade-in">
-            {% block content %}{% endblock %}
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="py-2 px-3 d-flex align-items-center border-bottom border-dark mb-2">
+            <div class="text-muted sidebar-header">
+                <i class="fas fa-th-large me-2"></i> 
+                <span class="nav-label">NAVEGAÇÃO</span>
+            </div>
         </div>
+        
+        <!-- Sidebar Menu -->
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if 'dashboard' in request.path %}active{% endif %}" href="{% url 'core:dashboard' %}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if '/alerts/' in request.path %}active{% endif %}" href="{% url 'alerts:alert_list' %}">
+                    <i class="fas fa-bell"></i>
+                    <span class="nav-label">Alertas</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if '/cases/' in request.path %}active{% endif %}" href="{% url 'cases:case_list' %}">
+                    <i class="fas fa-briefcase"></i>
+                    <span class="nav-label">Casos</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if '/observable/' in request.path %}active{% endif %}" href="{% url 'core:observable_list' %}">
+                    <i class="fas fa-eye"></i>
+                    <span class="nav-label">Observables</span>
+                </a>
+            </li>
+
+            <div class="py-2 px-3 d-flex align-items-center border-bottom border-dark mt-3 mb-2">
+                <div class="text-muted sidebar-header">
+                    <i class="fas fa-tools me-2"></i>
+                    <span class="nav-label">ADMINISTRAÇÃO</span>
+                </div>
+            </div>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if '/organizations/' in request.path %}active{% endif %}" href="{% url 'organizations:organization_list' %}">
+                    <i class="fas fa-building"></i>
+                    <span class="nav-label">Organizações</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if '/accounts/' in request.path and '/login/' not in request.path %}active{% endif %}" href="{% url 'accounts:user_list' %}">
+                    <i class="fas fa-users"></i>
+                    <span class="nav-label">Usuários</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if '/vision/' in request.path %}active{% endif %}" href="{% url 'vision:feed_list' %}">
+                    <i class="fas fa-satellite-dish"></i>
+                    <span class="nav-label">Intel Feeds</span>
+                </a>
+            </li>
+            
+            <div class="py-2 px-3 d-flex align-items-center border-bottom border-dark mt-3 mb-2">
+                <div class="text-muted sidebar-header">
+                    <i class="fas fa-sliders-h me-2"></i>
+                    <span class="nav-label">CONFIGURAÇÕES</span>
+                </div>
+            </div>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if '/threat_category/' in request.path %}active{% endif %}" href="{% url 'cases:threat_category_list' %}">
+                    <i class="fas fa-bug"></i>
+                    <span class="nav-label">Categorias de Ameaça</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if '/tag/' in request.path %}active{% endif %}" href="{% url 'core:tag_list' %}">
+                    <i class="fas fa-tags"></i>
+                    <span class="nav-label">Tags</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link {% if '/task_template/' in request.path %}active{% endif %}" href="{% url 'cases:task_template_list' %}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="nav-label">Modelos de Tarefas</span>
+                </a>
+            </li>
+        </ul>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white mt-5 pt-5 pb-4 m-0">
-        <div class="container">
-            <div class="row">
-                <!-- Coluna 1: Informações da empresa -->
-                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="fas fa-shield-alt fa-2x me-3"></i>
-                        <h5 class="mb-0">SentinelIQ</h5>
-                    </div>
-                    <p class="small mb-3">Sistema inteligente de gerenciamento de alertas e organizações com foco em segurança e eficiência.</p>
-                    <p class="small">&copy; {% now "Y" %} SentinelIQ. Todos os direitos reservados.</p>
-                </div>
-                
-                <!-- Coluna 2: Links Rápidos -->
-                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-                    <h5 class="mb-3">Links Rápidos</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a href="{% url 'core:dashboard' %}" class="text-decoration-none text-white-50">
-                                <i class="fas fa-angle-right me-2"></i>Dashboard
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'alerts:alert_list' %}" class="text-decoration-none text-white-50">
-                                <i class="fas fa-angle-right me-2"></i>Alertas
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'cases:case_list' %}" class="text-decoration-none text-white-50">
-                                <i class="fas fa-angle-right me-2"></i>Casos
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'cases:threat_category_list' %}" class="text-decoration-none text-white-50">
-                                <i class="fas fa-angle-right me-2"></i>Categorias de Ameaças
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'cases:task_template_list' %}" class="text-decoration-none text-white-50">
-                                <i class="fas fa-angle-right me-2"></i>Templates de Tarefas
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'core:observable_list' %}" class="text-decoration-none text-white-50">
-                                <i class="fas fa-angle-right me-2"></i>Observables
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'vision:feed_list' %}" class="text-decoration-none text-white-50">
-                                <i class="fas fa-angle-right me-2"></i>Vision
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'core:tag_list' %}" class="text-decoration-none text-white-50">
-                                <i class="fas fa-angle-right me-2"></i>Tags
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{% url 'accounts:user_list' %}" class="text-decoration-none text-white-50">
-                                <i class="fas fa-angle-right me-2"></i>Usuários
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'organizations:organization_list' %}" class="text-decoration-none text-white-50">
-                                <i class="fas fa-angle-right me-2"></i>Organizações
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                
-                <!-- Coluna 3: Contato -->
-                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-                    <h5 class="mb-3">Contato</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a href="mailto:contato@sentineliq.com.br" class="text-decoration-none text-white-50">
-                                <i class="fas fa-envelope me-2"></i>contato@sentineliq.com.br
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <span class="text-white-50">
-                                <i class="fas fa-phone me-2"></i>(11) 5555-1234
-                            </span>
-                        </li>
-                        <li>
-                            <span class="text-white-50">
-                                <i class="fas fa-map-marker-alt me-2"></i>Av. Paulista, 1000 - São Paulo/SP
-                            </span>
-                        </li>
-                    </ul>
-                </div>
-                
-                <!-- Coluna 4: Redes Sociais e Links Úteis -->
-                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-                    <h5 class="mb-3">Redes Sociais</h5>
-                    <div class="d-flex mb-4">
-                        <a href="#" class="text-white me-3 fs-5" title="LinkedIn">
-                            <i class="fab fa-linkedin"></i>
-                        </a>
-                        <a href="#" class="text-white me-3 fs-5" title="Twitter">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-white me-3 fs-5" title="Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="text-white fs-5" title="YouTube">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                    </div>
-                    
-                    <h5 class="mb-3">Links Úteis</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a href="#" class="text-decoration-none text-white-50">
-                                <i class="fas fa-file-alt me-2"></i>Termos de Uso
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="text-decoration-none text-white-50">
-                                <i class="fas fa-lock me-2"></i>Política de Privacidade
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            
-            <hr class="my-4 bg-secondary">
-            
-            <div class="row align-items-center">
-                <div class="col-md-6 small">
-                    <span>SentinelIQ &copy; {% now "Y" %} | Desenvolvido com <i class="fas fa-heart text-danger"></i> no Brasil</span>
-                </div>
-                <div class="col-md-6 text-md-end small">
-                    <a href="#" class="text-white-50 text-decoration-none me-3">Suporte</a>
-                    <a href="#" class="text-white-50 text-decoration-none me-3">FAQ</a>
-                    <a href="#" class="text-white-50 text-decoration-none">Sobre</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <!-- Main Content -->
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Custom JS -->
-    <script src="{% static 'js/main.js' %}"></script>
+    <!-- Custom Scripts -->
+    <script>
+        // Sidebar toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const content = document.querySelector('.content');
+            
+            // Desktop sidebar toggle
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('sidebar-collapsed');
+                    content.classList.toggle('content-expanded');
+                    
+                    // Toggle visibility of text in nav links
+                    const navLabels = document.querySelectorAll('.nav-label');
+                    navLabels.forEach(label => {
+                        label.style.display = label.style.display === 'none' ? '' : 'none';
+                    });
+                    
+                    const sidebarHeaders = document.querySelectorAll('.sidebar-header');
+                    sidebarHeaders.forEach(header => {
+                        header.style.display = header.style.display === 'none' ? '' : 'none';
+                    });
+                });
+            }
+            
+            // Mobile sidebar toggle
+            if (mobileSidebarToggle) {
+                mobileSidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(event) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickSidebarToggle = mobileSidebarToggle && mobileSidebarToggle.contains(event.target);
+                
+                if (!isClickInsideSidebar && !isClickSidebarToggle && sidebar.classList.contains('show') && window.innerWidth < 992) {
+                    sidebar.classList.remove('show');
+                }
+            });
+            
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
     
     {% block extra_js %}{% endblock %}
 </body>

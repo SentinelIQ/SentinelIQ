@@ -7,31 +7,87 @@
 <style>
     .form-card {
         border-top: 4px solid var(--primary);
+        background-color: var(--bg-card);
+        border-radius: var(--border-radius);
+        border: 1px solid var(--border-color);
     }
+    
     .form-section {
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--border-color);
         padding-bottom: 1.5rem;
         margin-bottom: 1.5rem;
     }
+    
     .form-section:last-child {
         border-bottom: none;
         margin-bottom: 0;
     }
+    
     .form-section-title {
         margin-bottom: 1.25rem;
         font-weight: 600;
         color: var(--primary);
     }
-    .focused label {
-        color: var(--primary);
+    
+    .form-control, .form-select {
+        background-color: rgba(44, 44, 44, 0.8);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        height: calc(3rem + 2px);
+        padding: 0.5rem 1rem;
     }
+    
     .form-control:focus, .form-select:focus {
+        background-color: rgba(44, 44, 44, 0.9);
         border-color: var(--primary);
-        box-shadow: 0 0 0 0.2rem rgba(58, 134, 255, 0.15);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        color: var(--text-primary);
     }
+    
+    .form-floating > .form-control,
+    .form-floating > .form-select {
+        background-color: rgba(44, 44, 44, 0.8);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-floating > .form-control:focus,
+    .form-floating > .form-select:focus {
+        background-color: rgba(44, 44, 44, 0.9);
+    }
+    
     .form-floating > .form-control:focus ~ label,
     .form-floating > .form-control:not(:placeholder-shown) ~ label {
-        color: var(--primary);
+        color: var(--primary-light);
+        opacity: 1;
+    }
+    
+    .form-floating > label {
+        color: var(--text-secondary);
+    }
+    
+    .form-text {
+        color: var(--text-secondary);
+    }
+    
+    .card-header {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .form-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-bottom: 0.375rem;
+    }
+    
+    .form-help-text {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .dropdown-role {
+        margin-bottom: 1rem;
     }
 </style>
 {% endblock %}
@@ -39,7 +95,7 @@
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1">
+        <h2 class="mb-1 fw-bold">
             <i class="fas fa-{% if form.instance.id %}edit text-warning{% else %}user-plus text-primary{% endif %} me-2"></i> 
             {% if form.instance.id %}
                 Editar Usuário
@@ -63,9 +119,9 @@
     </div>
 </div>
 
-<div class="card shadow-sm form-card">
-    <div class="card-header bg-white">
-        <h4 class="mb-0">
+<div class="card form-card">
+    <div class="card-header">
+        <h4 class="mb-0 fw-bold">
             {% if form.instance.id %}
                 <span class="text-warning">
                     <i class="fas fa-edit me-2"></i> Editar Usuário: {{ form.instance.username }}
@@ -85,23 +141,23 @@
                 <h5 class="form-section-title"><i class="fas fa-id-card me-2"></i> Informações Básicas</h5>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <div class="form-floating mb-3">
-                            {{ form.username }}
-                            <label for="{{ form.username.id_for_label }}">Nome de Usuário</label>
-                        </div>
+                        <label for="{{ form.username.id_for_label }}" class="form-label">Nome de Usuário</label>
+                        <input type="text" name="{{ form.username.html_name }}" id="{{ form.username.id_for_label }}" 
+                               class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                               value="{{ form.username.value|default:'' }}" placeholder="Nome de usuário">
                         {% if form.username.errors %}
-                            <div class="text-danger small">
+                            <div class="invalid-feedback">
                                 {{ form.username.errors }}
                             </div>
                         {% endif %}
                     </div>
                     <div class="col-md-6">
-                        <div class="form-floating mb-3">
-                            {{ form.email }}
-                            <label for="{{ form.email.id_for_label }}">Email</label>
-                        </div>
+                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                        <input type="email" name="{{ form.email.html_name }}" id="{{ form.email.id_for_label }}" 
+                               class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                               value="{{ form.email.value|default:'' }}" placeholder="email@exemplo.com">
                         {% if form.email.errors %}
-                            <div class="text-danger small">
+                            <div class="invalid-feedback">
                                 {{ form.email.errors }}
                             </div>
                         {% endif %}
@@ -110,23 +166,23 @@
                 
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <div class="form-floating mb-3">
-                            {{ form.first_name }}
-                            <label for="{{ form.first_name.id_for_label }}">Nome</label>
-                        </div>
+                        <label for="{{ form.first_name.id_for_label }}" class="form-label">Nome</label>
+                        <input type="text" name="{{ form.first_name.html_name }}" id="{{ form.first_name.id_for_label }}" 
+                               class="form-control {% if form.first_name.errors %}is-invalid{% endif %}" 
+                               value="{{ form.first_name.value|default:'' }}" placeholder="Nome">
                         {% if form.first_name.errors %}
-                            <div class="text-danger small">
+                            <div class="invalid-feedback">
                                 {{ form.first_name.errors }}
                             </div>
                         {% endif %}
                     </div>
                     <div class="col-md-6">
-                        <div class="form-floating mb-3">
-                            {{ form.last_name }}
-                            <label for="{{ form.last_name.id_for_label }}">Sobrenome</label>
-                        </div>
+                        <label for="{{ form.last_name.id_for_label }}" class="form-label">Sobrenome</label>
+                        <input type="text" name="{{ form.last_name.html_name }}" id="{{ form.last_name.id_for_label }}" 
+                               class="form-control {% if form.last_name.errors %}is-invalid{% endif %}" 
+                               value="{{ form.last_name.value|default:'' }}" placeholder="Sobrenome">
                         {% if form.last_name.errors %}
-                            <div class="text-danger small">
+                            <div class="invalid-feedback">
                                 {{ form.last_name.errors }}
                             </div>
                         {% endif %}
@@ -139,24 +195,24 @@
                 <h5 class="form-section-title"><i class="fas fa-key me-2"></i> Senha</h5>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <div class="form-floating mb-3">
-                            {{ form.password1 }}
-                            <label for="{{ form.password1.id_for_label }}">Senha</label>
-                        </div>
+                        <label for="{{ form.password1.id_for_label }}" class="form-label">Senha</label>
+                        <input type="password" name="{{ form.password1.html_name }}" id="{{ form.password1.id_for_label }}" 
+                               class="form-control {% if form.password1.errors %}is-invalid{% endif %}" 
+                               placeholder="Digite uma senha segura">
                         {% if form.password1.errors %}
-                            <div class="text-danger small">
+                            <div class="invalid-feedback">
                                 {{ form.password1.errors }}
                             </div>
                         {% endif %}
                         <div class="form-text small">{{ form.password1.help_text }}</div>
                     </div>
                     <div class="col-md-6">
-                        <div class="form-floating mb-3">
-                            {{ form.password2 }}
-                            <label for="{{ form.password2.id_for_label }}">Confirmar Senha</label>
-                        </div>
+                        <label for="{{ form.password2.id_for_label }}" class="form-label">Confirmar Senha</label>
+                        <input type="password" name="{{ form.password2.html_name }}" id="{{ form.password2.id_for_label }}" 
+                               class="form-control {% if form.password2.errors %}is-invalid{% endif %}" 
+                               placeholder="Confirme a senha">
                         {% if form.password2.errors %}
-                            <div class="text-danger small">
+                            <div class="invalid-feedback">
                                 {{ form.password2.errors }}
                             </div>
                         {% endif %}
@@ -167,16 +223,23 @@
             
             <div class="form-section">
                 <h5 class="form-section-title"><i class="fas fa-user-cog me-2"></i> Permissões e Organização</h5>
-                <div class="row mb-3">
-                    <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
                         <label for="{{ form.role.id_for_label }}" class="form-label">Função</label>
-                        {{ form.role }}
+                        <select name="{{ form.role.html_name }}" id="{{ form.role.id_for_label }}"
+                                class="form-select {% if form.role.errors %}is-invalid{% endif %}">
+                            {% for value, text in form.role.field.choices %}
+                                <option value="{{ value }}" {% if form.role.value == value %}selected{% endif %}>
+                                    {{ text }}
+                                </option>
+                            {% endfor %}
+                        </select>
                         {% if form.role.errors %}
-                            <div class="text-danger small">
+                            <div class="invalid-feedback d-block">
                                 {{ form.role.errors }}
                             </div>
                         {% endif %}
-                        <div class="form-text small">
+                        <div class="form-text form-help-text">
                             <ul class="mb-0 ps-3">
                                 <li><strong>Super Admin:</strong> Acesso total ao sistema</li>
                                 <li><strong>Admin da Organização:</strong> Acesso total à organização</li>
@@ -184,15 +247,25 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 mb-4">
                         <label for="{{ form.organization.id_for_label }}" class="form-label">Organização</label>
-                        {{ form.organization }}
+                        <select name="{{ form.organization.html_name }}" id="{{ form.organization.id_for_label }}"
+                                class="form-select {% if form.organization.errors %}is-invalid{% endif %}">
+                            <option value="">---------</option>
+                            {% for value, text in form.organization.field.choices %}
+                                {% if value %}
+                                    <option value="{{ value }}" {% if form.organization.value|stringformat:"i" == value|stringformat:"i" %}selected{% endif %}>
+                                        {{ text }}
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
                         {% if form.organization.errors %}
-                            <div class="text-danger small">
+                            <div class="invalid-feedback d-block">
                                 {{ form.organization.errors }}
                             </div>
                         {% endif %}
-                        <div class="form-text small">Organização à qual o usuário pertence</div>
+                        <div class="form-text form-help-text">Organização à qual o usuário pertence</div>
                     </div>
                 </div>
             </div>

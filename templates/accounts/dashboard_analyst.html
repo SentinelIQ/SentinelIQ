@@ -7,25 +7,138 @@
 <style>
     .stat-card {
         transition: all 0.3s ease;
+        border-radius: var(--border-radius);
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
     }
+    
     .stat-card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
+    
     .stat-icon {
-        font-size: 3rem;
-        opacity: 0.8;
+        font-size: 2.5rem;
+        opacity: 0.7;
     }
+    
     .dashboard-action {
         transition: all 0.3s ease;
     }
+    
     .dashboard-action:hover {
         transform: translateY(-3px);
     }
+    
     .border-left-primary {
-        border-left: 0.25rem solid var(--primary) !important;
+        border-left: 4px solid var(--primary) !important;
     }
+    
+    .border-left-danger {
+        border-left: 4px solid var(--danger) !important;
+    }
+    
+    .border-left-success {
+        border-left: 4px solid var(--success) !important;
+    }
+    
     .border-left-info {
-        border-left: 0.25rem solid var(--info) !important;
+        border-left: 4px solid var(--info) !important;
+    }
+    
+    .card-header {
+        background-color: rgba(255,255,255,0.05);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .table-responsive {
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        overflow: hidden;
+    }
+    
+    .table {
+        margin-bottom: 0;
+    }
+    
+    .table thead th {
+        background-color: rgba(255,255,255,0.05);
+        color: var(--text-primary);
+        font-weight: 600;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .table tbody td {
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+    
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+    
+    .welcome-card {
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, rgba(13, 110, 253, 0.05) 100%);
+        border: 1px solid rgba(13, 110, 253, 0.2);
+        border-radius: var(--border-radius);
+    }
+    
+    .badge {
+        padding: 0.5em 0.75em;
+        font-weight: 500;
+    }
+    
+    .quick-action-btn {
+        border: none;
+        background-color: rgba(255,255,255,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .quick-action-btn:hover {
+        background-color: rgba(255,255,255,0.1);
+        transform: translateY(-3px);
+    }
+    
+    .quick-action-btn.primary-action {
+        background-color: rgba(13, 110, 253, 0.15);
+    }
+    
+    .quick-action-btn.primary-action:hover {
+        background-color: rgba(13, 110, 253, 0.25);
+    }
+    
+    .quick-action-btn.danger-action {
+        background-color: rgba(220, 53, 69, 0.15);
+    }
+    
+    .quick-action-btn.danger-action:hover {
+        background-color: rgba(220, 53, 69, 0.25);
+    }
+    
+    .quick-action-btn.info-action {
+        background-color: rgba(13, 202, 240, 0.15);
+    }
+    
+    .quick-action-btn.info-action:hover {
+        background-color: rgba(13, 202, 240, 0.25);
+    }
+    
+    .quick-action-btn.success-action {
+        background-color: rgba(25, 135, 84, 0.15);
+    }
+    
+    .quick-action-btn.success-action:hover {
+        background-color: rgba(25, 135, 84, 0.25);
     }
 </style>
 {% endblock %}
@@ -33,26 +146,30 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-12">
-        <div class="d-sm-flex align-items-center justify-content-between mb-2">
-            <h2 class="mb-0">
+        <div class="d-sm-flex align-items-center justify-content-between mb-3">
+            <h2 class="mb-0 fw-bold">
                 <i class="fas fa-tachometer-alt text-primary me-2"></i> Dashboard do Analista
             </h2>
-            <span class="badge bg-primary p-2">
-                <i class="fas fa-calendar me-1"></i> {% now "d/m/Y" %}
+            <span class="badge bg-primary p-2 d-flex align-items-center">
+                <i class="fas fa-calendar me-2"></i> {% now "d/m/Y" %}
             </span>
         </div>
-        <nav aria-label="breadcrumb">
+        <nav aria-label="breadcrumb" class="mb-3">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
                 <li class="breadcrumb-item active">Dashboard</li>
             </ol>
         </nav>
-        <div class="alert alert-info d-flex align-items-center">
-            <i class="fas fa-user-circle fa-lg me-3"></i>
-            <div>
-                <span class="fw-bold">Bem-vindo, {{ user.get_full_name|default:user.username }}!</span>
-                <div class="mt-1">
-                    <i class="fas fa-building"></i> Organização: <strong>{{ user.organization.name }}</strong>
+        <div class="welcome-card p-3 mb-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-user-circle fa-2x text-primary"></i>
+                </div>
+                <div>
+                    <h5 class="mb-1 fw-bold">Bem-vindo, {{ user.get_full_name|default:user.username }}!</h5>
+                    <p class="mb-0 text-secondary">
+                        <i class="fas fa-building me-1"></i> Organização: <strong>{{ user.organization.name }}</strong>
+                    </p>
                 </div>
             </div>
         </div>
@@ -61,81 +178,81 @@
 
 <!-- Cards de estatísticas -->
 <div class="row mb-4">
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card border-left-primary shadow-sm h-100 py-2 stat-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Alertas Atribuídos a Você</div>
-                        <div class="h3 mb-0 font-weight-bold">{{ alerts_count|default:"0" }}</div>
-                        <a href="{% url 'alerts:alert_list' %}" class="text-decoration-none mt-2 d-block">
-                            <small>Ver todos <i class="fas fa-arrow-right"></i></small>
-                        </a>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card border-left-primary h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-xs text-uppercase fw-bold text-primary">
+                        Alertas Atribuídos
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-tasks fa-3x text-primary opacity-50"></i>
+                    <div class="stat-icon text-primary">
+                        <i class="fas fa-bell"></i>
                     </div>
                 </div>
+                <div class="h2 mb-0 fw-bold">{{ alerts_count|default:"0" }}</div>
+                <a href="{% url 'alerts:alert_list' %}" class="text-decoration-none mt-3 d-flex align-items-center">
+                    <small>Ver todos</small>
+                    <i class="fas fa-arrow-right ms-1 small"></i>
+                </a>
             </div>
         </div>
     </div>
     
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card border-left-danger shadow-sm h-100 py-2 stat-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                            Casos Atribuídos a Você</div>
-                        <div class="h3 mb-0 font-weight-bold">{{ cases_count|default:"0" }}</div>
-                        <a href="{% url 'cases:case_list' %}" class="text-decoration-none mt-2 d-block">
-                            <small>Ver todos <i class="fas fa-arrow-right"></i></small>
-                        </a>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card border-left-danger h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-xs text-uppercase fw-bold text-danger">
+                        Casos Ativos
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-briefcase fa-3x text-danger opacity-50"></i>
+                    <div class="stat-icon text-danger">
+                        <i class="fas fa-briefcase"></i>
                     </div>
                 </div>
+                <div class="h2 mb-0 fw-bold">{{ cases_count|default:"0" }}</div>
+                <a href="{% url 'cases:case_list' %}" class="text-decoration-none mt-3 d-flex align-items-center">
+                    <small>Ver todos</small>
+                    <i class="fas fa-arrow-right ms-1 small"></i>
+                </a>
             </div>
         </div>
     </div>
     
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card border-left-info shadow-sm h-100 py-2 stat-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Organização</div>
-                        <div class="h3 mb-0 font-weight-bold">{{ user.organization.name }}</div>
-                        <div class="text-decoration-none mt-2 d-block text-muted">
-                            <small><i class="fas fa-users me-1"></i> Sua Equipe</small>
-                        </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card border-left-success h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-xs text-uppercase fw-bold text-success">
+                        Observables
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-building fa-3x text-info opacity-50"></i>
+                    <div class="stat-icon text-success">
+                        <i class="fas fa-eye"></i>
                     </div>
                 </div>
+                <div class="h2 mb-0 fw-bold">{{ observables_count|default:"0" }}</div>
+                <a href="{% url 'core:observable_list' %}" class="text-decoration-none mt-3 d-flex align-items-center">
+                    <small>Ver todos</small>
+                    <i class="fas fa-arrow-right ms-1 small"></i>
+                </a>
             </div>
         </div>
     </div>
     
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card border-left-success shadow-sm h-100 py-2 stat-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Observables Relacionados</div>
-                        <div class="h3 mb-0 font-weight-bold">{{ observables_count|default:"0" }}</div>
-                        <a href="{% url 'core:observable_list' %}" class="text-decoration-none mt-2 d-block">
-                            <small>Ver todos <i class="fas fa-arrow-right"></i></small>
-                        </a>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card border-left-info h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-xs text-uppercase fw-bold text-info">
+                        Organização
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-eye fa-3x text-success opacity-50"></i>
+                    <div class="stat-icon text-info">
+                        <i class="fas fa-building"></i>
                     </div>
+                </div>
+                <div class="h5 mb-0 fw-bold text-truncate">{{ user.organization.name }}</div>
+                <div class="text-decoration-none mt-3 d-flex align-items-center text-muted">
+                    <i class="fas fa-users me-1 small"></i>
+                    <small>Sua Equipe</small>
                 </div>
             </div>
         </div>
@@ -144,89 +261,89 @@
 
 <div class="row mb-4">
     <div class="col-md-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
+        <div class="card">
+            <div class="card-header py-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i> Alertas Atribuídos a Você</h5>
-                    <a href="{% url 'alerts:alert_list' %}" class="btn btn-sm btn-light d-flex align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-bell text-primary me-2"></i> Alertas Atribuídos a Você
+                    </h5>
+                    <a href="{% url 'alerts:alert_list' %}" class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-list me-1"></i> Ver Todos
                     </a>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Título</th>
-                                <th>Severidade</th>
-                                <th>Status</th>
-                                <th>Data</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if assigned_alerts %}
-                                {% for alert in assigned_alerts %}
-                                    <tr>
-                                        <td>
-                                            <span class="fw-bold">{{ alert.title }}</span>
-                                        </td>
-                                        <td>
-                                            {% if alert.severity == 'critical' %}
-                                                <span class="badge bg-danger">Crítico</span>
-                                            {% elif alert.severity == 'high' %}
-                                                <span class="badge bg-warning text-dark">Alto</span>
-                                            {% elif alert.severity == 'medium' %}
-                                                <span class="badge bg-info text-dark">Médio</span>
-                                            {% else %}
-                                                <span class="badge bg-success">Baixo</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if alert.status == 'new' %}
-                                                <span class="badge bg-danger">Novo</span>
-                                            {% elif alert.status == 'acknowledged' %}
-                                                <span class="badge bg-warning text-dark">Reconhecido</span>
-                                            {% elif alert.status == 'in_progress' %}
-                                                <span class="badge bg-info text-dark">Em Progresso</span>
-                                            {% elif alert.status == 'resolved' %}
-                                                <span class="badge bg-success">Resolvido</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">Fechado</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <span class="small text-muted">
-                                                <i class="fas fa-clock me-1"></i>
-                                                {{ alert.created_at|date:"d/m/Y H:i" }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="{% url 'alerts:alert_detail' alert.id %}" class="btn btn-info" title="Visualizar">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{% url 'alerts:alert_update' alert.id %}" class="btn btn-warning" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            {% else %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Severidade</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if assigned_alerts %}
+                            {% for alert in assigned_alerts %}
                                 <tr>
-                                    <td colspan="5" class="text-center py-4">
-                                        <div class="d-flex flex-column align-items-center">
-                                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-                                            <p class="mb-0 text-muted">Nenhum alerta atribuído a você no momento.</p>
+                                    <td>
+                                        <span class="fw-bold">{{ alert.title }}</span>
+                                    </td>
+                                    <td>
+                                        {% if alert.severity == 'critical' %}
+                                            <span class="badge bg-danger">Crítico</span>
+                                        {% elif alert.severity == 'high' %}
+                                            <span class="badge bg-warning text-dark">Alto</span>
+                                        {% elif alert.severity == 'medium' %}
+                                            <span class="badge bg-info text-dark">Médio</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Baixo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if alert.status == 'new' %}
+                                            <span class="badge bg-danger">Novo</span>
+                                        {% elif alert.status == 'acknowledged' %}
+                                            <span class="badge bg-warning text-dark">Reconhecido</span>
+                                        {% elif alert.status == 'in_progress' %}
+                                            <span class="badge bg-info text-dark">Em Progresso</span>
+                                        {% elif alert.status == 'resolved' %}
+                                            <span class="badge bg-success">Resolvido</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Fechado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="small text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            {{ alert.created_at|date:"d/m/Y H:i" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'alerts:alert_detail' alert.id %}" class="btn btn-sm btn-primary action-btn me-1" title="Visualizar">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'alerts:alert_update' alert.id %}" class="btn btn-sm btn-warning action-btn" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                                        <p class="mb-0 text-muted">Nenhum alerta atribuído a você no momento.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -234,95 +351,95 @@
 
 <div class="row mb-4">
     <div class="col-md-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-danger text-white">
+        <div class="card">
+            <div class="card-header py-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i> Casos Atribuídos a Você</h5>
-                    <a href="{% url 'cases:case_list' %}" class="btn btn-sm btn-light d-flex align-items-center">
-                        <i class="fas fa-list"></i> <span class="ms-1">Ver Todos</span>
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-briefcase text-danger me-2"></i> Casos Atribuídos a Você
+                    </h5>
+                    <a href="{% url 'cases:case_list' %}" class="btn btn-sm btn-outline-danger">
+                        <i class="fas fa-list me-1"></i> Ver Todos
                     </a>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Título</th>
-                                <th>Prioridade</th>
-                                <th>Status</th>
-                                <th>Data Limite</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if assigned_cases %}
-                                {% for case in assigned_cases %}
-                                    <tr>
-                                        <td>
-                                            <span class="fw-bold">{{ case.title }}</span>
-                                        </td>
-                                        <td>
-                                            {% if case.priority == 'critical' %}
-                                                <span class="badge bg-danger">Crítico</span>
-                                            {% elif case.priority == 'high' %}
-                                                <span class="badge bg-warning text-dark">Alto</span>
-                                            {% elif case.priority == 'medium' %}
-                                                <span class="badge bg-info text-dark">Médio</span>
-                                            {% else %}
-                                                <span class="badge bg-success">Baixo</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if case.status == 'open' %}
-                                                <span class="badge bg-danger">Aberto</span>
-                                            {% elif case.status == 'in_progress' %}
-                                                <span class="badge bg-info text-dark">Em Progresso</span>
-                                            {% elif case.status == 'pending' %}
-                                                <span class="badge bg-warning text-dark">Pendente</span>
-                                            {% elif case.status == 'resolved' %}
-                                                <span class="badge bg-success">Resolvido</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">Fechado</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if case.due_date %}
-                                                <span class="small {% if case.due_date < today %}text-danger fw-bold{% endif %}">
-                                                    <i class="fas fa-calendar-day me-1"></i>
-                                                    {{ case.due_date|date:"d/m/Y" }}
-                                                </span>
-                                            {% else %}
-                                                <span class="small text-muted">
-                                                    <i class="fas fa-calendar-times me-1"></i> Não definida
-                                                </span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="{% url 'cases:case_detail' case.id %}" class="btn btn-info" title="Visualizar">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{% url 'cases:case_update' case.id %}" class="btn btn-warning" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            {% else %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Prioridade</th>
+                            <th>Status</th>
+                            <th>Data Limite</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if assigned_cases %}
+                            {% for case in assigned_cases %}
                                 <tr>
-                                    <td colspan="5" class="text-center py-4">
-                                        <div class="d-flex flex-column align-items-center">
-                                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-                                            <p class="mb-0 text-muted">Nenhum caso atribuído a você no momento.</p>
+                                    <td>
+                                        <span class="fw-bold">{{ case.title }}</span>
+                                    </td>
+                                    <td>
+                                        {% if case.priority == 'critical' %}
+                                            <span class="badge bg-danger">Crítico</span>
+                                        {% elif case.priority == 'high' %}
+                                            <span class="badge bg-warning text-dark">Alto</span>
+                                        {% elif case.priority == 'medium' %}
+                                            <span class="badge bg-info text-dark">Médio</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Baixo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if case.status == 'open' %}
+                                            <span class="badge bg-danger">Aberto</span>
+                                        {% elif case.status == 'in_progress' %}
+                                            <span class="badge bg-info text-dark">Em Progresso</span>
+                                        {% elif case.status == 'pending' %}
+                                            <span class="badge bg-warning text-dark">Pendente</span>
+                                        {% elif case.status == 'resolved' %}
+                                            <span class="badge bg-success">Resolvido</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Fechado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if case.due_date %}
+                                            <span class="small {% if case.due_date < today %}text-danger fw-bold{% endif %}">
+                                                <i class="fas fa-calendar-day me-1"></i>
+                                                {{ case.due_date|date:"d/m/Y" }}
+                                            </span>
+                                        {% else %}
+                                            <span class="small text-muted">
+                                                <i class="fas fa-calendar-times me-1"></i> Não definida
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'cases:case_detail' case.id %}" class="btn btn-sm btn-primary action-btn me-1" title="Visualizar">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'cases:case_update' case.id %}" class="btn btn-sm btn-warning action-btn" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                                        <p class="mb-0 text-muted">Nenhum caso atribuído a você no momento.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -330,46 +447,56 @@
 
 <div class="row">
     <div class="col-md-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i> Ações Rápidas</h5>
+        <div class="card">
+            <div class="card-header py-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-bolt text-warning me-2"></i> Ações Rápidas
+                </h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <a href="{% url 'alerts:alert_list' %}" class="btn btn-primary w-100 p-3 d-flex align-items-center justify-content-between">
-                            <div>
-                                <i class="fas fa-search fa-lg"></i>
-                                <span class="ms-2">Buscar Alertas</span>
+                <div class="row g-3">
+                    <div class="col-lg-3 col-md-6">
+                        <a href="{% url 'alerts:alert_list' %}" class="card quick-action-btn primary-action p-3 text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-search fa-lg text-primary me-3"></i>
+                                    <span>Buscar Alertas</span>
+                                </div>
+                                <i class="fas fa-arrow-right text-primary"></i>
                             </div>
-                            <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <a href="{% url 'alerts:alert_list' %}?status=new" class="btn btn-danger w-100 p-3 d-flex align-items-center justify-content-between">
-                            <div>
-                                <i class="fas fa-bell fa-lg"></i>
-                                <span class="ms-2">Alertas Novos</span>
+                    <div class="col-lg-3 col-md-6">
+                        <a href="{% url 'alerts:alert_list' %}?status=new" class="card quick-action-btn danger-action p-3 text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-bell fa-lg text-danger me-3"></i>
+                                    <span>Alertas Novos</span>
+                                </div>
+                                <i class="fas fa-arrow-right text-danger"></i>
                             </div>
-                            <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <a href="{% url 'alerts:alert_list' %}?status=in_progress" class="btn btn-info w-100 p-3 d-flex align-items-center justify-content-between">
-                            <div>
-                                <i class="fas fa-spinner fa-lg"></i>
-                                <span class="ms-2">Em Progresso</span>
+                    <div class="col-lg-3 col-md-6">
+                        <a href="{% url 'alerts:alert_list' %}?status=in_progress" class="card quick-action-btn info-action p-3 text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-spinner fa-lg text-info me-3"></i>
+                                    <span>Em Progresso</span>
+                                </div>
+                                <i class="fas fa-arrow-right text-info"></i>
                             </div>
-                            <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <a href="{% url 'alerts:alert_list' %}?status=resolved" class="btn btn-success w-100 p-3 d-flex align-items-center justify-content-between">
-                            <div>
-                                <i class="fas fa-check-circle fa-lg"></i>
-                                <span class="ms-2">Resolvidos</span>
+                    <div class="col-lg-3 col-md-6">
+                        <a href="{% url 'alerts:alert_list' %}?status=resolved" class="card quick-action-btn success-action p-3 text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-check-circle fa-lg text-success me-3"></i>
+                                    <span>Resolvidos</span>
+                                </div>
+                                <i class="fas fa-arrow-right text-success"></i>
                             </div>
-                            <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
                 </div>

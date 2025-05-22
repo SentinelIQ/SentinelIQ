@@ -3,63 +3,189 @@
 
 {% block title %}Login - SentinelIQ{% endblock %}
 
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f36 100%);
+    }
+    
+    .sidebar, .navbar {
+        display: none;
+    }
+    
+    .content {
+        margin-left: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 0;
+    }
+    
+    .login-container {
+        width: 100%;
+        max-width: 420px;
+        padding: 1rem;
+    }
+    
+    .login-card {
+        background: var(--bg-card);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: fadeIn 0.6s ease;
+    }
+    
+    .login-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 2.5rem 2rem;
+        text-align: center;
+    }
+    
+    .login-logo {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #fff;
+    }
+    
+    .login-body {
+        padding: 2.5rem;
+    }
+    
+    .login-form .form-control {
+        height: 50px;
+        background-color: rgba(44, 44, 44, 0.8);
+        border: 1px solid var(--border-color);
+        font-size: 1rem;
+        padding-left: 1rem;
+    }
+    
+    .login-form .form-control:focus {
+        background-color: rgba(44, 44, 44, 0.9);
+    }
+    
+    .login-btn {
+        height: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        margin-top: 1rem;
+    }
+    
+    .login-footer {
+        background-color: rgba(255, 255, 255, 0.03);
+        border-top: 1px solid var(--border-color);
+        padding: 1rem;
+        text-align: center;
+    }
+    
+    .form-input-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .input-icon {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 50px;
+        width: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+    }
+    
+    .login-form .form-control {
+        padding-left: 50px;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .product-name {
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+    
+    .version-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 0.75rem;
+        background-color: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="login-container">
     <div class="login-card">
-        <div class="card shadow-lg">
-            <div class="card-header bg-primary text-white text-center py-4">
-                <div class="mb-3">
-                    <i class="fas fa-shield-alt fa-3x"></i>
-                </div>
-                <h4 class="mb-0">SentinelIQ</h4>
+        <div class="login-header position-relative">
+            <span class="version-badge">v2.0</span>
+            <div class="login-logo">
+                <i class="fas fa-shield-alt"></i>
             </div>
-            <div class="card-body p-4">
-                <h5 class="card-title text-center mb-4">Acesso ao Sistema</h5>
+            <h1 class="text-white product-name mb-0">SENTINEL<span class="text-light">IQ</span></h1>
+            <p class="text-white-50 mt-2 mb-0">Plataforma de Cibersegurança</p>
+        </div>
+        <div class="login-body">
+            <h5 class="mb-4 text-center">Acesso ao Sistema</h5>
+            
+            {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i> Credenciais inválidas. Por favor, tente novamente.
+            </div>
+            {% endif %}
+            
+            <form method="post" class="login-form">
+                {% csrf_token %}
                 
-                <form method="post" class="needs-validation" novalidate>
-                    {% csrf_token %}
-                    
-                    <div class="mb-4">
-                        <div class="input-group">
-                            <span class="input-group-text bg-light">
-                                <i class="fas fa-user text-primary"></i>
-                            </span>
-                            {{ form.username }}
-                        </div>
-                        {% if form.username.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.username.errors }}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="mb-4">
-                        <div class="input-group">
-                            <span class="input-group-text bg-light">
-                                <i class="fas fa-lock text-primary"></i>
-                            </span>
-                            {{ form.password }}
-                        </div>
-                        {% if form.password.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.password.errors }}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-sign-in-alt me-2"></i> Entrar
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <div class="card-footer bg-light text-center py-3">
-                <div class="small text-muted">
-                    <i class="fas fa-shield-alt me-1"></i> Sistema de Monitoramento de Alertas
+                <div class="form-input-group">
+                    <span class="input-icon">
+                        <i class="fas fa-user"></i>
+                    </span>
+                    {{ form.username }}
                 </div>
+                
+                <div class="form-input-group">
+                    <span class="input-icon">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    {{ form.password }}
+                </div>
+                
+                <div class="d-flex justify-content-between mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberCheck">
+                        <label class="form-check-label text-muted" for="rememberCheck">
+                            Lembrar-me
+                        </label>
+                    </div>
+                    <div>
+                        <a href="#" class="text-primary">Esqueceu a senha?</a>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 login-btn">
+                    <i class="fas fa-sign-in-alt me-2"></i> Entrar
+                </button>
+            </form>
+        </div>
+        <div class="login-footer">
+            <div class="text-muted">
+                <i class="fas fa-lock me-1"></i> Ambiente Seguro
             </div>
         </div>
+    </div>
+    
+    <div class="mt-4 text-center text-muted">
+        <small>&copy; {% now "Y" %} SentinelIQ. Todos os direitos reservados.</small>
     </div>
 </div>
 {% endblock %} 

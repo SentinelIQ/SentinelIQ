@@ -6,12 +6,14 @@
 {% block extra_css %}
 <style>
     .user-header {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.9) 0%, rgba(13, 202, 240, 0.8) 100%);
         color: white;
         border-radius: var(--border-radius);
         padding: 2rem;
         margin-bottom: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
+    
     .user-avatar-lg {
         width: 80px;
         height: 80px;
@@ -24,30 +26,99 @@
         font-size: 2rem;
         font-weight: bold;
         margin-right: 1.5rem;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
     }
+    
     .info-card {
         height: 100%;
         transition: all 0.3s ease;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
     }
+    
     .info-card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
+    
+    .nav-tabs {
+        border-bottom: 1px solid var(--border-color);
+    }
+    
     .nav-tabs .nav-link {
         border: none;
         border-bottom: 3px solid transparent;
-        color: var(--dark);
+        color: var(--text-secondary);
         font-weight: 600;
+        padding: 1rem 1.5rem;
+        transition: all 0.2s ease;
     }
+    
+    .nav-tabs .nav-link:hover {
+        color: var(--text-primary);
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+    
     .nav-tabs .nav-link.active {
         border: none;
         border-bottom: 3px solid var(--primary);
         color: var(--primary);
+        background-color: transparent;
     }
+    
     .badge {
         transition: all 0.2s ease;
+        font-weight: 500;
+        padding: 0.5em 0.75em;
     }
+    
     .badge:hover {
         transform: scale(1.05);
+    }
+    
+    .table thead th {
+        background-color: rgba(255,255,255,0.05);
+        color: var(--text-primary);
+        font-weight: 600;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .table tbody td {
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+    
+    .list-group-item {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+    
+    .card-header-tabs {
+        margin-right: 0;
+        margin-left: 0;
+        margin-bottom: -1px;
+    }
+    
+    .card-header {
+        background-color: rgba(255,255,255,0.05);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .card-bg-primary {
+        background-color: rgba(13, 110, 253, 0.15) !important;
+        border: 1px solid rgba(13, 110, 253, 0.3) !important;
     }
 </style>
 {% endblock %}
@@ -55,7 +126,7 @@
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1"><i class="fas fa-user text-primary me-2"></i> Detalhes do Usuário</h2>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-user text-primary me-2"></i> Detalhes do Usuário</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
@@ -112,12 +183,12 @@
 <!-- Cards de Informações -->
 <div class="row mb-4">
     <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card shadow-sm info-card">
+        <div class="card info-card">
             <div class="card-body">
                 <h5 class="card-title text-primary">
                     <i class="fas fa-envelope me-2"></i> Contato
                 </h5>
-                <hr>
+                <hr class="border-dark">
                 <p class="mb-1">
                     <strong>Email:</strong> 
                     <a href="mailto:{{ user_obj.email }}" class="text-decoration-none">
@@ -142,12 +213,12 @@
     </div>
     
     <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card shadow-sm info-card">
+        <div class="card info-card">
             <div class="card-body">
                 <h5 class="card-title text-warning">
                     <i class="fas fa-shield-alt me-2"></i> Status da Conta
                 </h5>
-                <hr>
+                <hr class="border-dark">
                 <p class="mb-1">
                     <strong>Status:</strong> 
                     {% if user_obj.is_active %}
@@ -173,12 +244,12 @@
     </div>
     
     <div class="col-xl-4 col-md-12 mb-4">
-        <div class="card shadow-sm info-card">
+        <div class="card info-card">
             <div class="card-body">
                 <h5 class="card-title text-success">
                     <i class="fas fa-chart-line me-2"></i> Atividade
                 </h5>
-                <hr>
+                <hr class="border-dark">
                 <div class="d-flex justify-content-around text-center mb-3">
                     <div>
                         <h2 class="mb-1 text-primary">{{ alerts_created|default:"0" }}</h2>
@@ -199,9 +270,9 @@
 </div>
 
 <!-- Abas de Conteúdo -->
-<div class="card shadow-sm">
-    <div class="card-header bg-white p-0 border-bottom-0">
-        <ul class="nav nav-tabs" id="userTabs" role="tablist">
+<div class="card">
+    <div class="card-header p-0">
+        <ul class="nav nav-tabs card-header-tabs" id="userTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-tab-pane" type="button" role="tab" aria-controls="info-tab-pane" aria-selected="true">
                     <i class="fas fa-info-circle me-1"></i> Informações
@@ -321,8 +392,8 @@
                     </div>
                     
                     <div class="col-lg-4">
-                        <div class="card bg-light mb-4">
-                            <div class="card-header bg-light">
+                        <div class="card mb-4">
+                            <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-cog me-2 text-primary"></i> Informações Técnicas</h5>
                             </div>
                             <div class="card-body">
@@ -330,7 +401,7 @@
                                     <tbody>
                                         <tr>
                                             <th scope="row">ID</th>
-                                            <td><code>{{ user_obj.id }}</code></td>
+                                            <td><code class="bg-dark text-light p-1">{{ user_obj.id }}</code></td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Último Login</th>
@@ -351,13 +422,13 @@
                             </div>
                         </div>
                         
-                        <div class="card border-primary">
+                        <div class="card card-bg-primary">
                             <div class="card-header bg-primary text-white">
                                 <h5 class="mb-0"><i class="fas fa-link me-2"></i> Ações Rápidas</h5>
                             </div>
                             <div class="card-body">
                                 <div class="d-grid gap-2">
-                                    <a href="{% url 'accounts:user_update' user_obj.id %}" class="btn btn-outline-warning">
+                                    <a href="{% url 'accounts:user_update' user_obj.id %}" class="btn btn-outline-primary">
                                         <i class="fas fa-edit me-1"></i> Editar Usuário
                                     </a>
                                     {% if user_obj.is_active %}
@@ -382,15 +453,15 @@
             <!-- Aba de Alertas -->
             <div class="tab-pane fade" id="alerts-tab-pane" role="tabpanel" aria-labelledby="alerts-tab" tabindex="0">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="mb-0"><i class="fas fa-bell text-warning me-2"></i> Alertas do Usuário</h5>
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-bell text-warning me-2"></i> Alertas do Usuário</h5>
                     <a href="{% url 'alerts:alert_list' %}" class="btn btn-warning btn-sm">
                         <i class="fas fa-list me-1"></i> Ver Todos os Alertas
                     </a>
                 </div>
                 
                 <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
+                    <table class="table">
+                        <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Título</th>
@@ -403,8 +474,8 @@
                         <tbody>
                             {% for alert in user_alerts %}
                                 <tr>
-                                    <td><code>{{ alert.id }}</code></td>
-                                    <td>{{ alert.title }}</td>
+                                    <td><code class="bg-dark text-light p-1">{{ alert.id }}</code></td>
+                                    <td class="fw-bold">{{ alert.title }}</td>
                                     <td>
                                         {% if alert.status == 'open' %}
                                             <span class="badge bg-danger">Aberto</span>
@@ -423,13 +494,13 @@
                                             <span class="text-muted">—</span>
                                         {% endif %}
                                     </td>
-                                    <td>{{ alert.created_at|date:"d/m/Y H:i" }}</td>
+                                    <td><small class="text-muted">{{ alert.created_at|date:"d/m/Y H:i" }}</small></td>
                                     <td class="text-center">
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="{% url 'alerts:alert_detail' alert.id %}" class="btn btn-info">
+                                        <div class="btn-group">
+                                            <a href="{% url 'alerts:alert_detail' alert.id %}" class="btn btn-sm btn-primary action-btn me-1" title="Visualizar">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{% url 'alerts:alert_update' alert.id %}" class="btn btn-warning">
+                                            <a href="{% url 'alerts:alert_update' alert.id %}" class="btn btn-sm btn-warning action-btn" title="Editar">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </div>
@@ -438,8 +509,10 @@
                             {% empty %}
                                 <tr>
                                     <td colspan="6" class="text-center py-4">
-                                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
-                                        <p class="text-muted">Nenhum alerta encontrado para este usuário.</p>
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">Nenhum alerta encontrado para este usuário.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -451,7 +524,7 @@
             <!-- Aba de Histórico -->
             <div class="tab-pane fade" id="history-tab-pane" role="tabpanel" aria-labelledby="history-tab" tabindex="0">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="mb-0"><i class="fas fa-history text-primary me-2"></i> Histórico de Atividades</h5>
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-history text-primary me-2"></i> Histórico de Atividades</h5>
                 </div>
                 
                 <div class="card">
@@ -492,8 +565,10 @@
                             </li>
                             {% empty %}
                             <li class="list-group-item text-center py-4">
-                                <i class="fas fa-history fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">Nenhuma atividade registrada para este usuário.</p>
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Nenhuma atividade registrada para este usuário.</p>
+                                </div>
                             </li>
                             {% endfor %}
                         </ul>

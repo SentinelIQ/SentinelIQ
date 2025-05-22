@@ -7,31 +7,151 @@
 <style>
     .stat-card {
         transition: all 0.3s ease;
+        border-radius: var(--border-radius);
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
     }
+    
     .stat-card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
+    
     .stat-icon {
-        font-size: 3rem;
-        opacity: 0.8;
+        font-size: 2.5rem;
+        opacity: 0.7;
     }
+    
     .dashboard-action {
         transition: all 0.3s ease;
+        background-color: rgba(255,255,255,0.05);
+        border: none;
+        color: var(--text-primary);
     }
+    
     .dashboard-action:hover {
         transform: translateY(-3px);
+        background-color: rgba(255,255,255,0.1);
     }
+    
+    .dashboard-action.action-primary {
+        background-color: rgba(13, 110, 253, 0.15);
+    }
+    
+    .dashboard-action.action-primary:hover {
+        background-color: rgba(13, 110, 253, 0.25);
+    }
+    
+    .dashboard-action.action-success {
+        background-color: rgba(25, 135, 84, 0.15);
+    }
+    
+    .dashboard-action.action-success:hover {
+        background-color: rgba(25, 135, 84, 0.25);
+    }
+    
+    .dashboard-action.action-warning {
+        background-color: rgba(255, 193, 7, 0.15);
+    }
+    
+    .dashboard-action.action-warning:hover {
+        background-color: rgba(255, 193, 7, 0.25);
+    }
+    
+    .dashboard-action.action-danger {
+        background-color: rgba(220, 53, 69, 0.15);
+    }
+    
+    .dashboard-action.action-danger:hover {
+        background-color: rgba(220, 53, 69, 0.25);
+    }
+    
+    .dashboard-action.action-info {
+        background-color: rgba(13, 202, 240, 0.15);
+    }
+    
+    .dashboard-action.action-info:hover {
+        background-color: rgba(13, 202, 240, 0.25);
+    }
+    
+    .dashboard-action.action-secondary {
+        background-color: rgba(108, 117, 125, 0.15);
+    }
+    
+    .dashboard-action.action-secondary:hover {
+        background-color: rgba(108, 117, 125, 0.25);
+    }
+    
     .border-left-primary {
-        border-left: 0.25rem solid var(--primary) !important;
+        border-left: 4px solid var(--primary) !important;
     }
+    
     .border-left-success {
-        border-left: 0.25rem solid var(--success) !important;
+        border-left: 4px solid var(--success) !important;
     }
+    
     .border-left-warning {
-        border-left: 0.25rem solid var(--warning) !important;
+        border-left: 4px solid var(--warning) !important;
     }
+    
     .border-left-danger {
-        border-left: 0.25rem solid var(--danger) !important;
+        border-left: 4px solid var(--danger) !important;
+    }
+    
+    .border-left-info {
+        border-left: 4px solid var(--info) !important;
+    }
+    
+    .welcome-card {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%);
+        border: 1px solid rgba(220, 53, 69, 0.2);
+        border-radius: var(--border-radius);
+    }
+    
+    .table-container {
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        overflow: hidden;
+    }
+    
+    .table {
+        margin-bottom: 0;
+    }
+    
+    .table thead th {
+        background-color: rgba(255,255,255,0.05);
+        color: var(--text-primary);
+        font-weight: 600;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .table tbody td {
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+    
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .card-header {
+        background-color: rgba(255,255,255,0.05);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+    
+    .badge {
+        padding: 0.5em 0.75em;
+        font-weight: 500;
     }
 </style>
 {% endblock %}
@@ -39,27 +159,31 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-12">
-        <div class="d-sm-flex align-items-center justify-content-between mb-2">
-            <h2 class="mb-0">
+        <div class="d-sm-flex align-items-center justify-content-between mb-3">
+            <h2 class="mb-0 fw-bold">
                 <i class="fas fa-tachometer-alt text-primary me-2"></i> Dashboard do Super Admin
             </h2>
-            <span class="badge bg-primary p-2">
-                <i class="fas fa-calendar me-1"></i> {% now "d/m/Y" %}
+            <span class="badge bg-primary p-2 d-flex align-items-center">
+                <i class="fas fa-calendar me-2"></i> {% now "d/m/Y" %}
             </span>
         </div>
-        <nav aria-label="breadcrumb">
+        <nav aria-label="breadcrumb" class="mb-3">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
                 <li class="breadcrumb-item active">Dashboard</li>
             </ol>
         </nav>
-        <div class="alert alert-info d-flex align-items-center shadow-sm">
-            <i class="fas fa-user-shield fa-lg me-3"></i>
-            <div>
-                <span class="fw-bold">Bem-vindo, {{ user.get_full_name|default:user.username }}!</span>
-                <div class="mt-1">
-                    <span class="badge bg-danger">Super Administrador</span>
-                    <small class="text-muted ms-2">Você tem acesso completo ao sistema.</small>
+        <div class="welcome-card p-3 mb-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-user-shield fa-2x text-danger"></i>
+                </div>
+                <div>
+                    <h5 class="mb-1 fw-bold">Bem-vindo, {{ user.get_full_name|default:user.username }}!</h5>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-danger me-2">Super Administrador</span>
+                        <p class="mb-0 text-secondary">Você tem acesso completo ao sistema.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -67,100 +191,102 @@
 </div>
 
 <div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow-sm h-100 py-2 stat-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total de Organizações</div>
-                        <div class="h3 mb-0 font-weight-bold">{{ organizations_count }}</div>
-                        <a href="{% url 'organizations:organization_list' %}" class="text-decoration-none mt-2 d-block">
-                            <small>Ver todas <i class="fas fa-arrow-right"></i></small>
-                        </a>
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="stat-card border-left-primary h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-xs text-uppercase fw-bold text-primary">
+                        Total de Organizações
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-building fa-3x text-primary opacity-50"></i>
+                    <div class="stat-icon text-primary">
+                        <i class="fas fa-building"></i>
                     </div>
                 </div>
+                <div class="h2 mb-0 fw-bold">{{ organizations_count }}</div>
+                <a href="{% url 'organizations:organization_list' %}" class="text-decoration-none mt-3 d-flex align-items-center">
+                    <small>Ver todas</small>
+                    <i class="fas fa-arrow-right ms-1 small"></i>
+                </a>
             </div>
         </div>
     </div>
     
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow-sm h-100 py-2 stat-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Total de Usuários</div>
-                        <div class="h3 mb-0 font-weight-bold">{{ users_count }}</div>
-                        <a href="{% url 'accounts:user_list' %}" class="text-decoration-none mt-2 d-block">
-                            <small>Ver todos <i class="fas fa-arrow-right"></i></small>
-                        </a>
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="stat-card border-left-success h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-xs text-uppercase fw-bold text-success">
+                        Total de Usuários
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-users fa-3x text-success opacity-50"></i>
+                    <div class="stat-icon text-success">
+                        <i class="fas fa-users"></i>
                     </div>
                 </div>
+                <div class="h2 mb-0 fw-bold">{{ users_count }}</div>
+                <a href="{% url 'accounts:user_list' %}" class="text-decoration-none mt-3 d-flex align-items-center">
+                    <small>Ver todos</small>
+                    <i class="fas fa-arrow-right ms-1 small"></i>
+                </a>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow-sm h-100 py-2 stat-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Total de Alertas</div>
-                        <div class="h3 mb-0 font-weight-bold">{{ alerts_count|default:"0" }}</div>
-                        <a href="{% url 'alerts:alert_list' %}" class="text-decoration-none mt-2 d-block">                            <small>Ver detalhes <i class="fas fa-arrow-right"></i></small>                        </a>
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="stat-card border-left-warning h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-xs text-uppercase fw-bold text-warning">
+                        Total de Alertas
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-bell fa-3x text-warning opacity-50"></i>
+                    <div class="stat-icon text-warning">
+                        <i class="fas fa-bell"></i>
                     </div>
                 </div>
+                <div class="h2 mb-0 fw-bold">{{ alerts_count|default:"0" }}</div>
+                <a href="{% url 'alerts:alert_list' %}" class="text-decoration-none mt-3 d-flex align-items-center">
+                    <small>Ver detalhes</small>
+                    <i class="fas fa-arrow-right ms-1 small"></i>
+                </a>
             </div>
         </div>
     </div>
     
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-danger shadow-sm h-100 py-2 stat-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                            Total de Casos</div>
-                        <div class="h3 mb-0 font-weight-bold">{{ cases_count|default:"0" }}</div>
-                        <a href="{% url 'cases:case_list' %}" class="text-decoration-none mt-2 d-block">
-                            <small>Ver detalhes <i class="fas fa-arrow-right"></i></small>
-                        </a>
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="stat-card border-left-danger h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-xs text-uppercase fw-bold text-danger">
+                        Total de Casos
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-briefcase fa-3x text-danger opacity-50"></i>
+                    <div class="stat-icon text-danger">
+                        <i class="fas fa-briefcase"></i>
                     </div>
                 </div>
+                <div class="h2 mb-0 fw-bold">{{ cases_count|default:"0" }}</div>
+                <a href="{% url 'cases:case_list' %}" class="text-decoration-none mt-3 d-flex align-items-center">
+                    <small>Ver detalhes</small>
+                    <i class="fas fa-arrow-right ms-1 small"></i>
+                </a>
             </div>
         </div>
     </div>
     
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow-sm h-100 py-2 stat-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Total de Observables</div>
-                        <div class="h3 mb-0 font-weight-bold">{{ observables_count|default:"0" }}</div>
-                        <a href="{% url 'core:observable_list' %}" class="text-decoration-none mt-2 d-block">
-                            <small>Ver detalhes <i class="fas fa-arrow-right"></i></small>
-                        </a>
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="stat-card border-left-info h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-xs text-uppercase fw-bold text-info">
+                        Total de Observables
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-eye fa-3x text-info opacity-50"></i>
+                    <div class="stat-icon text-info">
+                        <i class="fas fa-eye"></i>
                     </div>
                 </div>
+                <div class="h2 mb-0 fw-bold">{{ observables_count|default:"0" }}</div>
+                <a href="{% url 'core:observable_list' %}" class="text-decoration-none mt-3 d-flex align-items-center">
+                    <small>Ver detalhes</small>
+                    <i class="fas fa-arrow-right ms-1 small"></i>
+                </a>
             </div>
         </div>
     </div>
@@ -168,112 +294,137 @@
 
 <div class="row">
     <div class="col-lg-8 mb-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-building me-2"></i> Organizações Recentes</h5>
-                <a href="{% url 'organizations:organization_list' %}" class="btn btn-sm btn-light">
-                    <i class="fas fa-list"></i> Ver Todas
-                </a>
+        <div class="card">
+            <div class="card-header py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-building text-primary me-2"></i> Organizações Recentes
+                    </h5>
+                    <a href="{% url 'organizations:organization_list' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-list me-1"></i> Ver Todas
+                    </a>
+                </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Nome</th>
-                                <th>Status</th>
-                                <th>Usuários</th>
-                                <th>Data de Criação</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if recent_organizations %}
-                                {% for org in recent_organizations %}
-                                    <tr>
-                                        <td><strong>{{ org.name }}</strong></td>
-                                        <td>
-                                            {% if org.is_active %}
-                                                <span class="badge bg-success">Ativo</span>
-                                            {% else %}
-                                                <span class="badge bg-danger">Inativo</span>
-                                            {% endif %}
-                                        </td>
-                                        <td><span class="badge bg-info">{{ org.user_count }}</span></td>
-                                        <td><small>{{ org.created_at|date:"d/m/Y H:i" }}</small></td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="{% url 'organizations:organization_detail' org.id %}" class="btn btn-info" title="Visualizar">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{% url 'organizations:organization_update' org.id %}" class="btn btn-warning" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            {% else %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Status</th>
+                            <th>Usuários</th>
+                            <th>Data de Criação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_organizations %}
+                            {% for org in recent_organizations %}
                                 <tr>
-                                    <td colspan="5" class="text-center py-3">
-                                        <p class="text-muted mb-0">Nenhuma organização recente.</p>
+                                    <td class="fw-bold">{{ org.name }}</td>
+                                    <td>
+                                        {% if org.is_active %}
+                                            <span class="badge bg-success">Ativo</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inativo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="badge bg-primary">{{ org.user_count }}</span></td>
+                                    <td><small class="text-muted">{{ org.created_at|date:"d/m/Y H:i" }}</small></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'organizations:organization_detail' org.id %}" class="btn btn-sm btn-primary action-btn me-1" title="Visualizar">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'organizations:organization_update' org.id %}" class="btn btn-sm btn-warning action-btn" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i class="fas fa-building text-muted fa-3x mb-3"></i>
+                                        <p class="mb-0 text-muted">Nenhuma organização recente.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
     
     <div class="col-lg-4 mb-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i> Ações Rápidas</h5>
+        <div class="card">
+            <div class="card-header py-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-bolt text-warning me-2"></i> Ações Rápidas
+                </h5>
             </div>
             <div class="card-body">
                 <div class="d-grid gap-3">
-                    <a href="{% url 'organizations:organization_create' %}" class="btn btn-primary p-3 dashboard-action d-flex align-items-center justify-content-between">
-                        <div>
-                            <i class="fas fa-plus-circle me-2"></i> Nova Organização
+                    <a href="{% url 'organizations:organization_create' %}" class="card dashboard-action action-primary p-3 text-decoration-none">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-plus-circle text-primary me-3"></i>
+                                <span>Nova Organização</span>
+                            </div>
+                            <i class="fas fa-arrow-right text-primary"></i>
                         </div>
-                        <i class="fas fa-arrow-right"></i>
                     </a>
                     
-                    <a href="{% url 'accounts:user_create' %}" class="btn btn-success p-3 dashboard-action d-flex align-items-center justify-content-between">
-                        <div>
-                            <i class="fas fa-user-plus me-2"></i> Novo Usuário
+                    <a href="{% url 'accounts:user_create' %}" class="card dashboard-action action-success p-3 text-decoration-none">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-plus text-success me-3"></i>
+                                <span>Novo Usuário</span>
+                            </div>
+                            <i class="fas fa-arrow-right text-success"></i>
                         </div>
-                        <i class="fas fa-arrow-right"></i>
                     </a>
                     
-                    <a href="{% url 'cases:case_create' %}" class="btn btn-danger p-3 dashboard-action d-flex align-items-center justify-content-between">
-                        <div>
-                            <i class="fas fa-briefcase me-2"></i> Novo Caso
+                    <a href="{% url 'cases:case_create' %}" class="card dashboard-action action-danger p-3 text-decoration-none">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-briefcase text-danger me-3"></i>
+                                <span>Novo Caso</span>
+                            </div>
+                            <i class="fas fa-arrow-right text-danger"></i>
                         </div>
-                        <i class="fas fa-arrow-right"></i>
                     </a>
                     
-                    <a href="{% url 'admin:index' %}" class="btn btn-secondary p-3 dashboard-action d-flex align-items-center justify-content-between">
-                        <div>
-                            <i class="fas fa-cog me-2"></i> Admin do Sistema
+                    <a href="{% url 'admin:index' %}" class="card dashboard-action action-secondary p-3 text-decoration-none">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-cog text-secondary me-3"></i>
+                                <span>Admin do Sistema</span>
+                            </div>
+                            <i class="fas fa-arrow-right text-secondary"></i>
                         </div>
-                        <i class="fas fa-arrow-right"></i>
                     </a>
                     
-                    <a href="{% url 'alerts:alert_list' %}" class="btn btn-warning p-3 dashboard-action d-flex align-items-center justify-content-between">
-                        <div>
-                            <i class="fas fa-bell me-2"></i> Gerenciar Alertas
+                    <a href="{% url 'alerts:alert_list' %}" class="card dashboard-action action-warning p-3 text-decoration-none">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-bell text-warning me-3"></i>
+                                <span>Gerenciar Alertas</span>
+                            </div>
+                            <i class="fas fa-arrow-right text-warning"></i>
                         </div>
-                        <i class="fas fa-arrow-right"></i>
                     </a>
                     
-                    <a href="{% url 'cases:case_list' %}" class="btn btn-info p-3 dashboard-action d-flex align-items-center justify-content-between">
-                        <div>
-                            <i class="fas fa-tasks me-2"></i> Gerenciar Casos
+                    <a href="{% url 'cases:case_list' %}" class="card dashboard-action action-info p-3 text-decoration-none">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-tasks text-info me-3"></i>
+                                <span>Gerenciar Casos</span>
+                            </div>
+                            <i class="fas fa-arrow-right text-info"></i>
                         </div>
-                        <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
             </div>
