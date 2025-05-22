@@ -1,0 +1,242 @@
+{% extends 'notifications/base_notifications.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Notification Rules" %}{% endblock %}
+
+{% block sidebar_rules_active %}active{% endblock %}
+
+{% block notification_content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-2 text-white"><i class="fas fa-cogs text-primary me-2"></i> {% trans "Notification Rules" %}</h1>
+        <p class="text-muted">{% trans "Configure rules that determine when notifications are sent." %}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'notifications:rule_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-1"></i> {% trans "Add Rule" %}
+        </a>
+    </div>
+</div>
+
+<!-- Filter form -->
+<div class="card bg-dark border-secondary shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="search" class="form-label text-light">{% trans "Search" %}</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-darker border-secondary">
+                        <i class="fas fa-search text-secondary"></i>
+                    </span>
+                    <input type="text" class="form-control bg-darker border-secondary text-light" id="search" name="search" 
+                           value="{{ search }}" placeholder="{% trans 'Search by name...' %}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label for="source" class="form-label text-light">{% trans "Source" %}</label>
+                <select class="form-select bg-darker border-secondary text-light" id="source" name="source">
+                    <option value="">{% trans "All Sources" %}</option>
+                    {% for source_value, source_label in source_choices %}
+                        <option value="{{ source_value }}" {% if selected_source == source_value %}selected{% endif %}>
+                            {{ source_label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="event_type" class="form-label text-light">{% trans "Event Type" %}</label>
+                <select class="form-select bg-darker border-secondary text-light" id="event_type" name="event_type">
+                    <option value="">{% trans "All Events" %}</option>
+                    {% for event_value, event_label in event_choices %}
+                        <option value="{{ event_value }}" {% if selected_event_type == event_value %}selected{% endif %}>
+                            {{ event_label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="status" class="form-label text-light">{% trans "Status" %}</label>
+                <select class="form-select bg-darker border-secondary text-light" id="status" name="status">
+                    <option value="">{% trans "All" %}</option>
+                    <option value="active" {% if selected_status == 'active' %}selected{% endif %}>
+                        {% trans "Active" %}
+                    </option>
+                    <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>
+                        {% trans "Inactive" %}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Rules list -->
+<div class="card bg-dark border-0 shadow">
+    <div class="card-body p-0">
+        {% if rules %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>{% trans "Name" %}</th>
+                            <th>{% trans "Source" %}</th>
+                            <th>{% trans "Event Type" %}</th>
+                            <th>{% trans "Destinations" %}</th>
+                            <th>{% trans "Status" %}</th>
+                            <th class="text-end">{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        {% for rule in rules %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'notifications:rule_detail' rule.id %}" class="fw-bold text-decoration-none text-info">
+                                        {{ rule.name }}
+                                    </a>
+                                    {% if rule.description %}
+                                        <br>
+                                        <small class="text-muted">{{ rule.description|truncatechars:60 }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        {% if rule.source == 'case' %}
+                                            <i class="fas fa-folder me-1"></i>
+                                        {% elif rule.source == 'alert' %}
+                                            <i class="fas fa-bell me-1"></i>
+                                        {% elif rule.source == 'task' %}
+                                            <i class="fas fa-tasks me-1"></i>
+                                        {% elif rule.source == 'observable' %}
+                                            <i class="fas fa-eye me-1"></i>
+                                        {% elif rule.source == 'system' %}
+                                            <i class="fas fa-server me-1"></i>
+                                        {% endif %}
+                                        {{ rule.get_source_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info text-dark">
+                                        <i class="fas fa-bolt me-1"></i> {{ rule.get_event_type_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% for destination in rule.destinations.all %}
+                                        <span class="badge {% if destination.type == 'email' %}bg-primary{% elif destination.type == 'webhook' %}bg-success{% elif destination.type == 'slack' %}bg-info{% elif destination.type == 'mattermost' %}bg-secondary{% elif destination.type == 'custom_http' %}bg-warning text-dark{% endif %} me-1 mb-1">
+                                            {% if destination.type == 'email' %}
+                                                <i class="fas fa-envelope me-1"></i>
+                                            {% elif destination.type == 'webhook' %}
+                                                <i class="fas fa-link me-1"></i>
+                                            {% elif destination.type == 'slack' %}
+                                                <i class="fab fa-slack me-1"></i>
+                                            {% elif destination.type == 'mattermost' %}
+                                                <i class="fas fa-comments me-1"></i>
+                                            {% elif destination.type == 'custom_http' %}
+                                                <i class="fas fa-code me-1"></i>
+                                            {% endif %}
+                                            {{ destination.name }}
+                                        </span>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% if rule.is_active %}
+                                        <span class="badge bg-success">{% trans "Active" %}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{% trans "Inactive" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <a href="{% url 'notifications:rule_detail' rule.id %}" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="{% trans 'View details' %}">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'notifications:rule_update' rule.id %}" class="btn btn-sm btn-outline-light" data-bs-toggle="tooltip" title="{% trans 'Edit' %}">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'notifications:rule_delete' rule.id %}" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="{% trans 'Delete' %}">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <nav aria-label="Pagination" class="p-3 border-top border-secondary">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link bg-dark border-secondary text-light" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link bg-dark border-secondary text-light" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link bg-primary border-primary">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link bg-dark border-secondary text-light" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link bg-dark border-secondary text-light" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link bg-dark border-secondary text-light" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-cogs fa-4x text-muted"></i>
+                </div>
+                <h4 class="text-light">{% trans "No rules found" %}</h4>
+                <p class="text-muted">{% trans "Create your first notification rule to start sending automated notifications." %}</p>
+                <a href="{% url 'notifications:rule_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-1"></i> {% trans "Add Rule" %}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %} 

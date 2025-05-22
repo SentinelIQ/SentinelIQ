@@ -1,0 +1,235 @@
+{% extends 'notifications/base_notifications.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ rule.name }} | {% trans "Notification Rule" %}{% endblock %}
+
+{% block sidebar_rules_active %}active{% endblock %}
+
+{% block notification_content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-2 text-white">
+            <i class="fas fa-cog text-primary me-2"></i> {{ rule.name }}
+        </h1>
+        <p class="text-muted">
+            <span class="badge {% if rule.is_active %}bg-success{% else %}bg-danger{% endif %} me-2">
+                {% if rule.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
+            </span>
+            <span class="badge bg-secondary me-2">
+                {% if rule.source == 'case' %}
+                    <i class="fas fa-folder me-1"></i>
+                {% elif rule.source == 'alert' %}
+                    <i class="fas fa-bell me-1"></i>
+                {% elif rule.source == 'task' %}
+                    <i class="fas fa-tasks me-1"></i>
+                {% elif rule.source == 'observable' %}
+                    <i class="fas fa-eye me-1"></i>
+                {% elif rule.source == 'system' %}
+                    <i class="fas fa-server me-1"></i>
+                {% endif %}
+                {{ rule.get_source_display }}
+            </span>
+            <span class="badge bg-info text-dark">
+                <i class="fas fa-bolt me-1"></i> {{ rule.get_event_type_display }}
+            </span>
+        </p>
+        {% if rule.description %}
+            <p class="text-light">{{ rule.description }}</p>
+        {% endif %}
+    </div>
+    <div class="col-md-4 text-end d-flex justify-content-end align-items-start">
+        <div class="btn-group">
+            <a href="{% url 'notifications:rule_update' rule.id %}" class="btn btn-outline-light">
+                <i class="fas fa-edit me-1"></i> {% trans "Edit" %}
+            </a>
+            <a href="{% url 'notifications:rule_delete' rule.id %}" class="btn btn-outline-danger">
+                <i class="fas fa-trash me-1"></i> {% trans "Delete" %}
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Rule details -->
+    <div class="col-md-6">
+        <div class="card bg-dark border-secondary shadow-sm mb-4">
+            <div class="card-header bg-gradient-dark border-bottom border-secondary">
+                <h5 class="mb-0 text-white"><i class="fas fa-info-circle me-2"></i> {% trans "Rule Details" %}</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-light">{% trans "Source" %}</dt>
+                    <dd class="col-sm-8 text-light">{{ rule.get_source_display }}</dd>
+                    
+                    <dt class="col-sm-4 text-light">{% trans "Event Type" %}</dt>
+                    <dd class="col-sm-8 text-light">{{ rule.get_event_type_display }}</dd>
+                    
+                    <dt class="col-sm-4 text-light">{% trans "Created" %}</dt>
+                    <dd class="col-sm-8 text-light">{{ rule.created_at|date:"d/m/Y H:i" }}</dd>
+                    
+                    <dt class="col-sm-4 text-light">{% trans "Updated" %}</dt>
+                    <dd class="col-sm-8 text-light">{{ rule.updated_at|date:"d/m/Y H:i" }}</dd>
+                </dl>
+                
+                {% if conditions_json %}
+                    <hr class="border-secondary">
+                    <h6 class="mb-3 text-light">{% trans "Conditions" %}</h6>
+                    <pre class="bg-darker p-3 rounded border border-secondary"><code>{{ conditions_json }}</code></pre>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Template details -->
+        <div class="card bg-dark border-secondary shadow-sm mb-4">
+            <div class="card-header bg-gradient-dark border-bottom border-secondary">
+                <h5 class="mb-0 text-white"><i class="fas fa-file-alt me-2"></i> {% trans "Notification Templates" %}</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="text-light">{% trans "Subject Template" %}</h6>
+                <pre class="bg-darker p-3 rounded border border-secondary mb-4"><code class="text-info">{{ rule.template_subject|default:"Notification from SentinelIQ" }}</code></pre>
+                
+                <h6 class="text-light">{% trans "Body Template" %}</h6>
+                <pre class="bg-darker p-3 rounded border border-secondary"><code class="text-info">{{ rule.template_body|default:"Event: {{ event_type }} for {{ source_type }} {{ source_id }}" }}</code></pre>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Destinations -->
+    <div class="col-md-6">
+        <div class="card bg-dark border-secondary shadow-sm mb-4">
+            <div class="card-header bg-gradient-dark border-bottom border-secondary d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-white"><i class="fas fa-paper-plane me-2"></i> {% trans "Destinations" %}</h5>
+                <a href="{% url 'notifications:destination_create' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i> {% trans "Add Destination" %}
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if rule.destinations.all %}
+                    <div class="list-group list-group-flush bg-dark">
+                        {% for destination in rule.destinations.all %}
+                            <a href="{% url 'notifications:destination_detail' destination.id %}" class="list-group-item list-group-item-action bg-dark text-light border-secondary">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            {% if destination.type == 'email' %}
+                                                <i class="fas fa-envelope text-primary me-2"></i>
+                                            {% elif destination.type == 'webhook' %}
+                                                <i class="fas fa-link text-success me-2"></i>
+                                            {% elif destination.type == 'slack' %}
+                                                <i class="fab fa-slack text-info me-2"></i>
+                                            {% elif destination.type == 'mattermost' %}
+                                                <i class="fas fa-comments text-secondary me-2"></i>
+                                            {% elif destination.type == 'custom_http' %}
+                                                <i class="fas fa-code text-warning me-2"></i>
+                                            {% endif %}
+                                            {{ destination.name }}
+                                        </h6>
+                                        <p class="mb-1 small text-muted">{{ destination.get_type_display }}</p>
+                                    </div>
+                                    {% if destination.is_active %}
+                                        <span class="badge bg-success">{% trans "Active" %}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{% trans "Inactive" %}</span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">{% trans "No destinations configured for this rule." %}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Recent logs -->
+        <div class="card bg-dark border-secondary shadow-sm">
+            <div class="card-header bg-gradient-dark border-bottom border-secondary d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-white"><i class="fas fa-history me-2"></i> {% trans "Recent Notification Logs" %}</h5>
+                <a href="{% url 'notifications:log_list' %}?rule={{ rule.id }}" class="btn btn-sm btn-outline-light">
+                    <i class="fas fa-list"></i> {% trans "View All" %}
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if logs %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-dark border-0">
+                                <tr>
+                                    <th>{% trans "Date" %}</th>
+                                    <th>{% trans "Destination" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in logs %}
+                                    <tr>
+                                        <td class="text-light">{{ log.created_at|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            {% if log.destination %}
+                                                <a href="{% url 'notifications:destination_detail' log.destination.id %}" class="text-info">{{ log.destination.name }}</a>
+                                                <small class="text-muted">({{ log.destination.get_type_display }})</small>
+                                            {% else %}
+                                                <span class="text-muted">{% trans "Deleted destination" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if log.status == 'success' %}
+                                                <span class="badge bg-success">{% trans "Success" %}</span>
+                                            {% elif log.status == 'failed' %}
+                                                <span class="badge bg-danger">{% trans "Failed" %}</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">{% trans "Pending" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'notifications:log_detail' log.id %}" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="{% trans 'View details' %}">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if log.status == 'failed' %}
+                                                <a href="{% url 'notifications:log_retry' log.id %}" class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="{% trans 'Retry' %}">
+                                                    <i class="fas fa-redo"></i>
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">{% trans "No notification logs for this rule yet." %}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Format JSON data if present
+        try {
+            const conditionsCode = document.querySelector('pre code');
+            if (conditionsCode && conditionsCode.textContent) {
+                const conditionsJson = JSON.parse(conditionsCode.textContent);
+                conditionsCode.textContent = JSON.stringify(conditionsJson, null, 2);
+            }
+        } catch(e) {
+            console.error('Error formatting JSON:', e);
+        }
+        
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %} 

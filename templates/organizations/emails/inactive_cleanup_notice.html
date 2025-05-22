@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inactive Organizations Cleanup Notice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #ff9800;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+        .footer {
+            background-color: #eee;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            border-radius: 0 0 5px 5px;
+            border: 1px solid #ddd;
+        }
+        .info {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .notice-box {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Inactive Organizations Cleanup Notice</h2>
+        </div>
+        
+        <div class="content">
+            <p>Hello Administrator,</p>
+            
+            <div class="notice-box">
+                <p>We have identified <strong>{{ count }} organization(s)</strong> that have been marked as inactive for over <strong>{{ inactive_days }} days</strong>. These organizations may be candidates for data archiving or cleanup.</p>
+            </div>
+            
+            <div class="info">
+                <h3>Inactive Organizations</h3>
+                {% if orgs %}
+                <table>
+                    <tr>
+                        <th>Organization ID</th>
+                        <th>Organization Name</th>
+                    </tr>
+                    {% for org in orgs %}
+                    <tr>
+                        <td>{{ org.id }}</td>
+                        <td>{{ org.name }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                
+                <p>Suggested actions:</p>
+                <ul>
+                    <li>Review these organizations to confirm they are no longer active</li>
+                    <li>Archive any important data before cleanup</li>
+                    <li>Consider permanently removing these organizations if they will no longer be used</li>
+                </ul>
+                {% else %}
+                <p>No inactive organizations found requiring cleanup.</p>
+                {% endif %}
+            </div>
+            
+            <p>Please review these organizations and determine appropriate action.</p>
+            
+            <a href="{{ base_url }}" class="btn">Review Organizations</a>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated email from SentinelIQ. Please do not reply to this message.</p>
+            <p>&copy; {% now "Y" %} SentinelIQ. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html> 

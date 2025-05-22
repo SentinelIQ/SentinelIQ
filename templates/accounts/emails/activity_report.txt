@@ -1,0 +1,33 @@
+WEEKLY USER ACTIVITY REPORT - {{ report.organization }}
+
+Hello Administrator,
+
+Here is the user activity report for {{ report.organization }} for the period of {{ report.period_start|date:"M d, Y" }} to {{ report.period_end|date:"M d, Y" }}.
+
+USER SUMMARY
+-----------
+Total Users: {{ report.total_users }}
+Active Users: {{ report.active_users }}
+Inactive Users: {{ report.inactive_users }}
+Activity Rate (Last {{ period_days }} days): {{ report.activity_rate }}%
+
+ACTIVITY BY ROLE
+--------------
+{% for role, stats in report.activity_by_role.items %}
+{{ role }}:
+  Total: {{ stats.total }}
+  Active: {{ stats.active }}
+  Inactive: {{ stats.inactive }}
+  Active %: {{ stats.active_percentage }}%
+{% endfor %}
+
+PRODUCTIVITY METRICS
+------------------
+Tasks Completed: {{ report.tasks_completed }}
+Alerts Resolved: {{ report.alerts_resolved }}
+
+For detailed user activity information, please visit the administration dashboard: {{ base_url }}
+
+---
+This is an automated report from SentinelIQ. Please do not reply to this message.
+© {% now "Y" %} SentinelIQ. All rights reserved. 

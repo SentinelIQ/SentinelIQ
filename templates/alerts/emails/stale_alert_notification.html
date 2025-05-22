@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stale Alert Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #ff9800;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+        .footer {
+            background-color: #eee;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            border-radius: 0 0 5px 5px;
+            border: 1px solid #ddd;
+        }
+        .info {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .warning {
+            color: #ff9800;
+            font-weight: bold;
+        }
+        .severity {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        .severity-low {
+            background-color: #8bc34a;
+            color: white;
+        }
+        .severity-medium {
+            background-color: #ffc107;
+            color: black;
+        }
+        .severity-high {
+            background-color: #ff5722;
+            color: white;
+        }
+        .severity-critical {
+            background-color: #f44336;
+            color: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Unacknowledged Alert Reminder</h2>
+        </div>
+        
+        <div class="content">
+            <p>Hello,</p>
+            
+            <p>This is a reminder that the following alert has been <span class="warning">unacknowledged for {{ days_stale }} day{{ days_stale|pluralize }}</span> and requires your attention:</p>
+            
+            <div class="info">
+                <h3>Alert Details</h3>
+                <table>
+                    <tr>
+                        <th>Alert ID:</th>
+                        <td>#{{ alert.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Title:</th>
+                        <td>{{ alert.title }}</td>
+                    </tr>
+                    <tr>
+                        <th>Severity:</th>
+                        <td>
+                            <span class="severity severity-{{ alert.severity }}">
+                                {{ alert.get_severity_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td>{{ alert.get_status_display }}</td>
+                    </tr>
+                    <tr>
+                        <th>Created:</th>
+                        <td>{{ alert.created_at }}</td>
+                    </tr>
+                    <tr>
+                        <th>Organization:</th>
+                        <td>{{ alert.organization.name }}</td>
+                    </tr>
+                </table>
+                
+                <h4>Description</h4>
+                <p>{{ alert.description|linebreaks }}</p>
+            </div>
+            
+            <p>Please review this alert and take appropriate action as soon as possible. Alerts that remain unacknowledged may indicate security issues that need to be addressed.</p>
+            
+            <p>Possible actions:</p>
+            <ul>
+                <li>Acknowledge the alert</li>
+                <li>Change the alert status to "In Progress"</li>
+                <li>Escalate the alert to a case</li>
+                <li>Close the alert if it's a false positive</li>
+            </ul>
+            
+            <a href="{{ alert_url }}" class="btn">View Alert</a>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated notification from SentinelIQ. Please do not reply to this email.</p>
+            <p>&copy; {% now "Y" %} SentinelIQ. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html> 

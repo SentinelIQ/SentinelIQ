@@ -1,0 +1,22 @@
+ACCOUNT INACTIVITY NOTICE
+
+Hello {{ user.first_name|default:user.username }},
+
+We noticed you haven't logged into your SentinelIQ account for {{ days_inactive }} days.
+
+ACCOUNT DETAILS
+--------------
+Username: {{ user.username }}
+Email: {{ user.email }}
+{% if organization %}Organization: {{ organization }}{% endif %}
+Last Login: {{ user.last_login }}
+
+To keep your account active, please log in to the system. Accounts inactive for more than 90 days may be automatically deactivated for security purposes.
+
+If you're having trouble accessing your account or no longer need it, please contact your administrator.
+
+Log in now: {{ base_url }}
+
+---
+This is an automated email from SentinelIQ. Please do not reply to this message.
+© {% now "Y" %} SentinelIQ. All rights reserved. 

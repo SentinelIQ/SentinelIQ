@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Deactivated</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #e53935;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+        .footer {
+            background-color: #eee;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            border-radius: 0 0 5px 5px;
+            border: 1px solid #ddd;
+        }
+        .info {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .alert {
+            background-color: #ffebee;
+            border-left: 4px solid #e53935;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Account Deactivated</h2>
+        </div>
+        
+        <div class="content">
+            <p>Hello {{ user.first_name|default:user.username }},</p>
+            
+            <div class="alert">
+                <p>Your SentinelIQ account has been automatically deactivated due to inactivity. You have not logged in for <strong>{{ days_inactive }} days</strong>.</p>
+            </div>
+            
+            <div class="info">
+                <h3>Account Details</h3>
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                {% if organization %}
+                <p><strong>Organization:</strong> {{ organization }}</p>
+                {% endif %}
+                <p><strong>Last Login:</strong> {{ user.last_login }}</p>
+            </div>
+            
+            <p>As part of our security policy, accounts that remain inactive for 90 days or more are automatically deactivated. If you need to regain access to your account, please contact your organization administrator.</p>
+            
+            <p>If you no longer need this account, no further action is required.</p>
+            
+            <p>If you believe this deactivation was in error, please contact support.</p>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated email from SentinelIQ. Please do not reply to this message.</p>
+            <p>&copy; {% now "Y" %} SentinelIQ. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html> 

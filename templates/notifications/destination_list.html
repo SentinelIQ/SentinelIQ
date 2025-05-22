@@ -1,0 +1,214 @@
+{% extends 'notifications/base_notifications.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Notification Destinations" %}{% endblock %}
+
+{% block sidebar_destinations_active %}active{% endblock %}
+
+{% block notification_content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="h3 mb-2 text-white"><i class="fas fa-paper-plane text-primary me-2"></i> {% trans "Notification Destinations" %}</h1>
+        <p class="text-muted">{% trans "Configure destinations where notifications can be sent." %}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'notifications:destination_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-1"></i> {% trans "Add Destination" %}
+        </a>
+    </div>
+</div>
+
+<!-- Filter form -->
+<div class="card bg-dark border-secondary shadow mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label text-light">{% trans "Search" %}</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-darker border-secondary">
+                        <i class="fas fa-search text-secondary"></i>
+                    </span>
+                    <input type="text" class="form-control bg-darker border-secondary text-light" id="search" name="search" 
+                           value="{{ search }}" placeholder="{% trans 'Search by name...' %}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label for="type" class="form-label text-light">{% trans "Type" %}</label>
+                <select class="form-select bg-darker border-secondary text-light" id="type" name="type">
+                    <option value="">{% trans "All Types" %}</option>
+                    {% for type_value, type_label in destination_types %}
+                        <option value="{{ type_value }}" {% if selected_type == type_value %}selected{% endif %}>
+                            {{ type_label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label text-light">{% trans "Status" %}</label>
+                <select class="form-select bg-darker border-secondary text-light" id="status" name="status">
+                    <option value="">{% trans "All" %}</option>
+                    <option value="active" {% if selected_status == 'active' %}selected{% endif %}>
+                        {% trans "Active" %}
+                    </option>
+                    <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>
+                        {% trans "Inactive" %}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-1"></i> {% trans "Filter" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Destinations list -->
+<div class="card bg-dark border-0 shadow">
+    <div class="card-body p-0">
+        {% if destinations %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>{% trans "Name" %}</th>
+                            <th>{% trans "Type" %}</th>
+                            <th>{% trans "Status" %}</th>
+                            <th>{% trans "Created" %}</th>
+                            <th class="text-end">{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        {% for destination in destinations %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'notifications:destination_detail' destination.id %}" class="fw-bold text-decoration-none text-info">
+                                        {{ destination.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if destination.type == 'email' %}
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-envelope me-1"></i> {% trans "Email" %}
+                                        </span>
+                                    {% elif destination.type == 'webhook' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-link me-1"></i> {% trans "Webhook" %}
+                                        </span>
+                                    {% elif destination.type == 'slack' %}
+                                        <span class="badge bg-info">
+                                            <i class="fab fa-slack me-1"></i> {% trans "Slack" %}
+                                        </span>
+                                    {% elif destination.type == 'mattermost' %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-comments me-1"></i> {% trans "Mattermost" %}
+                                        </span>
+                                    {% elif destination.type == 'custom_http' %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-code me-1"></i> {% trans "Custom HTTP" %}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if destination.is_active %}
+                                        <span class="badge bg-success">{% trans "Active" %}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{% trans "Inactive" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ destination.created_at|date:"d/m/Y" }}</td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <a href="{% url 'notifications:destination_detail' destination.id %}" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="{% trans 'View details' %}">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'notifications:destination_update' destination.id %}" class="btn btn-sm btn-outline-light" data-bs-toggle="tooltip" title="{% trans 'Edit' %}">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'notifications:destination_test' destination.id %}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="{% trans 'Test' %}">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </a>
+                                        <a href="{% url 'notifications:destination_delete' destination.id %}" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="{% trans 'Delete' %}">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <nav aria-label="Pagination" class="p-3 border-top border-secondary">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link bg-dark border-secondary text-light" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link bg-dark border-secondary text-light" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link bg-primary border-primary">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link bg-dark border-secondary text-light" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link bg-dark border-secondary text-light" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link bg-dark border-secondary text-light" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-paper-plane fa-4x text-muted"></i>
+                </div>
+                <h4 class="text-light">{% trans "No destinations found" %}</h4>
+                <p class="text-muted">{% trans "Create your first notification destination to start sending notifications." %}</p>
+                <a href="{% url 'notifications:destination_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-1"></i> {% trans "Add Destination" %}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %} 

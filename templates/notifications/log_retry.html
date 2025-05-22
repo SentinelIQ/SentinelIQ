@@ -1,0 +1,65 @@
+{% extends 'notifications/base_notifications.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Retry Notification" %}{% endblock %}
+
+{% block sidebar_logs_active %}active{% endblock %}
+
+{% block notification_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-warning">
+        <h5 class="mb-0 text-dark"><i class="fas fa-redo me-2"></i> {% trans "Retry Failed Notification" %}</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info mb-4">
+            <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i> {% trans "Information" %}</h5>
+            <p>{% trans "You are about to retry sending a failed notification." %}</p>
+            
+            <p class="mb-0">
+                {% trans "The system will attempt to send this notification again using the same content and destination." %}
+            </p>
+        </div>
+        
+        <div class="mb-4">
+            <h6>{% trans "Notification details:" %}</h6>
+            <dl class="row mb-0">
+                <dt class="col-sm-3">{% trans "Subject" %}</dt>
+                <dd class="col-sm-9">{{ log.subject }}</dd>
+                
+                <dt class="col-sm-3">{% trans "Failed At" %}</dt>
+                <dd class="col-sm-9">{{ log.created_at|date:"d/m/Y H:i:s" }}</dd>
+                
+                {% if log.destination %}
+                    <dt class="col-sm-3">{% trans "Destination" %}</dt>
+                    <dd class="col-sm-9">
+                        {{ log.destination.name }} ({{ log.destination.get_type_display }})
+                    </dd>
+                {% endif %}
+                
+                {% if log.rule %}
+                    <dt class="col-sm-3">{% trans "Rule" %}</dt>
+                    <dd class="col-sm-9">{{ log.rule.name }}</dd>
+                {% endif %}
+                
+                <dt class="col-sm-3">{% trans "Error" %}</dt>
+                <dd class="col-sm-9">
+                    <span class="text-danger">{{ log.error_message|truncatechars:150 }}</span>
+                </dd>
+            </dl>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'notifications:log_detail' log.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> {% trans "Cancel" %}
+                </a>
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-redo me-1"></i> {% trans "Retry Notification" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

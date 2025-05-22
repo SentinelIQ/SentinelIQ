@@ -1,0 +1,255 @@
+{% extends 'notifications/base_notifications.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}
+    {% if object %}
+        {% trans "Edit Notification Destination" %}
+    {% else %}
+        {% trans "Add Notification Destination" %}
+    {% endif %}
+{% endblock %}
+
+{% block sidebar_destinations_active %}active{% endblock %}
+
+{% block notification_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            {% if object %}
+                <i class="fas fa-edit text-primary me-2"></i> {% trans "Edit Notification Destination" %}
+            {% else %}
+                <i class="fas fa-plus-circle text-primary me-2"></i> {% trans "Add Notification Destination" %}
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <h5 class="alert-heading">{% trans "Please correct the errors below:" %}</h5>
+                    <ul class="mb-0">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                        <i class="fas fa-tag me-1"></i> {% trans "Name" %}*
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.name.errors }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">{% trans "A name to identify this notification destination." %}</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.type.id_for_label }}" class="form-label">
+                        <i class="fas fa-paper-plane me-1"></i> {% trans "Type" %}*
+                    </label>
+                    {{ form.type }}
+                    {% if form.type.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.type.errors }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">{% trans "The type of notification destination." %}</div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-12">
+                    <label for="{{ form.config_json.id_for_label }}" class="form-label">
+                        <i class="fas fa-cogs me-1"></i> {% trans "Configuration" %}*
+                    </label>
+                    {{ form.config_json }}
+                    {% if form.config_json.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.config_json.errors }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">{% trans "Configuration in JSON format. See examples below." %}</div>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="form-check">
+                        {{ form.is_active }}
+                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                            {% trans "Active" %}
+                        </label>
+                    </div>
+                    <div class="form-text">
+                        {% trans "Disable to prevent notifications from being sent to this destination." %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'notifications:destination_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> {% trans "Cancel" %}
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> {% trans "Save Destination" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Configuration Examples -->
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> {% trans "Configuration Examples" %}</h5>
+    </div>
+    <div class="card-body">
+        <ul class="nav nav-tabs" id="configTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="email-tab" data-bs-toggle="tab" data-bs-target="#email-config" type="button" role="tab">
+                    <i class="fas fa-envelope me-1"></i> {% trans "Email" %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="webhook-tab" data-bs-toggle="tab" data-bs-target="#webhook-config" type="button" role="tab">
+                    <i class="fas fa-link me-1"></i> {% trans "Webhook" %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="slack-tab" data-bs-toggle="tab" data-bs-target="#slack-config" type="button" role="tab">
+                    <i class="fab fa-slack me-1"></i> {% trans "Slack" %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="mattermost-tab" data-bs-toggle="tab" data-bs-target="#mattermost-config" type="button" role="tab">
+                    <i class="fas fa-comments me-1"></i> {% trans "Mattermost" %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="custom-http-tab" data-bs-toggle="tab" data-bs-target="#custom-http-config" type="button" role="tab">
+                    <i class="fas fa-code me-1"></i> {% trans "Custom HTTP" %}
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content p-3 border border-top-0 rounded-bottom">
+            <div class="tab-pane fade show active" id="email-config" role="tabpanel">
+                <h6 class="mb-3">{% trans "Email Configuration" %}</h6>
+                <pre class="bg-light p-3 rounded"><code>{
+  "recipients": ["user@example.com", "another@example.com"],
+  "from_email": "sentinel@example.com",
+  "use_html": true
+}</code></pre>
+                <p class="text-muted small">{% trans "Required fields: recipients (list of email addresses)" %}</p>
+            </div>
+            <div class="tab-pane fade" id="webhook-config" role="tabpanel">
+                <h6 class="mb-3">{% trans "Webhook Configuration" %}</h6>
+                <pre class="bg-light p-3 rounded"><code>{
+  "url": "https://example.com/webhook",
+  "headers": {
+    "Authorization": "Bearer your-token",
+    "Content-Type": "application/json"
+  },
+  "timeout": 10
+}</code></pre>
+                <p class="text-muted small">{% trans "Required fields: url" %}</p>
+            </div>
+            <div class="tab-pane fade" id="slack-config" role="tabpanel">
+                <h6 class="mb-3">{% trans "Slack Configuration" %}</h6>
+                <pre class="bg-light p-3 rounded"><code>{
+  "webhook_url": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+  "include_fields": true,
+  "timeout": 10
+}</code></pre>
+                <p class="text-muted small">{% trans "Required fields: webhook_url" %}</p>
+            </div>
+            <div class="tab-pane fade" id="mattermost-config" role="tabpanel">
+                <h6 class="mb-3">{% trans "Mattermost Configuration" %}</h6>
+                <pre class="bg-light p-3 rounded"><code>{
+  "webhook_url": "https://mattermost.example.com/hooks/xxx-generatedkey-xxx",
+  "username": "SentinelIQ",
+  "icon_url": "https://example.com/icon.png",
+  "use_attachment": true,
+  "color": "#ff5252"
+}</code></pre>
+                <p class="text-muted small">{% trans "Required fields: webhook_url" %}</p>
+            </div>
+            <div class="tab-pane fade" id="custom-http-config" role="tabpanel">
+                <h6 class="mb-3">{% trans "Custom HTTP Configuration" %}</h6>
+                <pre class="bg-light p-3 rounded"><code>{
+  "url": "https://api.example.com/endpoint",
+  "method": "POST",
+  "headers": {
+    "Authorization": "Bearer your-token",
+    "Content-Type": "application/json"
+  },
+  "payload_template": "{ \"message\": \"{{subject}}\", \"details\": \"{{body}}\", \"timestamp\": \"{{timestamp}}\" }"
+}</code></pre>
+                <p class="text-muted small">{% trans "Required fields: url" %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show appropriate configuration example based on selected type
+    const typeSelect = document.getElementById('{{ form.type.id_for_label }}');
+    const configTabs = new bootstrap.Tab(document.getElementById('email-tab'));
+    
+    // Function to switch tab based on selected type
+    function updateConfigTab() {
+        const selectedType = typeSelect.value;
+        let tabId;
+        
+        // Choose the tab based on the selected type
+        switch(selectedType) {
+            case 'email':
+                tabId = 'email-tab';
+                break;
+            case 'webhook':
+                tabId = 'webhook-tab';
+                break;
+            case 'slack':
+                tabId = 'slack-tab';
+                break;
+            case 'mattermost':
+                tabId = 'mattermost-tab';
+                break;
+            case 'custom_http':
+                tabId = 'custom-http-tab';
+                break;
+            default:
+                tabId = 'email-tab';
+        }
+        
+        // Activate the tab
+        const tab = document.getElementById(tabId);
+        if (tab) {
+            const bsTab = new bootstrap.Tab(tab);
+            bsTab.show();
+        }
+    }
+    
+    // Update on change
+    typeSelect.addEventListener('change', updateConfigTab);
+    
+    // Update on page load
+    updateConfigTab();
+});
+</script>
+{% endblock %} 
