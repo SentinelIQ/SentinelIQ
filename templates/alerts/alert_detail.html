@@ -89,20 +89,20 @@
         <h2 class="mb-1"><i class="fas fa-bell text-primary me-2"></i> Detalhes do Alerta</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'alert_list' %}">Alertas</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_list' %}">Alertas</a></li>
                 <li class="breadcrumb-item active">{{ alert.title }}</li>
             </ol>
         </nav>
     </div>
     <div class="d-flex">
-        <a href="{% url 'escalate_to_case' alert.id %}" class="btn btn-success me-2 d-flex align-items-center">
+        <a href="{% url 'alerts:escalate_to_case' alert.id %}" class="btn btn-success me-2 d-flex align-items-center">
             <i class="fas fa-arrow-circle-up me-2"></i> Escalar para Caso
         </a>
-        <a href="{% url 'alert_update' alert.id %}" class="btn btn-warning me-2 d-flex align-items-center">
+        <a href="{% url 'alerts:alert_update' alert.id %}" class="btn btn-warning me-2 d-flex align-items-center">
             <i class="fas fa-edit me-2"></i> Editar
         </a>
-        <a href="{% url 'alert_delete' alert.id %}" class="btn btn-danger d-flex align-items-center">
+        <a href="{% url 'alerts:alert_delete' alert.id %}" class="btn btn-danger d-flex align-items-center">
             <i class="fas fa-trash me-2"></i> Excluir
         </a>
     </div>
@@ -352,13 +352,13 @@
                                                 {% endif %}
                                             </div>
                                             <div class="ms-2">
-                                                <a href="{% url 'alert_update' alert.id %}" class="btn btn-sm btn-outline-primary">
+                                                <a href="{% url 'alerts:alert_update' alert.id %}" class="btn btn-sm btn-outline-primary">
                                                     <i class="fas fa-edit me-1"></i> Editar Tags
                                                 </a>
-                                                <a href="{% url 'tag_create' %}?alert_id={{ alert.id }}" class="btn btn-sm btn-outline-success" title="Criar Tag associada a este alerta">
+                                                <a href="{% url 'core:tag_create' %}?alert_id={{ alert.id }}" class="btn btn-sm btn-outline-success" title="Criar Tag associada a este alerta">
                                                     <i class="fas fa-plus-circle"></i> Nova Tag
                                                 </a>
-                                                <a href="{% url 'tag_list' %}" class="btn btn-sm btn-outline-info" title="Gerenciar Tags">
+                                                <a href="{% url 'core:tag_list' %}" class="btn btn-sm btn-outline-info" title="Gerenciar Tags">
                                                     <i class="fas fa-tags"></i>
                                                 </a>
                                             </div>
@@ -414,7 +414,7 @@
                 <div class="card shadow-sm mb-3">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <p class="text-muted mb-0"><i class="fas fa-shield-virus me-1"></i> MITRE ATT&CK</p>
-                        <a href="{% url 'add_alert_mitre_attack' alert.id %}" class="btn btn-sm btn-light">
+                        <a href="{% url 'core:add_alert_mitre_attack' alert.id %}" class="btn btn-sm btn-light">
                             <i class="fas fa-plus-circle"></i> Adicionar
                         </a>
                     </div>
@@ -521,7 +521,7 @@
                     <div class="col-lg-12">
                         <div class="d-flex align-items-center justify-content-between mb-4">
                             <h5><i class="fas fa-eye me-2 text-primary"></i> Observables (IOCs)</h5>
-                            <a href="{% url 'add_alert_observable' alert.id %}" class="btn btn-sm btn-primary">
+                            <a href="{% url 'core:add_alert_observable' alert.id %}" class="btn btn-sm btn-primary">
                                 <i class="fas fa-plus-circle me-1"></i> Adicionar Observable
                             </a>
                         </div>
@@ -571,13 +571,8 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="btn-group btn-group-sm">
-                                                        <a href="{% url 'observable_detail' observable.id %}" class="btn btn-info" data-bs-toggle="tooltip" title="Visualizar">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        <a href="{% url 'observable_update' observable.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        <form method="post" action="{% url 'remove_alert_observable' alert.id observable.id %}" class="d-inline" 
+                                                                                                                <a href="{% url 'core:observable_detail' observable.id %}" class="btn btn-info" data-bs-toggle="tooltip" title="Visualizar">                                                            <i class="fas fa-eye"></i>                                                        </a>                                                        <a href="{% url 'core:observable_update' observable.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">                                                            <i class="fas fa-edit"></i>                                                        </a>
+                                                        <form method="post" action="{% url 'core:remove_alert_observable' alert.id observable.id %}" class="d-inline" 
                                                               onsubmit="return confirm('Tem certeza que deseja remover este observable?');">
                                                             {% csrf_token %}
                                                             <button type="submit" class="btn btn-danger" data-bs-toggle="tooltip" title="Remover">
@@ -595,7 +590,7 @@
                             <div class="text-center py-5">
                                 <i class="fas fa-search fa-3x text-muted mb-3"></i>
                                 <p class="mb-0 text-muted">Nenhum observable encontrado para este alerta.</p>
-                                <a href="{% url 'add_alert_observable' alert.id %}" class="btn btn-primary mt-3">
+                                <a href="{% url 'core:add_alert_observable' alert.id %}" class="btn btn-primary mt-3">
                                     <i class="fas fa-plus-circle me-1"></i> Adicionar Observable
                                 </a>
                             </div>
@@ -642,7 +637,7 @@
 
         <div class="add-comment mt-3">
             <h6 class="mb-3"><i class="fas fa-plus-circle me-2"></i> Adicionar Comentário</h6>
-            <form method="post" action="{% url 'add_alert_comment' alert.id %}">
+            <form method="post" action="{% url 'alerts:add_alert_comment' alert.id %}">
                 {% csrf_token %}
                 <div class="form-group mb-3">
                     <textarea name="content" class="form-control" rows="3" placeholder="Digite seu comentário..."></textarea>
@@ -660,7 +655,7 @@
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="fas fa-link me-2"></i> Alertas Relacionados</h5>
-        <a href="{% url 'related_alerts' alert.id %}" class="btn btn-sm btn-light">
+        <a href="{% url 'alerts:related_alerts' alert.id %}" class="btn btn-sm btn-light">
             <i class="fas fa-cog me-1"></i> Gerenciar
         </a>
     </div>
@@ -695,7 +690,7 @@
                                 </td>
                                 <td>{{ related.created_at|date:"d/m/Y" }}</td>
                                 <td>
-                                    <a href="{% url 'alert_detail' related.id %}" class="btn btn-sm btn-primary">
+                                    <a href="{% url 'alerts:alert_detail' related.id %}" class="btn btn-sm btn-primary">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>

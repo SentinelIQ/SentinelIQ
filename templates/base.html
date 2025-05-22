@@ -27,7 +27,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'dashboard' %}">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'core:dashboard' %}">
                 <i class="fas fa-shield-alt me-2"></i> SentinelIQ
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
@@ -37,17 +37,17 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'dashboard' %}">
+                        <a class="nav-link d-flex align-items-center" href="{% url 'core:dashboard' %}">
                             <i class="fas fa-tachometer-alt me-1"></i> Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'alert_list' %}">
+                        <a class="nav-link d-flex align-items-center" href="{% url 'alerts:alert_list' %}">
                             <i class="fas fa-bell me-1"></i> Alertas
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'case_list' %}">
+                        <a class="nav-link d-flex align-items-center" href="{% url 'cases:case_list' %}">
                             <i class="fas fa-briefcase me-1"></i> Casos
                         </a>
                     </li>
@@ -59,18 +59,18 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="templatesDropdown">
                             <li>
-                                <a class="dropdown-item" href="{% url 'threat_category_list' %}">
+                                <a class="dropdown-item" href="{% url 'cases:threat_category_list' %}">
                                     <i class="fas fa-shield-alt me-2"></i> Categorias de Ameaças
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{% url 'task_template_list' %}">
+                                <a class="dropdown-item" href="{% url 'cases:task_template_list' %}">
                                     <i class="fas fa-tasks me-2"></i> Templates de Tarefas
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item" href="{% url 'task_template_bulk_create' %}">
+                                <a class="dropdown-item" href="{% url 'cases:task_template_bulk_create' %}">
                                     <i class="fas fa-copy me-2"></i> Criação em Massa
                                 </a>
                             </li>
@@ -78,7 +78,7 @@
                     </li>
                     {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'observable_list' %}">
+                        <a class="nav-link d-flex align-items-center" href="{% url 'core:observable_list' %}">
                             <i class="fas fa-eye me-1"></i> Observables
                         </a>
                     </li>
@@ -110,19 +110,19 @@
                     </li>
                     {% if user.is_superadmin or user.is_org_admin %}
                     <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'tag_list' %}">
+                        <a class="nav-link d-flex align-items-center" href="{% url 'core:tag_list' %}">
                             <i class="fas fa-tags me-1"></i> Tags
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'user_list' %}">
+                        <a class="nav-link d-flex align-items-center" href="{% url 'accounts:user_list' %}">
                             <i class="fas fa-users me-1"></i> Usuários
                         </a>
                     </li>
                     {% endif %}
                     {% if user.is_superadmin %}
                     <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center" href="{% url 'organization_list' %}">
+                        <a class="nav-link d-flex align-items-center" href="{% url 'organizations:organization_list' %}">
                             <i class="fas fa-building me-1"></i> Organizações
                         </a>
                     </li>
@@ -146,7 +146,7 @@
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item d-flex align-items-center" href="{% url 'logout' %}">
+                                <a class="dropdown-item d-flex align-items-center" href="{% url 'accounts:logout' %}">
                                     <i class="fas fa-sign-out-alt me-2"></i> Sair
                                 </a>
                             </li>
@@ -193,32 +193,32 @@
                     <h5 class="mb-3">Links Rápidos</h5>
                     <ul class="list-unstyled">
                         <li class="mb-2">
-                            <a href="{% url 'dashboard' %}" class="text-decoration-none text-white-50">
+                            <a href="{% url 'core:dashboard' %}" class="text-decoration-none text-white-50">
                                 <i class="fas fa-angle-right me-2"></i>Dashboard
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="{% url 'alert_list' %}" class="text-decoration-none text-white-50">
+                            <a href="{% url 'alerts:alert_list' %}" class="text-decoration-none text-white-50">
                                 <i class="fas fa-angle-right me-2"></i>Alertas
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="{% url 'case_list' %}" class="text-decoration-none text-white-50">
+                            <a href="{% url 'cases:case_list' %}" class="text-decoration-none text-white-50">
                                 <i class="fas fa-angle-right me-2"></i>Casos
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="{% url 'threat_category_list' %}" class="text-decoration-none text-white-50">
+                            <a href="{% url 'cases:threat_category_list' %}" class="text-decoration-none text-white-50">
                                 <i class="fas fa-angle-right me-2"></i>Categorias de Ameaças
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="{% url 'task_template_list' %}" class="text-decoration-none text-white-50">
+                            <a href="{% url 'cases:task_template_list' %}" class="text-decoration-none text-white-50">
                                 <i class="fas fa-angle-right me-2"></i>Templates de Tarefas
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="{% url 'observable_list' %}" class="text-decoration-none text-white-50">
+                            <a href="{% url 'core:observable_list' %}" class="text-decoration-none text-white-50">
                                 <i class="fas fa-angle-right me-2"></i>Observables
                             </a>
                         </li>
@@ -228,17 +228,17 @@
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="{% url 'tag_list' %}" class="text-decoration-none text-white-50">
+                            <a href="{% url 'core:tag_list' %}" class="text-decoration-none text-white-50">
                                 <i class="fas fa-angle-right me-2"></i>Tags
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="{% url 'user_list' %}" class="text-decoration-none text-white-50">
+                            <a href="{% url 'accounts:user_list' %}" class="text-decoration-none text-white-50">
                                 <i class="fas fa-angle-right me-2"></i>Usuários
                             </a>
                         </li>
                         <li>
-                            <a href="{% url 'organization_list' %}" class="text-decoration-none text-white-50">
+                            <a href="{% url 'organizations:organization_list' %}" class="text-decoration-none text-white-50">
                                 <i class="fas fa-angle-right me-2"></i>Organizações
                             </a>
                         </li>

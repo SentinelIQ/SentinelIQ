@@ -15,11 +15,11 @@
         <div class="col-lg-8">
             <div class="mb-4">
                 {% if request.GET.category %}
-                    <a href="{% url 'threat_category_detail' request.GET.category %}" class="btn btn-sm btn-outline-secondary">
+                    <a href="{% url 'cases:threat_category_detail' request.GET.category %}" class="btn btn-sm btn-outline-secondary">
                         <i class="fas fa-arrow-left"></i> {% trans "Back to Category" %}
                     </a>
                 {% else %}
-                    <a href="{% url 'task_template_list' %}" class="btn btn-sm btn-outline-secondary">
+                    <a href="{% url 'cases:task_template_list' %}" class="btn btn-sm btn-outline-secondary">
                         <i class="fas fa-arrow-left"></i> {% trans "Back to Templates" %}
                     </a>
                 {% endif %}
@@ -127,11 +127,11 @@
                         
                         <div class="d-flex justify-content-end gap-2 mt-4">
                             {% if request.GET.category %}
-                                <a href="{% url 'threat_category_detail' request.GET.category %}" class="btn btn-outline-secondary">
+                                <a href="{% url 'cases:threat_category_detail' request.GET.category %}" class="btn btn-outline-secondary">
                                     {% trans "Cancel" %}
                                 </a>
                             {% else %}
-                                <a href="{% url 'task_template_list' %}" class="btn btn-outline-secondary">
+                                <a href="{% url 'cases:task_template_list' %}" class="btn btn-outline-secondary">
                                     {% trans "Cancel" %}
                                 </a>
                             {% endif %}

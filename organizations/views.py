@@ -26,8 +26,13 @@ class OrganizationDetailView(LoginRequiredMixin, SuperAdminRequiredMixin, Detail
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         organization = self.get_object()
-        context['users'] = organization.users.all()
-        context['alerts'] = organization.alerts.all()[:5]
+        users = organization.users.all()
+        context['users'] = users
+        context['users_count'] = users.count()
+        context['admins_count'] = users.filter(role='org_admin').count()
+        alerts = organization.alerts.all()
+        context['alerts'] = alerts[:5]  # Only first 5 for display
+        context['alerts_count'] = alerts.count()
         return context
 
 
@@ -36,7 +41,7 @@ class OrganizationCreateView(LoginRequiredMixin, SuperAdminRequiredMixin, Create
     model = Organization
     form_class = OrganizationForm
     template_name = 'organizations/organization_form.html'
-    success_url = reverse_lazy('organization_list')
+    success_url = reverse_lazy('organizations:organization_list')
     
     def form_valid(self, form):
         messages.success(self.request, _('Organization created successfully.'))
@@ -48,7 +53,7 @@ class OrganizationUpdateView(LoginRequiredMixin, SuperAdminRequiredMixin, Update
     model = Organization
     form_class = OrganizationForm
     template_name = 'organizations/organization_form.html'
-    success_url = reverse_lazy('organization_list')
+    success_url = reverse_lazy('organizations:organization_list')
     
     def form_valid(self, form):
         messages.success(self.request, _('Organization updated successfully.'))
@@ -59,7 +64,18 @@ class OrganizationDeleteView(LoginRequiredMixin, SuperAdminRequiredMixin, Delete
     """Delete view for organizations"""
     model = Organization
     template_name = 'organizations/organization_confirm_delete.html'
-    success_url = reverse_lazy('organization_list')
+    success_url = reverse_lazy('organizations:organization_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        organization = self.get_object()
+        users = organization.users.all()
+        context['users_count'] = users.count()
+        alerts = organization.alerts.all()
+        context['alerts_count'] = alerts.count()
+        # For demonstration purposes - this could be actual related data count
+        context['other_data_count'] = 0
+        return context
     
     def delete(self, request, *args, **kwargs):
         organization = self.get_object()

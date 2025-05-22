@@ -9,8 +9,8 @@
         <h2 class="mb-1"><i class="fas fa-trash text-danger me-2"></i> Excluir Observable</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'observable_list' %}">Observables</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:observable_list' %}">Observables</a></li>
                 <li class="breadcrumb-item active">Excluir</li>
             </ol>
         </nav>
@@ -23,33 +23,36 @@
             <div class="card-header bg-danger text-white">
                 <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Confirmação</h5>
             </div>
-            <div class="card-body p-4 text-center">
-                <div class="mb-4">
-                    <i class="fas fa-trash-alt fa-5x text-danger mb-3"></i>
-                    <h4>Tem certeza que deseja excluir este observable?</h4>
-                    <p class="mb-0 lead">
-                        <span class="badge bg-secondary">{{ observable.get_type_display }}</span>
-                        <code class="fs-5">{{ observable.value }}</code>
+            <div class="card-body">
+                <div class="alert alert-warning mb-4">
+                    <p class="mb-0">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Você está prestes a excluir permanentemente o observable <code>{{ observable.value }}</code> ({{ observable.get_type_display }}). Esta ação não pode ser desfeita!
                     </p>
                 </div>
                 
-                {% if observable.alerts.all or observable.cases.all %}
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong>Atenção:</strong> Este observable está associado a
-                    {% if observable.alerts.all %}{{ observable.alerts.count }} alerta(s){% endif %}
-                    {% if observable.alerts.all and observable.cases.all %}e{% endif %}
-                    {% if observable.cases.all %}{{ observable.cases.count }} caso(s){% endif %}.
-                    <br>
-                    Excluir este observable removerá todas estas associações.
+                {% if observable.alerts.exists or observable.cases.exists %}
+                <div class="alert alert-danger mb-4">
+                    <h5 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i> Atenção!</h5>
+                    <p>Este observable está associado a:</p>
+                    <ul class="mb-0">
+                        {% if observable.alerts.exists %}
+                        <li><strong>{{ observable.alerts.count }} alerta(s)</strong></li>
+                        {% endif %}
+                        {% if observable.cases.exists %}
+                        <li><strong>{{ observable.cases.count }} caso(s)</strong></li>
+                        {% endif %}
+                    </ul>
+                    <hr>
+                    <p class="mb-0">A exclusão removerá este observable de todos os alertas e casos associados!</p>
                 </div>
                 {% endif %}
                 
                 <form method="post">
                     {% csrf_token %}
-                    <div class="d-flex justify-content-center gap-3">
-                        <a href="{% url 'observable_detail' observable.id %}" class="btn btn-secondary">
-                            <i class="fas fa-times me-2"></i> Cancelar
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'core:observable_detail' observable.id %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Cancelar
                         </a>
                         <button type="submit" class="btn btn-danger">
                             <i class="fas fa-trash me-2"></i> Confirmar Exclusão

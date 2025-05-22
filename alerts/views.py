@@ -20,7 +20,7 @@ class AlertListView(LoginRequiredMixin, ListView):
     model = Alert
     template_name = 'alerts/alert_list.html'
     context_object_name = 'alerts'
-    paginate_by = 10
+    paginate_by = 20
     
     def get_queryset(self):
         """Filter alerts by organization and parameters"""
@@ -101,7 +101,7 @@ class AlertCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateView):
     model = Alert
     form_class = AlertForm
     template_name = 'alerts/alert_form.html'
-    success_url = reverse_lazy('alert_list')
+    success_url = reverse_lazy('alerts:alert_list')
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -255,7 +255,7 @@ class AlertDeleteView(LoginRequiredMixin, OrgAdminRequiredMixin, DeleteView):
     """Delete view for alerts"""
     model = Alert
     template_name = 'alerts/alert_confirm_delete.html'
-    success_url = reverse_lazy('alert_list')
+    success_url = reverse_lazy('alerts:alert_list')
     
     def get_queryset(self):
         """Ensure users can only delete alerts from their organization"""
@@ -279,7 +279,7 @@ def escalate_to_case(request, pk):
     # Verificar se o usuário tem acesso ao alerta
     if not request.user.is_superadmin() and alert.organization != request.user.organization:
         messages.error(request, _("You don't have permission to access this alert."))
-        return redirect('alert_list')
+        return redirect('alerts:alert_list')
     
     # Get task templates for this threat category and organization
     task_templates = []
@@ -524,7 +524,7 @@ def add_alert_comment(request, alert_id):
     # Verify user has access to alert
     if not request.user.is_superadmin() and alert.organization != request.user.organization:
         messages.error(request, _("You don't have permission to access this alert."))
-        return redirect('alert_list')
+        return redirect('alerts:alert_list')
     
     if request.method == 'POST':
         content = request.POST.get('content', '').strip()
@@ -552,7 +552,7 @@ def related_alerts(request, alert_id):
     # Verificar acesso
     if not request.user.is_superadmin() and alert.organization != request.user.organization:
         messages.error(request, _("You don't have permission to access this alert."))
-        return redirect('alert_list')
+        return redirect('alerts:alert_list')
     
     # Obter todos os alertas da mesma organização, excluindo o atual
     available_alerts = Alert.objects.filter(
@@ -580,7 +580,7 @@ def add_related_alert(request, alert_id):
     # Verificar acesso
     if not request.user.is_superadmin() and alert.organization != request.user.organization:
         messages.error(request, _("You don't have permission to access this alert."))
-        return redirect('alert_list')
+        return redirect('alerts:alert_list')
     
     if request.method == 'POST':
         related_alert_id = request.POST.get('related_alert_id')
@@ -618,7 +618,7 @@ def remove_related_alert(request, alert_id, related_id):
     # Verificar acesso
     if not request.user.is_superadmin() and alert.organization != request.user.organization:
         messages.error(request, _("You don't have permission to access this alert."))
-        return redirect('alert_list')
+        return redirect('alerts:alert_list')
     
     try:
         related_alert = alert.related_alerts.get(pk=related_id)
@@ -654,8 +654,8 @@ class AlertCustomFieldCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, Crea
     """Create view for alert custom fields"""
     model = AlertCustomField
     form_class = AlertCustomFieldForm
-    template_name = 'alerts/custom_field_form.html'
-    success_url = reverse_lazy('alert_custom_field_list')
+    template_name = 'alerts/alert_custom_field_form.html'
+    success_url = reverse_lazy('alerts:alert_custom_field_list')
     
     def form_valid(self, form):
         form.instance.organization = self.request.user.organization
@@ -668,8 +668,8 @@ class AlertCustomFieldUpdateView(LoginRequiredMixin, OrgAdminRequiredMixin, Upda
     """Update view for alert custom fields"""
     model = AlertCustomField
     form_class = AlertCustomFieldForm
-    template_name = 'alerts/custom_field_form.html'
-    success_url = reverse_lazy('alert_custom_field_list')
+    template_name = 'alerts/alert_custom_field_form.html'
+    success_url = reverse_lazy('alerts:alert_custom_field_list')
     
     def get_queryset(self):
         return AlertCustomField.objects.filter(
@@ -685,8 +685,8 @@ class AlertCustomFieldUpdateView(LoginRequiredMixin, OrgAdminRequiredMixin, Upda
 class AlertCustomFieldDeleteView(LoginRequiredMixin, OrgAdminRequiredMixin, DeleteView):
     """Delete view for alert custom fields"""
     model = AlertCustomField
-    template_name = 'alerts/custom_field_confirm_delete.html'
-    success_url = reverse_lazy('alert_custom_field_list')
+    template_name = 'alerts/alert_custom_field_confirm_delete.html'
+    success_url = reverse_lazy('alerts:alert_custom_field_list')
     
     def get_queryset(self):
         return AlertCustomField.objects.filter(

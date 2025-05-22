@@ -29,7 +29,7 @@
                     <form method="post">
                         {% csrf_token %}
                         <div class="d-flex justify-content-center gap-3">
-                            <a href="{% url 'threat_category_detail' template.threat_category.id %}" class="btn btn-outline-secondary">
+                            <a href="{% url 'cases:threat_category_detail' template.threat_category.id %}" class="btn btn-outline-secondary">
                                 <i class="fas fa-times me-2"></i> {% trans "Cancel" %}
                             </a>
                             <button type="submit" class="btn btn-primary">

@@ -9,9 +9,9 @@
         <h2 class="mb-1"><i class="fas fa-trash text-danger me-2"></i> Confirmar Exclusão</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'organization_list' %}">Organizações</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'organization_detail' object.id %}">{{ object.name }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'organizations:organization_list' %}">Organizações</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'organizations:organization_detail' object.id %}">{{ object.name }}</a></li>
                 <li class="breadcrumb-item active">Excluir</li>
             </ol>
         </nav>
@@ -81,7 +81,7 @@
             {% csrf_token %}
             
             <div class="d-flex justify-content-center mt-4">
-                <a href="{% url 'organization_detail' object.id %}" class="btn btn-secondary me-2">
+                <a href="{% url 'organizations:organization_detail' object.id %}" class="btn btn-secondary me-2">
                     <i class="fas fa-times me-1"></i> Cancelar
                 </a>
                 <button type="submit" class="btn btn-danger">

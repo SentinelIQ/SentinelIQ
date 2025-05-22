@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.http import JsonResponse
@@ -14,6 +14,7 @@ import logging
 from .models import ThreatIntelligenceFeed, MISPInstance, ThreatIntelligenceItem
 from .forms import MISPInstanceForm, ThreatIntelligenceSearchForm
 from .services.misp import MISPService
+from .services.misp_case_integration import MISPCaseIntegration
 
 
 class FeedListView(LoginRequiredMixin, ListView):
@@ -243,4 +244,150 @@ class MISPInstanceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView
             request, 
             _('MISP Instance "%(name)s" was successfully deleted.') % {'name': misp_instance.name}
         )
-        return super().delete(request, *args, **kwargs) 
+        return super().delete(request, *args, **kwargs)
+
+
+@login_required
+@require_POST
+def create_case_from_threat_intel(request, pk):
+    """Create a new case from a threat intelligence item"""
+    # Get the threat intelligence item
+    intel_item = get_object_or_404(ThreatIntelligenceItem, pk=pk)
+    
+    # Check if user has access to this intel item
+    user_org = request.user.organization
+    if not (intel_item.feed.is_public or intel_item.feed.organization == user_org):
+        messages.error(request, _("You don't have access to this threat intelligence item."))
+        return redirect('vision:search')
+    
+    try:
+        # Create a new case
+        case = MISPCaseIntegration.create_case_from_threat_intel(
+            threat_intel_item=intel_item,
+            organization=user_org,
+            user=request.user,
+            title=request.POST.get('title')
+        )
+        
+        messages.success(
+            request,
+            _('Case "{title}" successfully created from threat intelligence item.').format(title=case.title)
+        )
+        
+        # Redirect to the new case
+        return redirect('cases:case_detail', pk=case.id)
+        
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error creating case from threat intelligence: {str(e)}", exc_info=True)
+        
+        messages.error(
+            request,
+            _('Failed to create case from threat intelligence: {error}').format(error=str(e))
+        )
+        
+        # Redirect back to the threat intel search
+        return redirect('vision:search')
+
+
+@login_required
+@require_POST
+def enrich_case_with_threat_intel(request, case_pk):
+    """Enrich an existing case with threat intelligence data for all its observables"""
+    from cases.models import Case
+    
+    # Get the case
+    case = get_object_or_404(Case, pk=case_pk)
+    
+    # Check if user has access to this case
+    user_org = request.user.organization
+    if case.organization != user_org:
+        messages.error(request, _("You don't have access to this case."))
+        return redirect('cases:case_list')
+    
+    try:
+        # Enrich the case with threat intelligence
+        stats = MISPCaseIntegration.enrich_case_with_threat_intel(case)
+        
+        if stats['observables_enriched'] > 0:
+            messages.success(
+                request,
+                _('Successfully enriched {count} observables with threat intelligence data.').format(
+                    count=stats['observables_enriched']
+                )
+            )
+        else:
+            messages.info(
+                request,
+                _('No matching threat intelligence found for observables in this case.')
+            )
+        
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error enriching case with threat intelligence: {str(e)}", exc_info=True)
+        
+        messages.error(
+            request,
+            _('Failed to enrich case with threat intelligence: {error}').format(error=str(e))
+        )
+    
+    # Redirect back to the case
+    return redirect('cases:case_detail', pk=case_pk)
+    
+
+@login_required
+def threat_intel_match(request, observable_pk):
+    """Check if an observable matches any threat intelligence items"""
+    from core.models import Observable
+    
+    # Get the observable
+    observable = get_object_or_404(Observable, pk=observable_pk)
+    
+    # Check if user has access to this observable
+    user_org = request.user.organization
+    if observable.organization != user_org:
+        return JsonResponse({
+            'success': False,
+            'error': str(_("You don't have access to this observable."))
+        }, status=403)
+    
+    try:
+        # Find matching threat intelligence
+        items = MISPCaseIntegration.find_threat_intel_for_observable(observable)
+        
+        # Format the response
+        items_data = []
+        for item in items:
+            items_data.append({
+                'id': item.id,
+                'value': item.value,
+                'type': item.get_item_type_display(),
+                'is_malicious': item.is_malicious,
+                'confidence': item.confidence,
+                'tlp': item.tlp,
+                'feed_name': item.feed.name,
+                'creator_org': item.creator_org,
+                'tags': item.tags,
+                'external_url': item.external_url,
+                'description': item.description[:200] + ('...' if len(item.description) > 200 else '')
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'observable': {
+                'id': observable.id,
+                'value': observable.value,
+                'type': observable.get_type_display()
+            },
+            'matches': items_data,
+            'count': len(items_data)
+        })
+        
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error checking threat intel match: {str(e)}", exc_info=True)
+        
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500) 

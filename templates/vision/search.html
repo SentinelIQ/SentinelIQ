@@ -142,8 +142,8 @@
                                                     </li>
                                                     {% endif %}
                                                     <li>
-                                                        <button type="button" class="dropdown-item">
-                                                            <i class="fas fa-plus-circle me-1"></i> {% trans "Add to Case" %}
+                                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modalCreateCase{{ item.id }}">
+                                                            <i class="fas fa-folder-plus me-1"></i> {% trans "Create Case" %}
                                                         </button>
                                                     </li>
                                                 </ul>
@@ -243,10 +243,50 @@
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
-                                                            <button type="button" class="btn btn-success">
-                                                                <i class="fas fa-plus-circle me-1"></i> {% trans "Add to Case" %}
+                                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCreateCase{{ item.id }}">
+                                                                <i class="fas fa-folder-plus me-1"></i> {% trans "Create Case" %}
                                                             </button>
                                                         </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Modal de Criar Caso -->
+                                            <div class="modal fade" id="modalCreateCase{{ item.id }}" tabindex="-1" aria-labelledby="modalCreateCaseLabel{{ item.id }}" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="modalCreateCaseLabel{{ item.id }}">{% trans "Create Case from Threat Intelligence" %}</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <form action="{% url 'vision:create_case_from_intel' item.id %}" method="post">
+                                                            {% csrf_token %}
+                                                            <div class="modal-body">
+                                                                <p>{% trans "This will create a new case from this threat intelligence item:" %}</p>
+                                                                
+                                                                <div class="alert alert-info mb-3">
+                                                                    <strong>{{ item.get_item_type_display }}:</strong> {{ item.value }}
+                                                                    {% if item.is_malicious %}
+                                                                        <span class="badge bg-danger ms-2">{% trans "Malicious" %}</span>
+                                                                    {% endif %}
+                                                                </div>
+                                                                
+                                                                <div class="mb-3">
+                                                                    <label for="title{{ item.id }}" class="form-label">{% trans "Case Title" %}</label>
+                                                                    <input type="text" class="form-control" id="title{{ item.id }}" name="title" value="Threat Intelligence: {{ item.value|truncatechars:30 }}">
+                                                                </div>
+                                                                
+                                                                <p class="mb-0 text-muted small">
+                                                                    <i class="fas fa-info-circle me-1"></i> {% trans "A new case will be created with this threat intelligence data and observable." %}
+                                                                </p>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                                                                <button type="submit" class="btn btn-primary">
+                                                                    <i class="fas fa-folder-plus me-1"></i> {% trans "Create Case" %}
+                                                                </button>
+                                                            </div>
+                                                        </form>
                                                     </div>
                                                 </div>
                                             </div>

@@ -18,7 +18,7 @@ from core.models import Observable
 def login_view(request):
     """Login view for users"""
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('core:dashboard')
     
     if request.method == 'POST':
         form = CustomAuthenticationForm(request, data=request.POST)
@@ -31,7 +31,7 @@ def login_view(request):
                 next_url = request.GET.get('next')
                 if next_url:
                     return redirect(next_url)
-                return redirect('dashboard')
+                return redirect('core:dashboard')
             else:
                 messages.error(request, _('Invalid username or password.'))
         else:
@@ -147,12 +147,12 @@ class UserDetailView(LoginRequiredMixin, OrgAdminRequiredMixin, DetailView):
             return User.objects.filter(organization=self.request.user.organization)
 
 
-class UserCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateView):
-    """Create view for users"""
+class UserCreateView(LoginRequiredMixin, SuperAdminRequiredMixin, CreateView):
+    """Create a new user"""
     model = User
     form_class = CustomUserCreationForm
     template_name = 'accounts/user_form.html'
-    success_url = reverse_lazy('user_list')
+    success_url = reverse_lazy('accounts:user_list')
     
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -176,12 +176,12 @@ class UserCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class UserUpdateView(LoginRequiredMixin, OrgAdminRequiredMixin, UpdateView):
-    """Update view for users"""
+class UserUpdateView(LoginRequiredMixin, SuperAdminRequiredMixin, UpdateView):
+    """Update an existing user"""
     model = User
     form_class = CustomUserChangeForm
     template_name = 'accounts/user_form.html'
-    success_url = reverse_lazy('user_list')
+    success_url = reverse_lazy('accounts:user_list')
     
     def get_queryset(self):
         if self.request.user.is_superadmin():

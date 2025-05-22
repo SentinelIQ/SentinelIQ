@@ -20,7 +20,7 @@ from cases.models import Case
 def home(request):
     """Home page view"""
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('core:dashboard')
     return render(request, 'core/home.html')
 
 
@@ -63,7 +63,7 @@ class TagCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateView):
     model = Tag
     form_class = TagForm
     template_name = 'core/tag_form.html'
-    success_url = reverse_lazy('tag_list')
+    success_url = reverse_lazy('core:tag_list')
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -101,7 +101,7 @@ class TagCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateView):
             # Registrar na timeline do alerta
             alert.log_tags_change(self.request.user, [], [tag])
             messages.success(self.request, f'Tag criada e associada ao alerta {alert.title} com sucesso!')
-            self.success_url = reverse_lazy('alert_detail', kwargs={'pk': alert.id})
+            self.success_url = reverse_lazy('alerts:alert_detail', kwargs={'pk': alert.id})
         
         # Associar a tag ao caso selecionado, se houver
         elif 'case' in form.cleaned_data and form.cleaned_data['case']:
@@ -110,7 +110,7 @@ class TagCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateView):
             # Registrar na timeline do caso
             case.log_tags_change(self.request.user, [], [tag])
             messages.success(self.request, f'Tag criada e associada ao caso {case.title} com sucesso!')
-            self.success_url = reverse_lazy('case_detail', kwargs={'pk': case.id})
+            self.success_url = reverse_lazy('cases:case_detail', kwargs={'pk': case.id})
         else:
             messages.success(self.request, 'Tag criada com sucesso!')
             
@@ -122,7 +122,7 @@ class TagUpdateView(LoginRequiredMixin, OrgAdminRequiredMixin, UpdateView):
     model = Tag
     form_class = TagForm
     template_name = 'core/tag_form.html'
-    success_url = reverse_lazy('tag_list')
+    success_url = reverse_lazy('core:tag_list')
     
     def form_valid(self, form):
         messages.success(self.request, _('Tag updated successfully.'))
@@ -133,7 +133,7 @@ class TagDeleteView(LoginRequiredMixin, OrgAdminRequiredMixin, DeleteView):
     """Delete view for tags"""
     model = Tag
     template_name = 'core/tag_confirm_delete.html'
-    success_url = reverse_lazy('tag_list')
+    success_url = reverse_lazy('core:tag_list')
     
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, _('Tag deleted successfully.'))
@@ -1067,7 +1067,7 @@ def mitre_attack_group_create(request):
         if form.is_valid():
             group = form.save()
             messages.success(request, _('MITRE ATT&CK Group created successfully.'))
-            return redirect('mitre_attack_group_detail', group_id=group.id)
+            return redirect('core:mitre_attack_group_detail', group_id=group.id)
     else:
         form = MitreAttackGroupForm(organization=request.user.organization)
     
@@ -1106,7 +1106,7 @@ def mitre_attack_group_edit(request, group_id):
         if form.is_valid():
             form.save()
             messages.success(request, _('MITRE ATT&CK Group updated successfully.'))
-            return redirect('mitre_attack_group_detail', group_id=group.id)
+            return redirect('core:mitre_attack_group_detail', group_id=group.id)
     else:
         form = MitreAttackGroupForm(instance=group, organization=request.user.organization)
     
@@ -1127,7 +1127,7 @@ def mitre_attack_group_delete(request, group_id):
     if request.method == 'POST':
         group.delete()
         messages.success(request, _('MITRE ATT&CK Group deleted successfully.'))
-        return redirect('mitre_attack_group_list')
+        return redirect('core:mitre_attack_group_list')
     
     context = {
         'group': group,

@@ -10,7 +10,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <h1 class="h3">{% trans "Add MITRE ATT&CK to Alert" %}: {{ alert.title }}</h1>
-                <a href="{% url 'alert_detail' alert.id %}" class="btn btn-secondary">
+                <a href="{% url 'alerts:alert_detail' alert.id %}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> {% trans "Back to Alert" %}
                 </a>
             </div>
@@ -41,7 +41,7 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-plus"></i> {% trans "Add to Alert" %}
                         </button>
-                        <a href="{% url 'mitre_attack_list' %}" class="btn btn-secondary" target="_blank">
+                        <a href="{% url 'core:mitre_attack_list' %}" class="btn btn-secondary" target="_blank">
                             <i class="fas fa-search"></i> {% trans "Browse MITRE ATT&CK" %}
                         </a>
                     </form>
@@ -63,7 +63,7 @@
                             <div>
                                 <strong>{{ tactic.tactic_id }}</strong> - {{ tactic.name }}
                             </div>
-                            <form method="post" action="{% url 'remove_alert_mitre_attack' alert.id 'tactic' tactic.id %}" class="d-inline">
+                            <form method="post" action="{% url 'core:remove_alert_mitre_attack' alert.id 'tactic' tactic.id %}" class="d-inline">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm btn-danger">
                                     <i class="fas fa-times"></i>
@@ -85,7 +85,7 @@
                             <div>
                                 <strong>{{ technique.technique_id }}</strong> - {{ technique.name }}
                             </div>
-                            <form method="post" action="{% url 'remove_alert_mitre_attack' alert.id 'technique' technique.id %}" class="d-inline">
+                            <form method="post" action="{% url 'core:remove_alert_mitre_attack' alert.id 'technique' technique.id %}" class="d-inline">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm btn-danger">
                                     <i class="fas fa-times"></i>
@@ -107,7 +107,7 @@
                             <div>
                                 <strong>{{ subtechnique.sub_technique_id }}</strong> - {{ subtechnique.name }}
                             </div>
-                            <form method="post" action="{% url 'remove_alert_mitre_attack' alert.id 'subtechnique' subtechnique.id %}" class="d-inline">
+                            <form method="post" action="{% url 'core:remove_alert_mitre_attack' alert.id 'subtechnique' subtechnique.id %}" class="d-inline">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm btn-danger">
                                     <i class="fas fa-times"></i>

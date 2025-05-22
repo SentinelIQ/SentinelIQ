@@ -8,10 +8,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">{% trans "Task Templates" %}</h1>
         <div>
-            <a href="{% url 'task_template_bulk_create' %}" class="btn btn-success me-2">
+            <a href="{% url 'cases:task_template_bulk_create' %}" class="btn btn-success me-2">
                 <i class="fas fa-copy me-2"></i> {% trans "Bulk Create" %}
             </a>
-            <a href="{% url 'task_template_create' %}" class="btn btn-primary">
+            <a href="{% url 'cases:task_template_create' %}" class="btn btn-primary">
                 <i class="fas fa-plus me-2"></i> {% trans "Add Template" %}
             </a>
         </div>
@@ -65,7 +65,7 @@
                                 <tr>
                                     <td>{{ template.title }}</td>
                                     <td>
-                                        <a href="{% url 'threat_category_detail' template.threat_category.id %}">
+                                        <a href="{% url 'cases:threat_category_detail' template.threat_category.id %}">
                                             <i class="{{ template.threat_category.icon_class }} me-1"></i>
                                             {{ template.threat_category.get_name_display }}
                                         </a>
@@ -90,21 +90,21 @@
                                     </td>
                                     <td class="text-end">
                                         <div class="btn-group">
-                                            <a href="{% url 'task_template_update' template.id %}" class="btn btn-sm btn-outline-secondary">
+                                            <a href="{% url 'cases:task_template_update' template.id %}" class="btn btn-sm btn-outline-secondary">
                                                 <i class="fas fa-edit"></i> {% trans "Edit" %}
                                             </a>
-                                            <a href="{% url 'task_template_clone' template.id %}" class="btn btn-sm btn-outline-primary">
+                                            <a href="{% url 'cases:task_template_clone' template.id %}" class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-copy"></i> {% trans "Clone" %}
                                             </a>
-                                            <form method="post" action="{% url 'task_template_toggle_status' template.id %}" class="d-inline">
+                                            <form method="post" action="{% url 'cases:task_template_toggle_status' template.id %}" class="d-inline">
                                                 {% csrf_token %}
-                                                <input type="hidden" name="next" value="{% url 'task_template_list' %}">
+                                                <input type="hidden" name="next" value="{% url 'cases:task_template_list' %}">
                                                 <button type="submit" class="btn btn-sm btn-outline-{% if template.is_active %}warning{% else %}success{% endif %}">
                                                     <i class="fas {% if template.is_active %}fa-toggle-off{% else %}fa-toggle-on{% endif %}"></i>
                                                     {% if template.is_active %}{% trans "Deactivate" %}{% else %}{% trans "Activate" %}{% endif %}
                                                 </button>
                                             </form>
-                                            <a href="{% url 'task_template_delete' template.id %}" class="btn btn-sm btn-outline-danger">
+                                            <a href="{% url 'cases:task_template_delete' template.id %}" class="btn btn-sm btn-outline-danger">
                                                 <i class="fas fa-trash"></i> {% trans "Delete" %}
                                             </a>
                                         </div>
@@ -123,10 +123,10 @@
                     <h4>{% trans "No task templates found" %}</h4>
                     <p class="text-muted mb-4">{% trans "Create your first task template to automate case handling." %}</p>
                     <div>
-                        <a href="{% url 'task_template_create' %}" class="btn btn-primary me-2">
+                        <a href="{% url 'cases:task_template_create' %}" class="btn btn-primary me-2">
                             <i class="fas fa-plus me-2"></i> {% trans "Add Template" %}
                         </a>
-                        <a href="{% url 'task_template_bulk_create' %}" class="btn btn-success">
+                        <a href="{% url 'cases:task_template_bulk_create' %}" class="btn btn-success">
                             <i class="fas fa-copy me-2"></i> {% trans "Bulk Create" %}
                         </a>
                     </div>

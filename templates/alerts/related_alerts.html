@@ -9,15 +9,15 @@
         <h2 class="mb-1"><i class="fas fa-link text-primary me-2"></i> Gerenciar Alertas Relacionados</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'alert_list' %}">Alertas</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'alert_detail' alert.id %}">{{ alert.title }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_list' %}">Alertas</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_detail' alert.id %}">{{ alert.title }}</a></li>
                 <li class="breadcrumb-item active">Alertas Relacionados</li>
             </ol>
         </nav>
     </div>
     <div>
-        <a href="{% url 'alert_detail' alert.id %}" class="btn btn-secondary">
+        <a href="{% url 'alerts:alert_detail' alert.id %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-1"></i> Voltar ao Alerta
         </a>
     </div>
@@ -48,10 +48,10 @@
                                     </small>
                                 </div>
                                 <div class="d-flex">
-                                    <a href="{% url 'alert_detail' related.id %}" class="btn btn-sm btn-info me-2" title="Ver detalhes">
+                                    <a href="{% url 'alerts:alert_detail' related.id %}" class="btn btn-sm btn-info me-2" title="Ver detalhes">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{% url 'remove_related_alert' alert.id related.id %}" class="btn btn-sm btn-danger" title="Remover relacionamento" onclick="return confirm('Tem certeza que deseja remover este relacionamento?');">
+                                    <a href="{% url 'alerts:remove_related_alert' alert.id related.id %}" class="btn btn-sm btn-danger" title="Remover relacionamento" onclick="return confirm('Tem certeza que deseja remover este relacionamento?');">
                                         <i class="fas fa-unlink"></i>
                                     </a>
                                 </div>
@@ -73,7 +73,7 @@
             </div>
             <div class="card-body">
                 {% if available_alerts %}
-                    <form method="post" action="{% url 'add_related_alert' alert.id %}">
+                    <form method="post" action="{% url 'alerts:add_related_alert' alert.id %}">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label for="related_alert_id" class="form-label">Selecione um alerta para relacionar</label>

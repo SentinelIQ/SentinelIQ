@@ -21,13 +21,13 @@
         </h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'case_list' %}">Casos</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cases:case_list' %}">Casos</a></li>
                 <li class="breadcrumb-item active">{% if form.instance.pk %}Editar{% else %}Novo{% endif %}</li>
             </ol>
         </nav>
     </div>
-    <a href="{% url 'case_list' %}" class="btn btn-secondary">
+    <a href="{% url 'cases:case_list' %}" class="btn btn-secondary">
         <i class="fas fa-arrow-left me-1"></i> Voltar
     </a>
 </div>

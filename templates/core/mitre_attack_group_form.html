@@ -10,7 +10,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <h1 class="h3">{{ title }}</h1>
-                <a href="{% url 'mitre_attack_group_list' %}" class="btn btn-secondary">
+                <a href="{% url 'core:mitre_attack_group_list' %}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> {% trans "Back to Groups" %}
                 </a>
             </div>
@@ -87,7 +87,7 @@
                         </div>
                         
                         <div class="d-flex justify-content-end mt-4">
-                            <a href="{% url 'mitre_attack_group_list' %}" class="btn btn-outline-secondary me-2">
+                            <a href="{% url 'core:mitre_attack_group_list' %}" class="btn btn-outline-secondary me-2">
                                 {% trans "Cancel" %}
                             </a>
                             <button type="submit" class="btn btn-primary">

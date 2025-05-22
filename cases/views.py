@@ -256,7 +256,7 @@ class CaseDeleteView(LoginRequiredMixin, OrgAdminRequiredMixin, DeleteView):
     """Delete view for cases"""
     model = Case
     template_name = 'cases/case_confirm_delete.html'
-    success_url = reverse_lazy('case_list')
+    success_url = reverse_lazy('cases:case_list')
     
     def get_queryset(self):
         """Ensure users can only delete cases from their organization"""
@@ -539,7 +539,7 @@ class ThreatCategoryCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, Create
     model = ThreatCategory
     form_class = ThreatCategoryForm
     template_name = 'cases/threat_category_form.html'
-    success_url = reverse_lazy('threat_category_list')
+    success_url = reverse_lazy('cases:threat_category_list')
     
     def form_valid(self, form):
         messages.success(self.request, _('Threat category created successfully.'))
@@ -551,6 +551,7 @@ class ThreatCategoryUpdateView(LoginRequiredMixin, OrgAdminRequiredMixin, Update
     model = ThreatCategory
     form_class = ThreatCategoryForm
     template_name = 'cases/threat_category_form.html'
+    success_url = reverse_lazy('cases:threat_category_list')
     
     def get_success_url(self):
         return reverse('threat_category_detail', kwargs={'pk': self.object.pk})
@@ -608,7 +609,7 @@ class TaskTemplateCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateVi
     model = TaskTemplate
     form_class = TaskTemplateForm
     template_name = 'cases/task_template_form.html'
-    success_url = reverse_lazy('task_template_list')
+    success_url = reverse_lazy('cases:task_template_list')
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -662,7 +663,7 @@ class TaskTemplateDeleteView(LoginRequiredMixin, OrgAdminRequiredMixin, DeleteVi
     """Delete view for task templates"""
     model = TaskTemplate
     template_name = 'cases/task_template_confirm_delete.html'
-    success_url = reverse_lazy('task_template_list')
+    success_url = reverse_lazy('cases:task_template_list')
     
     def get_queryset(self):
         """Ensure users can only delete templates from their organization"""

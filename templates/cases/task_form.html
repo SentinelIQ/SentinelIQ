@@ -21,9 +21,9 @@
         </h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'case_list' %}">Casos</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'case_detail' case.id %}">{{ case.title }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cases:case_list' %}">Casos</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cases:case_detail' case.id %}">{{ case.title }}</a></li>
                 <li class="breadcrumb-item active">
                     {% if task %}Editar Tarefa{% else %}Nova Tarefa{% endif %}
                 </li>
@@ -31,7 +31,7 @@
         </nav>
     </div>
     <div>
-        <a href="{% url 'case_detail' case.id %}" class="btn btn-secondary">
+        <a href="{% url 'cases:case_detail' case.id %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-1"></i> Voltar ao Caso
         </a>
     </div>
@@ -104,7 +104,7 @@
             </div>
             
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <a href="{% url 'case_detail' case.id %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                <a href="{% url 'cases:case_detail' case.id %}" class="btn btn-secondary me-md-2">Cancelar</a>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save me-1"></i> Salvar Tarefa
                 </button>

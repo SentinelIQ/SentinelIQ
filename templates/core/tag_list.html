@@ -23,13 +23,13 @@
         <h2 class="mb-1"><i class="fas fa-tags text-primary me-2"></i> Gerenciar Tags</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
                 <li class="breadcrumb-item active">Tags</li>
             </ol>
         </nav>
     </div>
     {% if user.is_superadmin or user.is_org_admin %}
-    <a href="{% url 'tag_create' %}" class="btn btn-primary d-flex align-items-center shadow-sm">
+    <a href="{% url 'core:tag_create' %}" class="btn btn-primary d-flex align-items-center shadow-sm">
         <i class="fas fa-plus-circle me-2"></i> Nova Tag
     </a>
     {% endif %}
@@ -49,7 +49,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-search me-1"></i> Buscar
                             </button>
-                            <a href="{% url 'tag_list' %}" class="btn btn-secondary">
+                            <a href="{% url 'core:tag_list' %}" class="btn btn-secondary">
                                 <i class="fas fa-sync me-1"></i> Limpar
                             </a>
                         </div>
@@ -121,10 +121,10 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{% url 'tag_update' tag.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
+                                    <a href="{% url 'core:tag_update' tag.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="{% url 'tag_delete' tag.id %}" class="btn btn-danger" data-bs-toggle="tooltip" title="Excluir">
+                                    <a href="{% url 'core:tag_delete' tag.id %}" class="btn btn-danger" data-bs-toggle="tooltip" title="Excluir">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </div>
@@ -137,11 +137,11 @@
                                     <i class="fas fa-tags fa-3x text-muted mb-3"></i>
                                     <p class="mb-0 text-muted">Nenhuma tag encontrada.</p>
                                     {% if search %}
-                                        <a href="{% url 'tag_list' %}" class="btn btn-sm btn-primary mt-3">
+                                        <a href="{% url 'core:tag_list' %}" class="btn btn-sm btn-primary mt-3">
                                             <i class="fas fa-sync me-1"></i> Limpar busca
                                         </a>
                                     {% else %}
-                                        <a href="{% url 'tag_create' %}" class="btn btn-sm btn-primary mt-3">
+                                        <a href="{% url 'core:tag_create' %}" class="btn btn-sm btn-primary mt-3">
                                             <i class="fas fa-plus-circle me-1"></i> Criar nova tag
                                         </a>
                                     {% endif %}

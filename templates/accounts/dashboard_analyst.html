@@ -43,7 +43,7 @@
         </div>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
                 <li class="breadcrumb-item active">Dashboard</li>
             </ol>
         </nav>
@@ -69,7 +69,7 @@
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                             Alertas Atribuídos a Você</div>
                         <div class="h3 mb-0 font-weight-bold">{{ alerts_count|default:"0" }}</div>
-                        <a href="{% url 'alert_list' %}" class="text-decoration-none mt-2 d-block">
+                        <a href="{% url 'alerts:alert_list' %}" class="text-decoration-none mt-2 d-block">
                             <small>Ver todos <i class="fas fa-arrow-right"></i></small>
                         </a>
                     </div>
@@ -89,7 +89,7 @@
                         <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                             Casos Atribuídos a Você</div>
                         <div class="h3 mb-0 font-weight-bold">{{ cases_count|default:"0" }}</div>
-                        <a href="{% url 'case_list' %}" class="text-decoration-none mt-2 d-block">
+                        <a href="{% url 'cases:case_list' %}" class="text-decoration-none mt-2 d-block">
                             <small>Ver todos <i class="fas fa-arrow-right"></i></small>
                         </a>
                     </div>
@@ -129,7 +129,7 @@
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                             Observables Relacionados</div>
                         <div class="h3 mb-0 font-weight-bold">{{ observables_count|default:"0" }}</div>
-                        <a href="{% url 'observable_list' %}" class="text-decoration-none mt-2 d-block">
+                        <a href="{% url 'core:observable_list' %}" class="text-decoration-none mt-2 d-block">
                             <small>Ver todos <i class="fas fa-arrow-right"></i></small>
                         </a>
                     </div>
@@ -148,7 +148,7 @@
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-tasks me-2"></i> Alertas Atribuídos a Você</h5>
-                    <a href="{% url 'alert_list' %}" class="btn btn-sm btn-light d-flex align-items-center">
+                    <a href="{% url 'alerts:alert_list' %}" class="btn btn-sm btn-light d-flex align-items-center">
                         <i class="fas fa-list me-1"></i> Ver Todos
                     </a>
                 </div>
@@ -204,10 +204,10 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="{% url 'alert_detail' alert.id %}" class="btn btn-info" title="Visualizar">
+                                                <a href="{% url 'alerts:alert_detail' alert.id %}" class="btn btn-info" title="Visualizar">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{% url 'alert_update' alert.id %}" class="btn btn-warning" title="Editar">
+                                                <a href="{% url 'alerts:alert_update' alert.id %}" class="btn btn-warning" title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             </div>
@@ -238,8 +238,8 @@
             <div class="card-header bg-danger text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i> Casos Atribuídos a Você</h5>
-                    <a href="{% url 'case_list' %}" class="btn btn-sm btn-light d-flex align-items-center">
-                        <i class="fas fa-list me-1"></i> Ver Todos
+                    <a href="{% url 'cases:case_list' %}" class="btn btn-sm btn-light d-flex align-items-center">
+                        <i class="fas fa-list"></i> <span class="ms-1">Ver Todos</span>
                     </a>
                 </div>
             </div>
@@ -300,10 +300,10 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="{% url 'case_detail' case.id %}" class="btn btn-info" title="Visualizar">
+                                                <a href="{% url 'cases:case_detail' case.id %}" class="btn btn-info" title="Visualizar">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{% url 'case_update' case.id %}" class="btn btn-warning" title="Editar">
+                                                <a href="{% url 'cases:case_update' case.id %}" class="btn btn-warning" title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             </div>
@@ -337,7 +337,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-lg-3 col-md-6 mb-3">
-                        <a href="{% url 'alert_list' %}" class="btn btn-primary w-100 p-3 d-flex align-items-center justify-content-between">
+                        <a href="{% url 'alerts:alert_list' %}" class="btn btn-primary w-100 p-3 d-flex align-items-center justify-content-between">
                             <div>
                                 <i class="fas fa-search fa-lg"></i>
                                 <span class="ms-2">Buscar Alertas</span>
@@ -346,7 +346,7 @@
                         </a>
                     </div>
                     <div class="col-lg-3 col-md-6 mb-3">
-                        <a href="{% url 'alert_list' %}?status=new" class="btn btn-danger w-100 p-3 d-flex align-items-center justify-content-between">
+                        <a href="{% url 'alerts:alert_list' %}?status=new" class="btn btn-danger w-100 p-3 d-flex align-items-center justify-content-between">
                             <div>
                                 <i class="fas fa-bell fa-lg"></i>
                                 <span class="ms-2">Alertas Novos</span>
@@ -355,7 +355,7 @@
                         </a>
                     </div>
                     <div class="col-lg-3 col-md-6 mb-3">
-                        <a href="{% url 'alert_list' %}?status=in_progress" class="btn btn-info w-100 p-3 d-flex align-items-center justify-content-between">
+                        <a href="{% url 'alerts:alert_list' %}?status=in_progress" class="btn btn-info w-100 p-3 d-flex align-items-center justify-content-between">
                             <div>
                                 <i class="fas fa-spinner fa-lg"></i>
                                 <span class="ms-2">Em Progresso</span>
@@ -364,7 +364,7 @@
                         </a>
                     </div>
                     <div class="col-lg-3 col-md-6 mb-3">
-                        <a href="{% url 'alert_list' %}?status=resolved" class="btn btn-success w-100 p-3 d-flex align-items-center justify-content-between">
+                        <a href="{% url 'alerts:alert_list' %}?status=resolved" class="btn btn-success w-100 p-3 d-flex align-items-center justify-content-between">
                             <div>
                                 <i class="fas fa-check-circle fa-lg"></i>
                                 <span class="ms-2">Resolvidos</span>

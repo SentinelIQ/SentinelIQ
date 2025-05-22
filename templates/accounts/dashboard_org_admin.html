@@ -37,7 +37,7 @@
         </div>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
                 <li class="breadcrumb-item active">Dashboard</li>
             </ol>
         </nav>
@@ -62,7 +62,7 @@
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                             Total de Alertas</div>
                         <div class="h3 mb-0 font-weight-bold">{{ alerts_count }}</div>
-                        <a href="{% url 'alert_list' %}" class="text-decoration-none mt-2 d-block">
+                        <a href="{% url 'alerts:alert_list' %}" class="text-decoration-none mt-2 d-block">
                             <small>Ver todos <i class="fas fa-arrow-right"></i></small>
                         </a>
                     </div>
@@ -82,7 +82,7 @@
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                             Total de Usuários</div>
                         <div class="h3 mb-0 font-weight-bold">{{ users_count }}</div>
-                        <a href="{% url 'user_list' %}" class="text-decoration-none mt-2 d-block">
+                        <a href="{% url 'accounts:user_list' %}" class="text-decoration-none mt-2 d-block">
                             <small>Ver todos <i class="fas fa-arrow-right"></i></small>
                         </a>
                     </div>
@@ -102,8 +102,8 @@
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                             Total de Casos</div>
                         <div class="h3 mb-0 font-weight-bold">{{ cases_count|default:"0" }}</div>
-                        <a href="{% url 'case_list' %}" class="text-decoration-none mt-2 d-block">
-                            <small>Ver todos <i class="fas fa-arrow-right"></i></small>
+                        <a href="{% url 'cases:case_list' %}" class="text-decoration-none mt-2 d-block">
+                            <small>Ver detalhes <i class="fas fa-arrow-right"></i></small>
                         </a>
                     </div>
                     <div class="col-auto">
@@ -122,7 +122,7 @@
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                             Alertas Resolvidos</div>
                         <div class="h3 mb-0 font-weight-bold">{{ resolved_alerts_count|default:"0" }}</div>
-                        <a href="{% url 'alert_list' %}?status=resolved" class="text-decoration-none mt-2 d-block">
+                        <a href="{% url 'alerts:alert_list' %}?status=resolved" class="text-decoration-none mt-2 d-block">
                             <small>Ver detalhes <i class="fas fa-arrow-right"></i></small>
                         </a>
                     </div>
@@ -142,7 +142,7 @@
                         <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                             Alertas Novos</div>
                         <div class="h3 mb-0 font-weight-bold">{{ new_alerts_count|default:"0" }}</div>
-                        <a href="{% url 'alert_list' %}?status=new" class="text-decoration-none mt-2 d-block">
+                        <a href="{% url 'alerts:alert_list' %}?status=new" class="text-decoration-none mt-2 d-block">
                             <small>Ver detalhes <i class="fas fa-arrow-right"></i></small>
                         </a>
                     </div>
@@ -162,7 +162,7 @@
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                             Total de Observables</div>
                         <div class="h3 mb-0 font-weight-bold">{{ observables_count|default:"0" }}</div>
-                        <a href="{% url 'observable_list' %}" class="text-decoration-none mt-2 d-block">
+                        <a href="{% url 'core:observable_list' %}" class="text-decoration-none mt-2 d-block">
                             <small>Ver detalhes <i class="fas fa-arrow-right"></i></small>
                         </a>
                     </div>
@@ -180,7 +180,7 @@
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-bell me-2"></i> Alertas Recentes</h5>
-                <a href="{% url 'alert_list' %}" class="btn btn-sm btn-light">
+                <a href="{% url 'alerts:alert_list' %}" class="btn btn-sm btn-light">
                     <i class="fas fa-list"></i> Ver Todos
                 </a>
             </div>
@@ -228,10 +228,10 @@
                                         <td><small>{{ alert.created_at|date:"d/m/Y H:i" }}</small></td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="{% url 'alert_detail' alert.id %}" class="btn btn-info" title="Visualizar">
+                                                <a href="{% url 'alerts:alert_detail' alert.id %}" class="btn btn-info" title="Visualizar">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{% url 'alert_update' alert.id %}" class="btn btn-warning" title="Editar">
+                                                <a href="{% url 'alerts:alert_update' alert.id %}" class="btn btn-warning" title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             </div>
@@ -259,42 +259,42 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-3">
-                    <a href="{% url 'alert_create' %}" class="btn btn-warning p-3 dashboard-action d-flex align-items-center justify-content-between">
+                    <a href="{% url 'alerts:alert_create' %}" class="btn btn-warning p-3 dashboard-action d-flex align-items-center justify-content-between">
                         <div>
                             <i class="fas fa-plus-circle me-2"></i> Novo Alerta
                         </div>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                     
-                    <a href="{% url 'user_create' %}" class="btn btn-info p-3 dashboard-action d-flex align-items-center justify-content-between">
+                    <a href="{% url 'accounts:user_create' %}" class="btn btn-info p-3 dashboard-action d-flex align-items-center justify-content-between">
                         <div>
                             <i class="fas fa-user-plus me-2"></i> Novo Usuário
                         </div>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                     
-                    <a href="{% url 'case_create' %}" class="btn btn-primary p-3 dashboard-action d-flex align-items-center justify-content-between">
+                    <a href="{% url 'cases:case_create' %}" class="btn btn-primary p-3 dashboard-action d-flex align-items-center justify-content-between">
                         <div>
                             <i class="fas fa-briefcase me-2"></i> Novo Caso
                         </div>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                     
-                    <a href="{% url 'alert_list' %}" class="btn btn-warning p-3 dashboard-action d-flex align-items-center justify-content-between">
+                    <a href="{% url 'alerts:alert_list' %}" class="btn btn-warning p-3 dashboard-action d-flex align-items-center justify-content-between">
                         <div>
                             <i class="fas fa-search me-2"></i> Gerenciar Alertas
                         </div>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                     
-                    <a href="{% url 'case_list' %}" class="btn btn-danger p-3 dashboard-action d-flex align-items-center justify-content-between">
+                    <a href="{% url 'cases:case_list' %}" class="btn btn-danger p-3 dashboard-action d-flex align-items-center justify-content-between">
                         <div>
                             <i class="fas fa-tasks me-2"></i> Gerenciar Casos
                         </div>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                     
-                    <a href="{% url 'user_list' %}" class="btn btn-secondary p-3 dashboard-action d-flex align-items-center justify-content-between">
+                    <a href="{% url 'accounts:user_list' %}" class="btn btn-secondary p-3 dashboard-action d-flex align-items-center justify-content-between">
                         <div>
                             <i class="fas fa-users-cog me-2"></i> Gerenciar Usuários
                         </div>

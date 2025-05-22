@@ -541,6 +541,7 @@ class CaseEvent(models.Model):
     TASK_COMPLETED = 'task_completed'
     MITRE_ATTACK_ADDED = 'mitre_attack_added'
     MITRE_ATTACK_REMOVED = 'mitre_attack_removed'
+    THREAT_INTEL_ADDED = 'threat_intel_added'
     CUSTOM = 'custom'
     
     EVENT_TYPE_CHOICES = [
@@ -563,6 +564,7 @@ class CaseEvent(models.Model):
         (TASK_COMPLETED, _('Task Completed')),
         (MITRE_ATTACK_ADDED, _('MITRE ATT&CK Added')),
         (MITRE_ATTACK_REMOVED, _('MITRE ATT&CK Removed')),
+        (THREAT_INTEL_ADDED, _('Threat Intelligence Added')),
         (CUSTOM, _('Custom Event')),
     ]
     
@@ -594,30 +596,31 @@ class CaseEvent(models.Model):
         return f"{self.get_event_type_display()} - {self.case.title}"
     
     def get_icon_class(self):
-        """Return an icon class based on event type"""
-        icon_map = {
+        """Get Bootstrap icon class for this event type"""
+        icon_mapping = {
             self.CREATED: 'fa-plus-circle text-success',
             self.STATUS_CHANGED: 'fa-exchange-alt text-info',
-            self.PRIORITY_CHANGED: 'fa-level-up-alt text-warning',
-            self.ASSIGNEE_CHANGED: 'fa-user-edit text-primary',
+            self.PRIORITY_CHANGED: 'fa-flag text-warning',
+            self.ASSIGNEE_CHANGED: 'fa-user-friends text-info',
             self.DUE_DATE_CHANGED: 'fa-calendar-alt text-info',
-            self.COMMENT_ADDED: 'fa-comment-dots text-secondary',
-            self.ATTACHMENT_ADDED: 'fa-paperclip text-secondary',
-            self.ALERT_LINKED: 'fa-link text-primary',
-            self.ALERT_UNLINKED: 'fa-unlink text-danger',
-            self.TLP_CHANGED: 'fa-shield-alt text-primary',
-            self.PAP_CHANGED: 'fa-user-shield text-warning',
+            self.COMMENT_ADDED: 'fa-comment text-info',
+            self.ATTACHMENT_ADDED: 'fa-paperclip text-info',
+            self.ALERT_LINKED: 'fa-bell text-danger',
+            self.ALERT_UNLINKED: 'fa-bell-slash text-warning',
+            self.TLP_CHANGED: 'fa-traffic-light text-info',
+            self.PAP_CHANGED: 'fa-shield-alt text-info',
             self.TAGS_CHANGED: 'fa-tags text-info',
-            self.OBSERVABLE_ADDED: 'fa-eye text-success',
-            self.OBSERVABLE_REMOVED: 'fa-eye-slash text-danger',
-            self.TASK_ADDED: 'fa-tasks text-success',
-            self.TASK_UPDATED: 'fa-edit text-info',
+            self.OBSERVABLE_ADDED: 'fa-search-plus text-success',
+            self.OBSERVABLE_REMOVED: 'fa-search-minus text-danger',
+            self.TASK_ADDED: 'fa-tasks text-info',
+            self.TASK_UPDATED: 'fa-edit text-warning',
             self.TASK_COMPLETED: 'fa-check-circle text-success',
-            self.MITRE_ATTACK_ADDED: 'fa-star text-warning',
-            self.MITRE_ATTACK_REMOVED: 'fa-star text-danger',
+            self.MITRE_ATTACK_ADDED: 'fa-shield-alt text-warning',
+            self.MITRE_ATTACK_REMOVED: 'fa-shield-alt text-danger',
+            self.THREAT_INTEL_ADDED: 'fa-database text-info',
             self.CUSTOM: 'fa-star text-warning',
         }
-        return icon_map.get(self.event_type, 'fa-circle')
+        return icon_mapping.get(self.event_type, 'fa-circle')
     
     class Meta:
         verbose_name = _('Case Event')

@@ -1,121 +1,65 @@
 #!/usr/bin/env python3
-"""
-misp_events_to_csv.py  –  v2
-Exporta eventos do MISP com Galaxies, Tags e Correlações → CSV/STDOUT.
-"""
+from datetime import datetime
+import os, pandas as pd
+from pymisp import PyMISP
 
-from __future__ import annotations
+URL, KEY = os.environ['MISP_URL'], os.environ['MISP_KEY']
+misp = PyMISP(URL, KEY, ssl=False)           # ✅ deixe True em produção
 
-import csv
-import os
-from pathlib import Path
-from typing import Any, Dict, List
+IOC_VALUE = "bolepaund.com"
 
-import click
-from dotenv import load_dotenv
-from pymisp import ExpandedPyMISP         # type: ignore
-from tabulate import tabulate
+# 1) Busca o atributo que tem exatamente esse value
+raw = misp.search(
+    'attributes',
+    value=IOC_VALUE,
+    pythonify=False,
+    metadata=True,            # garante bloco Event
+    include_event_info=True,
+    include_event_tags=True,
+    include_correlations=True,
+    include_context=True,
+)
 
-# ───────────────────────── Configuração ────────────────────────── #
+attrs = raw['Attribute'] if isinstance(raw, dict) else raw
+if not attrs:
+    print(f"Nenhum atributo encontrado para {IOC_VALUE}")
+    raise SystemExit()
 
-ENV_PATH = Path(".env")         # MISP_URL e MISP_KEY aqui
-DEFAULT_VERIFY_SSL = False
-
-# ---- flags ricos de retorno (incluem Galaxy, Tags, Correl.) ---- #
-DEFAULT_FILTERS: Dict[str, Any] = {
-    "include_galaxy": True,
-    "include_event_tags": True,
-    "include_correlations": True,
-    "include_context": True,
-    "include_sightings": True,
-    "sg_reference_only": True,
-    # paginação default; pode ser sobrescrita pela CLI
-    "page": 1,
-    "limit": 500,
+# 2) Extrai IDs de evento
+event_ids = {
+    (a.get('Event') or {}).get('id', a.get('event_id'))
+    for a in attrs
 }
+print(f"💡  {IOC_VALUE} aparece em {len(event_ids)} evento(s).")
 
-load_dotenv(ENV_PATH, override=True)
+# 3) Detalhes só desses eventos
+events = misp.search(
+    'events',
+    eventid=list(event_ids),
+    pythonify=False,
+    include_galaxy=True,
+    include_event_tags=True,
+)
 
+# 4) Timeline
+# … (código de conexão e busca igual ao anterior) …
 
-def connect_misp() -> ExpandedPyMISP:
-    """Cria a instância ExpandedPyMISP com env vars."""
-    return ExpandedPyMISP(
-        os.environ["MISP_URL"],
-        os.environ["MISP_KEY"],
-        ssl=DEFAULT_VERIFY_SSL,
-    )
+# 4) Timeline com URL
+timeline = []
+for ev in events:
+    evt = ev['Event']
+    ev_id = evt['id']
+    # monta a URL de visualização
+    url = f"{URL.rstrip('/')}/events/view/{ev_id}"
+    timeline.append({
+        "Event ID":    ev_id,
+        "Date":        datetime.strptime(evt['date'], "%Y-%m-%d"),
+        "Info":        evt['info'],
+        "Tags":        ", ".join(t['name'] for t in evt.get('Tag', [])),
+        "URL":         url,
+    })
 
+df = pd.DataFrame(timeline).sort_values('Date')
+print("\nTimeline:")
+print(df.to_string(index=False))
 
-# ────────────────────── Transformação de Evento ────────────────────── #
-
-def flatten_event(raw_evt: Dict[str, Any]) -> Dict[str, Any]:
-    """Reduz o JSON do evento às colunas exigidas, lidando com ambos formatos."""
-    evt = raw_evt.get("Event", raw_evt)  # desce um nível caso necessário
-
-    clusters = [
-        c["value"]
-        for g in evt.get("Galaxy", [])
-        for c in g.get("GalaxyCluster", [])
-    ]
-
-    tags = [t["name"] for t in evt.get("Tag", [])]
-
-    return {
-        "Creator org": evt.get("Orgc", {}).get("name", ""),
-        "Owner org":   evt.get("Org", {}).get("name", ""),
-        "ID":          evt.get("id"),
-        "Clusters":    ", ".join(clusters),
-        "Tags":        ", ".join(tags),
-        "#Attr.":      len(evt.get("Attribute", [])),
-        "#Corr.":      evt.get("Attribute_correlation_count", 0),
-        "Creator user": evt.get("user", {}).get("email", ""),
-        "Date":        evt.get("date"),
-        "Info":        evt.get("info"),
-        "Distribution": evt.get("distribution"),
-    }
-
-
-# ─────────────────────────── CSV helpers ─────────────────────────── #
-
-def write_csv(rows: List[Dict[str, Any]], path: Path) -> None:
-    with path.open("w", newline="", encoding="utf-8") as fp:
-        writer = csv.DictWriter(fp, fieldnames=rows[0].keys())
-        writer.writeheader()
-        writer.writerows(rows)
-    print(f"✅ CSV salvo em {path.resolve()}")
-
-
-# ───────────────────────────── CLI ───────────────────────────── #
-
-@click.command()
-@click.option("--from", "date_from", help="Data inicial YYYY-MM-DD.")
-@click.option("--to", "date_to", help="Data final YYYY-MM-DD.")
-@click.option("-o", "--output", type=click.Path(), help="Arquivo CSV de destino.")
-@click.option("--page", type=int, default=1, help="Página para paginação.")
-@click.option("--limit", type=int, default=500, help="Máximo de eventos por página.")
-def main(date_from, date_to, output, page, limit):
-    misp = connect_misp()
-
-    # mistura filtros default + argumentos de data/paginação
-    filters = DEFAULT_FILTERS | {
-        "date_from": date_from,
-        "date_to": date_to,
-        "page": page,
-        "limit": limit,
-    }
-
-    events = misp.search("events", **{k: v for k, v in filters.items() if v is not None})
-    rows = [flatten_event(e) for e in events]
-
-    if not rows:
-        print("⚠️  Nenhum evento encontrado.")
-        return
-
-    if output:
-        write_csv(rows, Path(output))
-    else:
-        print(tabulate(rows, headers="keys", tablefmt="github"))
-
-
-if __name__ == "__main__":
-    main()

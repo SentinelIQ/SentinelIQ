@@ -30,17 +30,17 @@
         <h2 class="mb-1"><i class="fas fa-eye text-primary me-2"></i> Detalhes do Observable</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'observable_list' %}">Observables</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:observable_list' %}">Observables</a></li>
                 <li class="breadcrumb-item active">{{ observable.value }}</li>
             </ol>
         </nav>
     </div>
     <div class="d-flex">
-        <a href="{% url 'observable_update' observable.id %}" class="btn btn-warning me-2 d-flex align-items-center">
+        <a href="{% url 'core:observable_update' observable.id %}" class="btn btn-warning me-2 d-flex align-items-center">
             <i class="fas fa-edit me-2"></i> Editar
         </a>
-        <a href="{% url 'observable_delete' observable.id %}" class="btn btn-danger d-flex align-items-center">
+        <a href="{% url 'core:observable_delete' observable.id %}" class="btn btn-danger d-flex align-items-center">
             <i class="fas fa-trash me-2"></i> Excluir
         </a>
     </div>
@@ -163,6 +163,22 @@
                     </div>
                 </div>
                 
+                <!-- Threat Intelligence Section -->
+                <div class="mb-4 mt-4">
+                    <h5 class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <span><i class="fas fa-database me-2"></i> Threat Intelligence</span>
+                        <button id="check-threat-intel" class="btn btn-sm btn-primary">
+                            <i class="fas fa-search me-1"></i> Check for Matches
+                        </button>
+                    </h5>
+                    
+                    <div id="threat-intel-results" class="mt-3">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> Click the button above to check if this observable has matches in threat intelligence feeds.
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="row mt-3 text-muted small">
                     <div class="col-md-6">
                         <p><i class="fas fa-calendar-plus me-1"></i> Primeira visualização: {{ observable.first_seen|date:"d/m/Y H:i" }}</p>
@@ -187,7 +203,7 @@
                         {% for alert in related_alerts %}
                             <li class="list-group-item related-item d-flex justify-content-between align-items-center">
                                 <div>
-                                    <a href="{% url 'alert_detail' alert.id %}" class="text-decoration-none">
+                                    <a href="{% url 'alerts:alert_detail' alert.id %}" class="text-decoration-none">
                                         {{ alert.title }}
                                     </a>
                                     <br>
@@ -199,7 +215,7 @@
                                         {{ alert.get_status_display }}
                                     </span>
                                 </div>
-                                <a href="{% url 'remove_alert_observable' alert.id observable.id %}" class="btn btn-sm btn-outline-danger" 
+                                <a href="{% url 'core:remove_alert_observable' alert.id observable.id %}" class="btn btn-sm btn-outline-danger" 
                                    onclick="return confirm('Tem certeza que deseja remover este observable do alerta?');">
                                     <i class="fas fa-unlink"></i>
                                 </a>
@@ -226,7 +242,7 @@
                         {% for case in related_cases %}
                             <li class="list-group-item related-item d-flex justify-content-between align-items-center">
                                 <div>
-                                    <a href="{% url 'case_detail' case.id %}" class="text-decoration-none">
+                                    <a href="{% url 'cases:case_detail' case.id %}" class="text-decoration-none">
                                         {{ case.title }}
                                     </a>
                                     <br>
@@ -238,7 +254,7 @@
                                         {{ case.get_status_display }}
                                     </span>
                                 </div>
-                                <a href="{% url 'remove_case_observable' case.id observable.id %}" class="btn btn-sm btn-outline-danger" 
+                                <a href="{% url 'core:remove_case_observable' case.id observable.id %}" class="btn btn-sm btn-outline-danger" 
                                    onclick="return confirm('Tem certeza que deseja remover este observable do caso?');">
                                     <i class="fas fa-unlink"></i>
                                 </a>
@@ -255,4 +271,33 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/misp_case_integration.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrfToken = getCookie('csrftoken');
+        
+        // Set up button click handler
+        document.getElementById('check-threat-intel').addEventListener('click', function() {
+            checkThreatIntelligenceMatch("{{ observable.id }}", csrfToken);
+        });
+    });
+</script>
 {% endblock %} 

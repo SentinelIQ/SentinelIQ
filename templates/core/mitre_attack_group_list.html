@@ -11,10 +11,10 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h1 class="h3">{% trans "MITRE ATT&CK Groups" %}</h1>
                 <div>
-                    <a href="{% url 'mitre_attack_list' %}" class="btn btn-info">
+                    <a href="{% url 'core:mitre_attack_list' %}" class="btn btn-info">
                         <i class="fas fa-list"></i> {% trans "Browse MITRE Framework" %}
                     </a>
-                    <a href="{% url 'mitre_attack_group_create' %}" class="btn btn-primary">
+                    <a href="{% url 'core:mitre_attack_group_create' %}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> {% trans "Create New Group" %}
                     </a>
                 </div>
@@ -43,7 +43,7 @@
                                 {% for group in groups %}
                                 <tr>
                                     <td>
-                                        <a href="{% url 'mitre_attack_group_detail' group.id %}">{{ group.name }}</a>
+                                        <a href="{% url 'core:mitre_attack_group_detail' group.id %}">{{ group.name }}</a>
                                     </td>
                                     <td>
                                         <div class="d-flex flex-wrap gap-1">
@@ -54,10 +54,10 @@
                                     </td>
                                     <td>{{ group.created_at|date:"d/m/Y H:i" }}</td>
                                     <td>
-                                        <a href="{% url 'mitre_attack_group_edit' group.id %}" class="btn btn-sm btn-outline-primary">
+                                        <a href="{% url 'core:mitre_attack_group_edit' group.id %}" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="{% url 'mitre_attack_group_delete' group.id %}" class="btn btn-sm btn-outline-danger">
+                                        <a href="{% url 'core:mitre_attack_group_delete' group.id %}" class="btn btn-sm btn-outline-danger">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </td>
@@ -66,7 +66,7 @@
                                 <tr>
                                     <td colspan="4" class="text-center py-4">
                                         <p class="text-muted mb-0">{% trans "No MITRE ATT&CK Groups created yet." %}</p>
-                                        <a href="{% url 'mitre_attack_group_create' %}" class="btn btn-primary mt-3">
+                                        <a href="{% url 'core:mitre_attack_group_create' %}" class="btn btn-primary mt-3">
                                             <i class="fas fa-plus"></i> {% trans "Create your first group" %}
                                         </a>
                                     </td>

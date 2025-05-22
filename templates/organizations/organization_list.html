@@ -39,12 +39,12 @@
         <h2 class="mb-1"><i class="fas fa-building text-primary me-2"></i> Organizações</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
                 <li class="breadcrumb-item active">Organizações</li>
             </ol>
         </nav>
     </div>
-    <a href="{% url 'organization_create' %}" class="btn btn-primary d-flex align-items-center shadow-sm">
+    <a href="{% url 'organizations:organization_create' %}" class="btn btn-primary d-flex align-items-center shadow-sm">
         <i class="fas fa-plus-circle me-2"></i> Nova Organização
     </a>
 </div>
@@ -78,7 +78,7 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-search me-1"></i> Filtrar
                         </button>
-                        <a href="{% url 'organization_list' %}" class="btn btn-secondary">
+                        <a href="{% url 'organizations:organization_list' %}" class="btn btn-secondary">
                             <i class="fas fa-sync me-1"></i> Limpar
                         </a>
                     </div>
@@ -141,13 +141,13 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{% url 'organization_detail' organization.id %}" class="btn btn-info" data-bs-toggle="tooltip" title="Visualizar">
+                                    <a href="{% url 'organizations:organization_detail' organization.id %}" class="btn btn-info" data-bs-toggle="tooltip" title="Visualizar">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{% url 'organization_update' organization.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
+                                    <a href="{% url 'organizations:organization_update' organization.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="{% url 'organization_delete' organization.id %}" class="btn btn-danger" data-bs-toggle="tooltip" title="Excluir">
+                                    <a href="{% url 'organizations:organization_delete' organization.id %}" class="btn btn-danger" data-bs-toggle="tooltip" title="Excluir">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </div>
@@ -159,7 +159,7 @@
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="fas fa-building-slash fa-3x text-muted mb-3"></i>
                                     <p class="mb-0 text-muted">Nenhuma organização encontrada.</p>
-                                    <a href="{% url 'organization_list' %}" class="btn btn-sm btn-primary mt-3">
+                                    <a href="{% url 'organizations:organization_list' %}" class="btn btn-sm btn-primary mt-3">
                                         <i class="fas fa-sync me-1"></i> Limpar filtros
                                     </a>
                                 </div>
