@@ -19,12 +19,12 @@ COPY requirements.txt /app/
 RUN pip install --no-cache-dir -U pip &&\
     pip install --no-cache-dir -r requirements.txt
 
-# Copiar arquivos do projeto
-COPY . /app/
-
-# Tornar o script de entrada executável
+# Copiar entrypoint script primeiro e torná-lo executável
 COPY entrypoint.sh /app/
 RUN chmod +x /app/entrypoint.sh
+
+# Copiar arquivos do projeto
+COPY . /app/
 
 # Expor a porta
 EXPOSE 8000

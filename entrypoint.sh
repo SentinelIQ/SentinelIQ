@@ -11,10 +11,10 @@ python manage.py migrate --noinput
 # Inicializar sistema com organização e superadmin padrão
 echo "Inicializando o sistema..."
 python manage.py initialize_system \
-  --username "${ADMIN_USERNAME:-admin}" \
-  --password "${ADMIN_PASSWORD:-admin123}" \
-  --email "${ADMIN_EMAIL:-admin@example.com}" \
-  --org-name "${ORG_NAME:-SentinelIQ}"
+  --username "" \
+  --password "" \
+  --email "" \
+  --org-name ""
 
 # Coletar arquivos estáticos
 echo "Coletando arquivos estáticos..."
@@ -22,4 +22,4 @@ python manage.py collectstatic --noinput
 
 # Iniciar servidor
 echo "Iniciando servidor..."
-exec "$@" 
+exec "$@"
