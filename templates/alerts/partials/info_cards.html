@@ -1,0 +1,72 @@
+<!-- Cards de Informações -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow-sm info-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase text-muted mb-2 small fw-bold">Organização</h6>
+                        <h5 class="mb-0 fw-bold">{{ alert.organization.name }}</h5>
+                    </div>
+                    <div class="icon-circle bg-primary bg-opacity-10 p-3 rounded-circle">
+                        <i class="fas fa-building fa-lg text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow-sm info-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase text-muted mb-2 small fw-bold">Atribuído a</h6>
+                        <h5 class="mb-0 fw-bold">
+                            {% if alert.assigned_to %}
+                                {{ alert.assigned_to.get_full_name|default:alert.assigned_to.username }}
+                            {% else %}
+                                <span class="text-muted">Não atribuído</span>
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="icon-circle bg-primary bg-opacity-10 p-3 rounded-circle">
+                        <i class="fas fa-user-check fa-lg text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow-sm info-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase text-muted mb-2 small fw-bold">Criado em</h6>
+                        <h5 class="mb-0 fw-bold">{{ alert.created_at|date:"d/m/Y H:i" }}</h5>
+                    </div>
+                    <div class="icon-circle bg-primary bg-opacity-10 p-3 rounded-circle">
+                        <i class="fas fa-calendar-plus fa-lg text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card shadow-sm info-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase text-muted mb-2 small fw-bold">Última Atualização</h6>
+                        <h5 class="mb-0 fw-bold">{{ alert.updated_at|date:"d/m/Y H:i" }}</h5>
+                    </div>
+                    <div class="icon-circle bg-primary bg-opacity-10 p-3 rounded-circle">
+                        <i class="fas fa-sync-alt fa-lg text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

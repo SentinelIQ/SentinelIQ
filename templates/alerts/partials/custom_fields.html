@@ -1,0 +1,38 @@
+<!-- Campos Personalizados -->
+{% if alert.custom_values.exists %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-cogs me-2"></i> Campos Personalizados</h5>
+        <span class="badge bg-light text-dark">{{ alert.custom_values.all|length }}</span>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for custom_value in alert.custom_values.all %}
+                <div class="col-md-6 mb-3">
+                    <div class="p-2 rounded" style="background-color: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
+                        <p class="text-muted mb-1 small text-uppercase">
+                            <i class="fas fa-angle-right me-1"></i> {{ custom_value.field.label }}
+                        </p>
+                        <p class="mb-0 fw-bold">
+                            {% if custom_value.field.field_type == 'url' %}
+                                <a href="{{ custom_value.value }}" target="_blank" class="d-inline-flex align-items-center text-primary">
+                                    {{ custom_value.value }}
+                                    <i class="fas fa-external-link-alt ms-1"></i>
+                                </a>
+                            {% elif custom_value.field.field_type == 'boolean' %}
+                                {% if custom_value.value == '1' %}
+                                    <span class="badge bg-success"><i class="fas fa-check me-1"></i> Sim</span>
+                                {% else %}
+                                    <span class="badge bg-secondary"><i class="fas fa-times me-1"></i> Não</span>
+                                {% endif %}
+                            {% else %}
+                                {{ custom_value.value|default:"<span class='text-muted'>Não informado</span>" }}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %} 

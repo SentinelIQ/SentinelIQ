@@ -1,0 +1,47 @@
+<!-- Attachments Section -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="fas fa-paperclip me-2"></i> Anexos</h5>
+    </div>
+    <div class="card-body">
+        <div class="attachment-list mb-3">
+            {% if case.attachments.all %}
+                <ul class="list-group">
+                    {% for attachment in case.attachments.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-file me-2"></i>
+                                <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.filename }}</a>
+                                <br>
+                                <small class="text-muted">
+                                    <i class="fas fa-user-circle me-1"></i> {{ attachment.uploaded_by.username }} -
+                                    <i class="fas fa-calendar me-1"></i> {{ attachment.uploaded_at|date:"d/m/Y H:i" }}
+                                </small>
+                            </div>
+                            {% if user.is_superadmin or user.is_org_admin or user == attachment.uploaded_by %}
+                                <a href="{% url 'cases:delete_case_attachment' case.id attachment.id %}" class="btn btn-sm btn-danger" 
+                                   onclick="return confirm('Tem certeza que deseja excluir este anexo?');">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-file-upload text-muted fa-2x mb-2"></i>
+                    <p class="mb-0 text-muted">Nenhum anexo adicionado.</p>
+                </div>
+            {% endif %}
+        </div>
+        <form method="post" action="{% url 'cases:add_case_attachment' case.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ attachment_form.file }}
+            </div>
+            <button type="submit" class="btn btn-success w-100">
+                <i class="fas fa-upload me-1"></i> Enviar Anexo
+            </button>
+        </form>
+    </div>
+</div> 

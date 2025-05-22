@@ -9,13 +9,90 @@
         resize: vertical;
         min-height: 100px;
     }
+    
+    .badge {
+        transition: all 0.2s ease;
+        padding: 0.5em 0.75em;
+        font-weight: 500;
+    }
+    
+    .table thead th {
+        background-color: rgba(255,255,255,0.05);
+        color: var(--text-primary);
+        font-weight: 600;
+        border-bottom: 1px solid var(--border-color);
+        white-space: nowrap;
+    }
+    
+    .table tbody td {
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+    
+    .table-dark-hoverable {
+        color: var(--text-primary);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(255,255,255,0.03);
+    }
+    
+    .card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+    }
+    
+    .card-header {
+        background-color: rgba(255,255,255,0.05);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .alert-info {
+        background-color: rgba(13, 202, 240, 0.15);
+        border-color: rgba(13, 202, 240, 0.3);
+        color: var(--text-primary);
+    }
+    
+    .alert-warning {
+        background-color: rgba(255, 193, 7, 0.15);
+        border-color: rgba(255, 193, 7, 0.3);
+        color: var(--text-primary);
+    }
+    
+    .form-control, .form-select {
+        background-color: var(--bg-sidebar);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: var(--bg-sidebar);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        color: var(--text-primary);
+    }
+    
+    .list-group-item {
+        background-color: var(--bg-sidebar);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .bg-light {
+        background-color: rgba(255,255,255,0.05) !important;
+    }
+    
+    .text-dark {
+        color: var(--text-primary) !important;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h2 class="mb-1"><i class="fas fa-arrow-up text-primary me-2"></i> Escalar Alerta para Caso</h2>
+        <h2 class="mb-1 fw-bold"><i class="fas fa-arrow-up text-primary me-2"></i> Escalar Alerta para Caso</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
@@ -27,9 +104,9 @@
     </div>
 </div>
 
-<div class="card shadow">
+<div class="card shadow mb-4">
     <div class="card-header bg-primary text-white">
-        <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Confirmação de Escalação</h5>
+        <h5 class="mb-0 fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> Confirmação de Escalação</h5>
     </div>
     <div class="card-body">
         <div class="alert alert-info mb-4">
@@ -45,9 +122,9 @@
         
         <div class="row mb-4">
             <div class="col-md-6">
-                <div class="card">
+                <div class="card h-100">
                     <div class="card-header bg-warning text-dark">
-                        <h6 class="mb-0"><i class="fas fa-bell me-2"></i> Detalhes do Alerta</h6>
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-bell me-2"></i> Detalhes do Alerta</h6>
                     </div>
                     <div class="card-body">
                         <table class="table table-sm">
@@ -133,9 +210,9 @@
             </div>
             
             <div class="col-md-6">
-                <div class="card">
+                <div class="card h-100">
                     <div class="card-header bg-primary text-white">
-                        <h6 class="mb-0"><i class="fas fa-briefcase me-2"></i> Novo Caso a ser Criado</h6>
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-briefcase me-2"></i> Novo Caso a ser Criado</h6>
                     </div>
                     <div class="card-body">
                         <table class="table table-sm">
@@ -209,12 +286,12 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-info text-white">
-                        <h6 class="mb-0"><i class="fas fa-exchange-alt me-2"></i> Dados Adicionais a Serem Transferidos</h6>
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-exchange-alt me-2"></i> Dados Adicionais a Serem Transferidos</h6>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <h6><i class="fas fa-eye"></i> Observables ({{ alert.observables.count }})</h6>
+                                <h6 class="fw-bold"><i class="fas fa-eye"></i> Observables ({{ alert.observables.count }})</h6>
                                 <ul class="list-group small mb-3">
                                     {% for observable in alert.observables.all|slice:":5" %}
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -234,7 +311,7 @@
                                 </ul>
                             </div>
                             <div class="col-md-6">
-                                <h6><i class="fas fa-shield-alt"></i> MITRE ATT&CK</h6>
+                                <h6 class="fw-bold"><i class="fas fa-shield-alt"></i> MITRE ATT&CK</h6>
                                 <ul class="list-group small">
                                     {% if alert.mitre_tactics.exists or alert.mitre_techniques.exists or alert.mitre_subtechniques.exists or alert.mitre_attack_groups.exists %}
                                         {% if alert.mitre_tactics.exists %}
@@ -273,7 +350,7 @@
             
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
-                    <h6 class="mb-0"><i class="fas fa-edit me-2"></i> Personalizar Caso</h6>
+                    <h6 class="mb-0 fw-bold"><i class="fas fa-edit me-2"></i> Personalizar Caso</h6>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -292,7 +369,7 @@
             {% if task_templates %}
             <div class="card mb-4">
                 <div class="card-header bg-success text-white">
-                    <h6 class="mb-0"><i class="fas fa-tasks me-2"></i> Tarefas Automáticas</h6>
+                    <h6 class="mb-0 fw-bold"><i class="fas fa-tasks me-2"></i> Tarefas Automáticas</h6>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-info mb-3">
@@ -354,7 +431,7 @@
             {% elif alert.threat_category %}
             <div class="card mb-4">
                 <div class="card-header bg-secondary text-white">
-                    <h6 class="mb-0"><i class="fas fa-tasks me-2"></i> Tarefas Automáticas</h6>
+                    <h6 class="mb-0 fw-bold"><i class="fas fa-tasks me-2"></i> Tarefas Automáticas</h6>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-warning mb-0">
@@ -366,7 +443,7 @@
             {% else %}
             <div class="card mb-4">
                 <div class="card-header bg-secondary text-white">
-                    <h6 class="mb-0"><i class="fas fa-tasks me-2"></i> Tarefas Automáticas</h6>
+                    <h6 class="mb-0 fw-bold"><i class="fas fa-tasks me-2"></i> Tarefas Automáticas</h6>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-info mb-0">

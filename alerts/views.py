@@ -502,7 +502,7 @@ def escalate_to_case(request, pk):
         )
         
         messages.success(request, _('Alert successfully escalated to case.'))
-        return redirect('case_detail', pk=case.id)
+        return redirect('cases:case_detail', pk=case.id)
     
     # Renderizar confirmação para escalação
     suggested_title = f'Case from alert: {alert.title}'
@@ -541,7 +541,7 @@ def add_alert_comment(request, alert_id):
         else:
             messages.error(request, _('Comment cannot be empty.'))
     
-    return redirect('alert_detail', pk=alert_id)
+    return redirect('alerts:alert_detail', pk=alert_id)
 
 
 @login_required

@@ -143,7 +143,7 @@ class CaseCreateView(LoginRequiredMixin, OrgAdminRequiredMixin, CreateView):
         return response
     
     def get_success_url(self):
-        return reverse('case_detail', kwargs={'pk': self.object.pk})
+        return reverse('cases:case_detail', kwargs={'pk': self.object.pk})
 
 
 class CaseUpdateView(LoginRequiredMixin, UpdateView):
@@ -249,7 +249,7 @@ class CaseUpdateView(LoginRequiredMixin, UpdateView):
         return response
     
     def get_success_url(self):
-        return reverse('case_detail', kwargs={'pk': self.object.pk})
+        return reverse('cases:case_detail', kwargs={'pk': self.object.pk})
 
 
 class CaseDeleteView(LoginRequiredMixin, OrgAdminRequiredMixin, DeleteView):
@@ -292,7 +292,7 @@ def add_case_comment(request, pk):
             # Timeline event is added in the CaseComment.save() method
             messages.success(request, _('Comment added successfully.'))
     
-    return redirect('case_detail', pk=pk)
+    return redirect('cases:case_detail', pk=pk)
 
 
 @login_required
@@ -315,7 +315,7 @@ def add_case_attachment(request, pk):
             # Timeline event is added in the CaseAttachment.save() method
             messages.success(request, _('Attachment added successfully.'))
     
-    return redirect('case_detail', pk=pk)
+    return redirect('cases:case_detail', pk=pk)
 
 
 @login_required
@@ -345,7 +345,7 @@ def delete_case_attachment(request, pk, attachment_pk):
     else:
         messages.error(request, _("You don't have permission to delete this attachment."))
     
-    return redirect('case_detail', pk=pk)
+    return redirect('cases:case_detail', pk=pk)
 
 
 @login_required
@@ -367,7 +367,7 @@ def add_case_event(request, pk):
             event.save()
             messages.success(request, _('Event added to timeline successfully.'))
     
-    return redirect('case_detail', pk=pk)
+    return redirect('cases:case_detail', pk=pk)
 
 
 @login_required
@@ -390,7 +390,7 @@ def add_case_task(request, case_id):
             task.save()
             
             messages.success(request, _('Task added successfully.'))
-            return redirect('case_detail', pk=case.id)
+            return redirect('cases:case_detail', pk=case.id)
     else:
         form = TaskForm(organization=request.user.organization)
     
@@ -427,7 +427,7 @@ def update_case_task(request, case_id, task_id):
             task.save()
             
             messages.success(request, _('Task updated successfully.'))
-            return redirect('case_detail', pk=case.id)
+            return redirect('cases:case_detail', pk=case.id)
     else:
         form = TaskForm(instance=task, organization=request.user.organization)
     
@@ -454,7 +454,7 @@ def delete_case_task(request, case_id, task_id):
     if request.method == 'POST':
         task.delete()
         messages.success(request, _('Task deleted successfully.'))
-        return redirect('case_detail', pk=case.id)
+        return redirect('cases:case_detail', pk=case.id)
     
     context = {
         'case': case,
@@ -554,7 +554,7 @@ class ThreatCategoryUpdateView(LoginRequiredMixin, OrgAdminRequiredMixin, Update
     success_url = reverse_lazy('cases:threat_category_list')
     
     def get_success_url(self):
-        return reverse('threat_category_detail', kwargs={'pk': self.object.pk})
+        return reverse('cases:threat_category_detail', kwargs={'pk': self.object.pk})
     
     def form_valid(self, form):
         messages.success(self.request, _('Threat category updated successfully.'))
@@ -651,8 +651,8 @@ class TaskTemplateUpdateView(LoginRequiredMixin, OrgAdminRequiredMixin, UpdateVi
     def get_success_url(self):
         if 'category' in self.request.GET:
             # Voltar para a página de detalhes da categoria
-            return reverse('threat_category_detail', kwargs={'pk': self.request.GET.get('category')})
-        return reverse('task_template_list')
+            return reverse('cases:threat_category_detail', kwargs={'pk': self.request.GET.get('category')})
+        return reverse('cases:task_template_list')
     
     def form_valid(self, form):
         messages.success(self.request, _('Task template updated successfully.'))
@@ -677,8 +677,8 @@ class TaskTemplateDeleteView(LoginRequiredMixin, OrgAdminRequiredMixin, DeleteVi
     def get_success_url(self):
         if 'category' in self.request.GET:
             # Voltar para a página de detalhes da categoria
-            return reverse('threat_category_detail', kwargs={'pk': self.request.GET.get('category')})
-        return reverse('task_template_list')
+            return reverse('cases:threat_category_detail', kwargs={'pk': self.request.GET.get('category')})
+        return reverse('cases:task_template_list')
 
 
 @login_required
@@ -700,7 +700,7 @@ def clone_task_template(request, pk):
         )
         
         messages.success(request, _('Task template cloned successfully.'))
-        return redirect('task_template_update', pk=new_template.pk)
+        return redirect('cases:task_template_update', pk=new_template.pk)
     
     return render(request, 'cases/task_template_clone.html', {'template': template})
 
@@ -789,7 +789,7 @@ def bulk_create_templates(request):
             else:
                 messages.warning(request, _('No templates were created. Template type not supported.'))
             
-            return redirect('threat_category_detail', pk=category.pk)
+            return redirect('cases:threat_category_detail', pk=category.pk)
         
         except ThreatCategory.DoesNotExist:
             messages.error(request, _('The selected threat category does not exist.'))
@@ -815,7 +815,7 @@ def toggle_template_status(request, pk):
         messages.success(request, _(f'Task template "{template.title}" {status_text} successfully.'))
         
         # Redirect to the previous page
-        next_url = request.POST.get('next', reverse('task_template_list'))
+        next_url = request.POST.get('next', reverse('cases:task_template_list'))
         return redirect(next_url)
     
     return render(request, 'cases/task_template_toggle_status.html', {'template': template})

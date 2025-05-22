@@ -1,0 +1,52 @@
+<!-- Related Alerts Section -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0"><i class="fas fa-bell me-2"></i> Alertas Relacionados</h5>
+    </div>
+    <div class="card-body">
+        {% if case.related_alerts.all %}
+            <div class="row">
+                {% for alert in case.related_alerts.all %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card related-alert h-100">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <a href="{% url 'alerts:alert_detail' alert.id %}">{{ alert.title }}</a>
+                                </h6>
+                                <p class="card-text small">{{ alert.description|truncatechars:100 }}</p>
+                                <div class="d-flex justify-content-between">
+                                    {% if alert.severity == 'critical' %}
+                                        <span class="badge bg-danger">Crítico</span>
+                                    {% elif alert.severity == 'high' %}
+                                        <span class="badge bg-warning text-dark">Alto</span>
+                                    {% elif alert.severity == 'medium' %}
+                                        <span class="badge bg-info text-dark">Médio</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Baixo</span>
+                                    {% endif %}
+                                    
+                                    {% if alert.status == 'new' %}
+                                        <span class="badge bg-danger">Novo</span>
+                                    {% elif alert.status == 'acknowledged' %}
+                                        <span class="badge bg-warning text-dark">Reconhecido</span>
+                                    {% elif alert.status == 'in_progress' %}
+                                        <span class="badge bg-info text-dark">Em Progresso</span>
+                                    {% elif alert.status == 'resolved' %}
+                                        <span class="badge bg-success">Resolvido</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Fechado</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-3">
+                <i class="fas fa-exclamation-circle text-muted fa-2x mb-2"></i>
+                <p class="mb-0 text-muted">Nenhum alerta relacionado.</p>
+            </div>
+        {% endif %}
+    </div>
+</div> 

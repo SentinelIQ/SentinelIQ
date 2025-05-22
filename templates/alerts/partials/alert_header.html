@@ -1,0 +1,53 @@
+<!-- Cabeçalho do Alerta -->
+<div class="alert-header shadow-sm d-flex align-items-center p-3 mb-4 rounded" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+    <div class="alert-status-icon me-3 d-flex align-items-center justify-content-center rounded-circle" 
+         style="width: 48px; height: 48px; background-color: var(--primary); color: #fff;">
+        {% if alert.status == 'new' %}
+            <i class="fas fa-exclamation fa-lg"></i>
+        {% elif alert.status == 'acknowledged' %}
+            <i class="fas fa-eye fa-lg"></i>
+        {% elif alert.status == 'in_progress' %}
+            <i class="fas fa-spinner fa-lg fa-pulse"></i>
+        {% elif alert.status == 'resolved' %}
+            <i class="fas fa-check fa-lg"></i>
+        {% else %}
+            <i class="fas fa-times fa-lg"></i>
+        {% endif %}
+    </div>
+    <div>
+        <h1 class="mb-2 fw-bold">{{ alert.title }}</h1>
+        <div class="d-flex align-items-center flex-wrap">
+            <span class="badge bg-secondary me-3">
+                <i class="fas fa-calendar-alt me-1"></i> {{ alert.created_at|date:"d/m/Y H:i" }}
+            </span>
+            
+            <span class="badge me-3 {% if alert.severity == 'critical' %}bg-danger{% elif alert.severity == 'high' %}bg-warning text-dark{% elif alert.severity == 'medium' %}bg-info text-dark{% else %}bg-success{% endif %}">
+                <i class="fas fa-exclamation-triangle me-1"></i> 
+                {% if alert.severity == 'critical' %}
+                    Crítico
+                {% elif alert.severity == 'high' %}
+                    Alto
+                {% elif alert.severity == 'medium' %}
+                    Médio
+                {% else %}
+                    Baixo
+                {% endif %}
+            </span>
+            
+            <span class="badge {% if alert.status == 'new' %}bg-danger{% elif alert.status == 'acknowledged' %}bg-warning text-dark{% elif alert.status == 'in_progress' %}bg-info text-dark{% elif alert.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
+                <i class="fas fa-{% if alert.status == 'new' %}exclamation{% elif alert.status == 'acknowledged' %}eye{% elif alert.status == 'in_progress' %}spinner fa-pulse{% elif alert.status == 'resolved' %}check{% else %}times{% endif %} me-1"></i>
+                {% if alert.status == 'new' %}
+                    Novo
+                {% elif alert.status == 'acknowledged' %}
+                    Reconhecido
+                {% elif alert.status == 'in_progress' %}
+                    Em Progresso
+                {% elif alert.status == 'resolved' %}
+                    Resolvido
+                {% else %}
+                    Fechado
+                {% endif %}
+            </span>
+        </div>
+    </div>
+</div> 

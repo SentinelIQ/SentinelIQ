@@ -233,7 +233,7 @@ def tag_create(request):
                 # Registrar na timeline do caso
                 case.log_tags_change(request.user, [], [tag])
                 messages.success(request, f'Tag criada e associada ao caso {case.title} com sucesso!')
-                return redirect('case_detail', pk=case.id)
+                return redirect('cases:case_detail', pk=case.id)
             else:
                 messages.success(request, 'Tag criada com sucesso, mas não foi associada a nenhum alerta ou caso!')
             
@@ -406,7 +406,7 @@ def observable_create(request):
                     case.observables.add(observable)
                     case.log_observable_added(request.user, observable)
                     messages.success(request, f'Observable associado ao caso {case.title} com sucesso!')
-                    return redirect('case_detail', pk=case.id)
+                    return redirect('cases:case_detail', pk=case.id)
                 
                 # Comportamento anterior de redirecionamento baseado em parâmetros na URL
                 elif 'alert_id' in request.GET:
@@ -421,7 +421,7 @@ def observable_create(request):
                     case = get_object_or_404(Case, pk=case_id, organization=request.user.organization)
                     case.observables.add(observable)
                     case.log_observable_added(request.user, observable)
-                    return redirect('case_detail', pk=case_id)
+                    return redirect('cases:case_detail', pk=case_id)
                 
                 return redirect('observable_list')
             except IntegrityError:
@@ -481,7 +481,7 @@ def observable_update(request, pk):
                 case.observables.add(observable)
                 case.log_observable_added(request.user, observable)
                 messages.success(request, f'Observable associado ao caso {case.title} com sucesso!')
-                return redirect('case_detail', pk=case.id)
+                return redirect('cases:case_detail', pk=case.id)
             else:
                 messages.success(request, 'Observable atualizado com sucesso!')
                 return redirect('observable_detail', pk=observable.pk)
@@ -640,7 +640,7 @@ def add_case_observable(request, case_id):
         
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'success': True})
-        return redirect('case_detail', case_id)
+        return redirect('cases:case_detail', case_id)
     
     # GET request: show form to add observable
     existing_observables = Observable.objects.exclude(cases=case).order_by('type', 'value')
@@ -676,7 +676,7 @@ def remove_case_observable(request, case_id, observable_id):
         else:
             messages.error(request, 'Este observable não está associado ao caso.')
     
-    return redirect('case_detail', case_id)
+    return redirect('cases:case_detail', case_id)
 
 
 @login_required
@@ -757,7 +757,7 @@ def add_case_mitre_attack(request, case_id):
             if not any([tactic, technique, subtechnique]):
                 messages.warning(request, 'Nenhum elemento MITRE ATT&CK selecionado.')
             
-            return redirect('case_detail', case_id)
+            return redirect('cases:case_detail', case_id)
     else:
         # GET request: show form to add MITRE ATT&CK elements
         tactic_id = request.GET.get('tactic')
@@ -830,7 +830,7 @@ def remove_case_mitre_attack(request, case_id, item_type, item_id):
         else:
             messages.error(request, 'Tipo de item MITRE ATT&CK inválido.')
     
-    return redirect('case_detail', case_id)
+    return redirect('cases:case_detail', case_id)
 
 
 @login_required
@@ -1157,7 +1157,7 @@ def add_case_mitre_attack_group(request, case_id):
             )
             
             messages.success(request, _('MITRE ATT&CK Group added to case successfully.'))
-            return redirect('case_detail', case_id=case.id)
+            return redirect('cases:case_detail', case_id=case.id)
     
     groups = MitreAttackGroup.objects.filter(organization=request.user.organization)
     existing_groups = case.mitre_attack_groups.all()
@@ -1192,7 +1192,7 @@ def remove_case_mitre_attack_group(request, case_id, group_id):
         
         messages.success(request, _('MITRE ATT&CK Group removed from case successfully.'))
     
-    return redirect('case_detail', case_id=case.id)
+    return redirect('cases:case_detail', case_id=case.id)
 
 
 @login_required

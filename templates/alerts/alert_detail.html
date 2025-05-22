@@ -27,32 +27,55 @@
     .info-card {
         height: 100%;
         transition: all 0.3s ease;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
     }
     .info-card:hover {
         transform: translateY(-5px);
+        border-color: var(--primary);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     }
+    
+    .nav-tabs {
+        border-bottom: 1px solid var(--border-color);
+    }
+    
     .nav-tabs .nav-link {
         border: none;
         border-bottom: 3px solid transparent;
-        color: var(--dark);
+        color: var(--text-primary);
         font-weight: 600;
+        padding: 0.75rem 1.25rem;
+        background-color: transparent;
     }
+    
+    .nav-tabs .nav-link:hover {
+        border-color: rgba(13, 110, 253, 0.5);
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+    
     .nav-tabs .nav-link.active {
         border: none;
         border-bottom: 3px solid var(--primary);
         color: var(--primary);
+        background-color: rgba(13, 110, 253, 0.05);
     }
+    
     .badge {
         transition: all 0.2s ease;
+        padding: 0.5em 0.75em;
     }
+    
     .badge:hover {
         transform: scale(1.05);
     }
+    
     .timeline {
         position: relative;
         padding-left: 1.5rem;
         margin-bottom: 0;
     }
+    
     .timeline::before {
         content: '';
         position: absolute;
@@ -62,10 +85,12 @@
         width: 2px;
         background: var(--primary);
     }
+    
     .timeline-item {
         position: relative;
         padding-bottom: 1.5rem;
     }
+    
     .timeline-item::before {
         content: '';
         position: absolute;
@@ -75,670 +100,87 @@
         width: 12px;
         border: 2px solid var(--primary);
         border-radius: 50%;
-        background: white;
+        background: var(--bg-card);
     }
+    
     .timeline-item:last-child {
         padding-bottom: 0;
+    }
+    
+    .table {
+        color: var(--text-primary);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .table th {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: var(--border-color);
+    }
+    
+    .table td {
+        border-color: var(--border-color);
+    }
+    
+    .bg-light {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    .text-dark {
+        color: var(--text-primary) !important;
+    }
+    
+    .card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+    }
+    
+    .card-header {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    code {
+        background-color: var(--bg-sidebar);
+        color: var(--text-secondary);
+        padding: 0.2em 0.4em;
+        border-radius: 0.25rem;
+    }
+    
+    .table-dark {
+        background-color: var(--bg-sidebar);
+        color: var(--text-primary);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <div>
-        <h2 class="mb-1"><i class="fas fa-bell text-primary me-2"></i> Detalhes do Alerta</h2>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'alerts:alert_list' %}">Alertas</a></li>
-                <li class="breadcrumb-item active">{{ alert.title }}</li>
-            </ol>
-        </nav>
-    </div>
-    <div class="d-flex">
-        <a href="{% url 'alerts:escalate_to_case' alert.id %}" class="btn btn-success me-2 d-flex align-items-center">
-            <i class="fas fa-arrow-circle-up me-2"></i> Escalar para Caso
-        </a>
-        <a href="{% url 'alerts:alert_update' alert.id %}" class="btn btn-warning me-2 d-flex align-items-center">
-            <i class="fas fa-edit me-2"></i> Editar
-        </a>
-        <a href="{% url 'alerts:alert_delete' alert.id %}" class="btn btn-danger d-flex align-items-center">
-            <i class="fas fa-trash me-2"></i> Excluir
-        </a>
-    </div>
-</div>
+{% include "alerts/partials/header.html" %}
 
-<!-- Cabeçalho do Alerta -->
-<div class="alert-header shadow-sm d-flex align-items-center">
-    <div class="alert-status-icon">
-        {% if alert.status == 'new' %}
-            <i class="fas fa-exclamation"></i>
-        {% elif alert.status == 'acknowledged' %}
-            <i class="fas fa-eye"></i>
-        {% elif alert.status == 'in_progress' %}
-            <i class="fas fa-spinner"></i>
-        {% elif alert.status == 'resolved' %}
-            <i class="fas fa-check"></i>
-        {% else %}
-            <i class="fas fa-times"></i>
-        {% endif %}
-    </div>
-    <div>
-        <h1 class="mb-2">{{ alert.title }}</h1>
-        <div class="d-flex align-items-center flex-wrap">
-            <span class="badge bg-light text-dark me-3">
-                <i class="fas fa-calendar-alt me-1"></i> {{ alert.created_at|date:"d/m/Y H:i" }}
-            </span>
-            
-            <span class="badge me-3 {% if alert.severity == 'critical' %}bg-danger{% elif alert.severity == 'high' %}bg-warning text-dark{% elif alert.severity == 'medium' %}bg-info text-dark{% else %}bg-success{% endif %}">
-                <i class="fas fa-exclamation-triangle me-1"></i> 
-                {% if alert.severity == 'critical' %}
-                    Crítico
-                {% elif alert.severity == 'high' %}
-                    Alto
-                {% elif alert.severity == 'medium' %}
-                    Médio
-                {% else %}
-                    Baixo
-                {% endif %}
-            </span>
-            
-            <span class="badge {% if alert.status == 'new' %}bg-danger{% elif alert.status == 'acknowledged' %}bg-warning text-dark{% elif alert.status == 'in_progress' %}bg-info text-dark{% elif alert.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
-                <i class="fas fa-{% if alert.status == 'new' %}exclamation{% elif alert.status == 'acknowledged' %}eye{% elif alert.status == 'in_progress' %}spinner{% elif alert.status == 'resolved' %}check{% else %}times{% endif %} me-1"></i>
-                {% if alert.status == 'new' %}
-                    Novo
-                {% elif alert.status == 'acknowledged' %}
-                    Reconhecido
-                {% elif alert.status == 'in_progress' %}
-                    Em Progresso
-                {% elif alert.status == 'resolved' %}
-                    Resolvido
-                {% else %}
-                    Fechado
-                {% endif %}
-            </span>
-        </div>
-    </div>
-</div>
+{% include "alerts/partials/alert_header.html" %}
 
-<!-- Cards de Informações -->
-<div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card shadow-sm info-card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase text-muted mb-2">Organização</h6>
-                        <h5 class="mb-0">{{ alert.organization.name }}</h5>
-                    </div>
-                    <i class="fas fa-building fa-2x text-primary opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card shadow-sm info-card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase text-muted mb-2">Atribuído a</h6>
-                        <h5 class="mb-0">
-                            {% if alert.assigned_to %}
-                                {{ alert.assigned_to.get_full_name|default:alert.assigned_to.username }}
-                            {% else %}
-                                <span class="text-muted">Não atribuído</span>
-                            {% endif %}
-                        </h5>
-                    </div>
-                    <i class="fas fa-user-check fa-2x text-primary opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card shadow-sm info-card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase text-muted mb-2">Criado em</h6>
-                        <h5 class="mb-0">{{ alert.created_at|date:"d/m/Y H:i" }}</h5>
-                    </div>
-                    <i class="fas fa-calendar-plus fa-2x text-primary opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card shadow-sm info-card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase text-muted mb-2">Última Atualização</h6>
-                        <h5 class="mb-0">{{ alert.updated_at|date:"d/m/Y H:i" }}</h5>
-                    </div>
-                    <i class="fas fa-sync-alt fa-2x text-primary opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+{% include "alerts/partials/info_cards.html" %}
 
 <!-- Abas de Conteúdo -->
-<div class="card shadow-sm">
-    <div class="card-header bg-white p-0 border-bottom-0">
-        <ul class="nav nav-tabs" id="alertTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details-tab-pane" type="button" role="tab" aria-controls="details-tab-pane" aria-selected="true">
-                    <i class="fas fa-info-circle me-1"></i> Detalhes
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline-tab-pane" type="button" role="tab" aria-controls="timeline-tab-pane" aria-selected="false">
-                    <i class="fas fa-history me-1"></i> Timeline
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="observables-tab" data-bs-toggle="tab" data-bs-target="#observables-tab-pane" type="button" role="tab" aria-controls="observables-tab-pane" aria-selected="false">
-                    <i class="fas fa-eye me-1"></i> Observables
-                </button>
-            </li>
-        </ul>
-    </div>
+<div class="card shadow-sm mb-4">
+    {% include "alerts/partials/tabs_nav.html" %}
+    
     <div class="card-body">
         <div class="tab-content" id="alertTabsContent">
-            <!-- Aba de Detalhes -->
-            <div class="tab-pane fade show active" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
-                <div class="row">
-                    <div class="col-lg-12 mb-4">
-                        <h5 class="mb-3"><i class="fas fa-align-left me-2 text-primary"></i> Descrição</h5>
-                        <div class="card">
-                            <div class="card-body bg-light">
-                                <p class="mb-0 lead">{{ alert.description|linebreaksbr }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-lg-6">
-                        <h5 class="mb-3"><i class="fas fa-file-alt me-2 text-primary"></i> Informações</h5>
-                        <table class="table table-hover">
-                            <tbody>
-                                <tr>
-                                    <th class="bg-light" style="width: 35%">Organização</th>
-                                    <td>{{ alert.organization.name }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="bg-light">Título</th>
-                                    <td>{{ alert.title }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="bg-light">Severidade</th>
-                                    <td>
-                                        <span class="badge {% if alert.severity == 'critical' %}bg-danger{% elif alert.severity == 'high' %}bg-warning text-dark{% elif alert.severity == 'medium' %}bg-info text-dark{% else %}bg-success{% endif %}">
-                                            {% if alert.severity == 'critical' %}
-                                                Crítico
-                                            {% elif alert.severity == 'high' %}
-                                                Alto
-                                            {% elif alert.severity == 'medium' %}
-                                                Médio
-                                            {% else %}
-                                                Baixo
-                                            {% endif %}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="bg-light">Status</th>
-                                    <td>
-                                        <span class="badge {% if alert.status == 'new' %}bg-danger{% elif alert.status == 'acknowledged' %}bg-warning text-dark{% elif alert.status == 'in_progress' %}bg-info text-dark{% elif alert.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
-                                            {% if alert.status == 'new' %}
-                                                Novo
-                                            {% elif alert.status == 'acknowledged' %}
-                                                Reconhecido
-                                            {% elif alert.status == 'in_progress' %}
-                                                Em Progresso
-                                            {% elif alert.status == 'resolved' %}
-                                                Resolvido
-                                            {% else %}
-                                                Fechado
-                                            {% endif %}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="bg-light">Categoria de Ameaça</th>
-                                    <td>
-                                        {% if alert.threat_category %}
-                                            <span class="badge bg-dark">
-                                                <i class="fas fa-{{ alert.threat_category.icon_class }} me-1"></i>
-                                                {{ alert.threat_category.get_name_display }}
-                                            </span>
-                                        {% else %}
-                                            <span class="text-muted">Não definida</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="bg-light">TLP</th>
-                                    <td>
-                                        <span class="badge {% if alert.tlp == 'red' %}bg-danger{% elif alert.tlp == 'amber' %}bg-warning text-dark{% elif alert.tlp == 'green' %}bg-success{% else %}bg-light text-dark border{% endif %}">
-                                            TLP:{% if alert.tlp == 'red' %}RED{% elif alert.tlp == 'amber' %}AMBER{% elif alert.tlp == 'green' %}GREEN{% else %}WHITE{% endif %}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="bg-light">PAP</th>
-                                    <td>
-                                        <span class="badge {% if alert.pap == 'red' %}bg-danger{% elif alert.pap == 'amber' %}bg-warning text-dark{% elif alert.pap == 'green' %}bg-success{% else %}bg-light text-dark border{% endif %}">
-                                            PAP:{% if alert.pap == 'red' %}RED{% elif alert.pap == 'amber' %}AMBER{% elif alert.pap == 'green' %}GREEN{% else %}WHITE{% endif %}
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="bg-light">Tags</th>
-                                    <td>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div>
-                                                {% if alert.tags.all %}
-                                                    {% for tag in alert.tags.all %}
-                                                        <span class="badge bg-{{ tag.color }} me-1">{{ tag.name }}</span>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <span class="text-muted">Nenhuma tag</span>
-                                                {% endif %}
-                                            </div>
-                                            <div class="ms-2">
-                                                <a href="{% url 'alerts:alert_update' alert.id %}" class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-edit me-1"></i> Editar Tags
-                                                </a>
-                                                <a href="{% url 'core:tag_create' %}?alert_id={{ alert.id }}" class="btn btn-sm btn-outline-success" title="Criar Tag associada a este alerta">
-                                                    <i class="fas fa-plus-circle"></i> Nova Tag
-                                                </a>
-                                                <a href="{% url 'core:tag_list' %}" class="btn btn-sm btn-outline-info" title="Gerenciar Tags">
-                                                    <i class="fas fa-tags"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="col-lg-6">
-                        <h5 class="mb-3"><i class="fas fa-clock me-2 text-primary"></i> Datas</h5>
-                        <table class="table table-hover">
-                            <tbody>
-                                <tr>
-                                    <th class="bg-light" style="width: 35%">Data de Criação</th>
-                                    <td>{{ alert.created_at|date:"d/m/Y H:i" }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="bg-light">Última Atualização</th>
-                                    <td>{{ alert.updated_at|date:"d/m/Y H:i" }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="bg-light">Atribuído a</th>
-                                    <td>
-                                        {% if alert.assigned_to %}
-                                            {{ alert.assigned_to.get_full_name|default:alert.assigned_to.username }}
-                                        {% else %}
-                                            <span class="text-muted">Não atribuído</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <!-- Tags do alerta -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <p class="text-muted mb-1"><i class="fas fa-tags me-1"></i> Tags</p>
-                        <div>
-                            {% for tag in alert.tags.all %}
-                                <span class="badge bg-{{ tag.color }} mb-1">{{ tag.name }}</span>
-                            {% empty %}
-                                <span class="text-muted">Nenhuma tag adicionada</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- MITRE ATT&CK -->
-                <div class="card shadow-sm mb-3">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <p class="text-muted mb-0"><i class="fas fa-shield-virus me-1"></i> MITRE ATT&CK</p>
-                        <a href="{% url 'core:add_alert_mitre_attack' alert.id %}" class="btn btn-sm btn-light">
-                            <i class="fas fa-plus-circle"></i> Adicionar
-                        </a>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            {% if alert.mitre_tactics.exists or alert.mitre_techniques.exists or alert.mitre_subtechniques.exists %}
-                                <h6 class="fw-bold small text-muted mb-2">Táticas:</h6>
-                                <div class="mb-3">
-                                    {% for tactic in alert.mitre_tactics.all %}
-                                    <span class="badge bg-primary mb-1 me-1 mitre-badge" 
-                                          data-bs-toggle="popover" 
-                                          data-bs-trigger="click"
-                                          data-bs-placement="top"
-                                          data-mitre-type="tactic"
-                                          data-mitre-id="{{ tactic.id }}"
-                                          role="button">
-                                        {{ tactic.tactic_id }}: {{ tactic.name }}
-                                    </span>
-                                    {% endfor %}
-                                </div>
-
-                                <h6 class="fw-bold small text-muted mb-2">Técnicas:</h6>
-                                <div class="mb-3">
-                                    {% for technique in alert.mitre_techniques.all %}
-                                    <span class="badge bg-success mb-1 me-1 mitre-badge" 
-                                          data-bs-toggle="popover"
-                                          data-bs-trigger="click"
-                                          data-bs-placement="top"
-                                          data-mitre-type="technique"
-                                          data-mitre-id="{{ technique.id }}"
-                                          role="button">
-                                        {{ technique.technique_id }}: {{ technique.name }}
-                                    </span>
-                                    {% endfor %}
-                                </div>
-
-                                <h6 class="fw-bold small text-muted mb-2">Sub-técnicas:</h6>
-                                <div class="mb-3">
-                                    {% for subtechnique in alert.mitre_subtechniques.all %}
-                                    <span class="badge bg-info text-dark mb-1 me-1 mitre-badge" 
-                                          data-bs-toggle="popover"
-                                          data-bs-trigger="click"
-                                          data-bs-placement="top"
-                                          data-mitre-type="subtechnique"
-                                          data-mitre-id="{{ subtechnique.id }}"
-                                          role="button">
-                                        {{ subtechnique.sub_technique_id }}: {{ subtechnique.name }}
-                                    </span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <span class="text-muted">Nenhum elemento MITRE ATT&CK adicionado</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% include "alerts/partials/tab_details.html" %}
             
-            <!-- Aba de Timeline -->
-            <div class="tab-pane fade" id="timeline-tab-pane" role="tabpanel" aria-labelledby="timeline-tab" tabindex="0">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <h5 class="mb-4"><i class="fas fa-history me-2 text-primary"></i> Histórico do Alerta</h5>
-                        <div class="timeline">
-                            {% if alert.timeline_events.all %}
-                                {% for event in alert.timeline_events.all %}
-                                    <div class="timeline-item">
-                                        <div class="card shadow-sm mb-0">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center mb-2">
-                                                    <span class="badge {% if event.event_type == 'created' %}bg-success{% elif event.event_type == 'status_changed' %}bg-info{% elif event.event_type == 'severity_changed' %}bg-warning text-dark{% elif event.event_type == 'assignee_changed' %}bg-primary{% elif event.event_type == 'tlp_changed' %}bg-primary{% elif event.event_type == 'pap_changed' %}bg-warning text-dark{% elif event.event_type == 'escalated' %}bg-success{% else %}bg-secondary{% endif %} me-2">
-                                                        <i class="fas {{ event.get_icon_class }} me-1"></i>
-                                                        {{ event.get_event_type_display }}
-                                                    </span>
-                                                    <span class="small text-muted">{{ event.created_at|date:"d/m/Y H:i" }}</span>
-                                                </div>
-                                                <p class="mb-0">{{ event.title }}</p>
-                                                {% if event.description %}
-                                                    <p class="small text-muted mt-1">{{ event.description }}</p>
-                                                {% endif %}
-                                                {% if event.user %}
-                                                    <div class="small text-muted mt-1">
-                                                        <i class="fas fa-user-circle me-1"></i> {{ event.user.username }}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="text-center py-3">
-                                    <i class="fas fa-exclamation-circle text-muted fa-2x mb-2"></i>
-                                    <p class="mb-0 text-muted">Nenhum evento registrado para este alerta.</p>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% include "alerts/partials/tab_timeline.html" %}
             
-            <!-- Aba de Observables -->
-            <div class="tab-pane fade" id="observables-tab-pane" role="tabpanel" aria-labelledby="observables-tab" tabindex="0">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="d-flex align-items-center justify-content-between mb-4">
-                            <h5><i class="fas fa-eye me-2 text-primary"></i> Observables (IOCs)</h5>
-                            <a href="{% url 'core:add_alert_observable' alert.id %}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-plus-circle me-1"></i> Adicionar Observable
-                            </a>
-                        </div>
-                        
-                        {% if alert.observables.all %}
-                            <div class="table-responsive">
-                                <table class="table table-hover table-striped">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th><i class="fas fa-bug me-1"></i> Malicioso</th>
-                                            <th><i class="fas fa-tag me-1"></i> Tipo</th>
-                                            <th><i class="fas fa-key me-1"></i> Valor</th>
-                                            <th><i class="fas fa-check-circle me-1"></i> Confiança</th>
-                                            <th><i class="fas fa-calendar-alt me-1"></i> Detectado</th>
-                                            <th class="text-center"><i class="fas fa-cogs me-1"></i> Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for observable in alert.observables.all %}
-                                            <tr>
-                                                <td>
-                                                    {% if observable.is_malicious %}
-                                                        <span class="badge bg-danger">Sim</span>
-                                                    {% else %}
-                                                        <span class="badge bg-success">Não</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-secondary">
-                                                        {{ observable.get_type_display }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <code>{{ observable.value }}</code>
-                                                </td>
-                                                <td>
-                                                    {% if observable.confidence == 'high' %}
-                                                        <span class="badge bg-success">Alta</span>
-                                                    {% elif observable.confidence == 'medium' %}
-                                                        <span class="badge bg-info text-dark">Média</span>
-                                                    {% else %}
-                                                        <span class="badge bg-warning text-dark">Baixa</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    <span class="small">{{ observable.first_seen|date:"d/m/Y H:i" }}</span>
-                                                </td>
-                                                <td class="text-center">
-                                                    <div class="btn-group btn-group-sm">
-                                                                                                                <a href="{% url 'core:observable_detail' observable.id %}" class="btn btn-info" data-bs-toggle="tooltip" title="Visualizar">                                                            <i class="fas fa-eye"></i>                                                        </a>                                                        <a href="{% url 'core:observable_update' observable.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">                                                            <i class="fas fa-edit"></i>                                                        </a>
-                                                        <form method="post" action="{% url 'core:remove_alert_observable' alert.id observable.id %}" class="d-inline" 
-                                                              onsubmit="return confirm('Tem certeza que deseja remover este observable?');">
-                                                            {% csrf_token %}
-                                                            <button type="submit" class="btn btn-danger" data-bs-toggle="tooltip" title="Remover">
-                                                                <i class="fas fa-unlink"></i>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        {% else %}
-                            <div class="text-center py-5">
-                                <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                                <p class="mb-0 text-muted">Nenhum observable encontrado para este alerta.</p>
-                                <a href="{% url 'core:add_alert_observable' alert.id %}" class="btn btn-primary mt-3">
-                                    <i class="fas fa-plus-circle me-1"></i> Adicionar Observable
-                                </a>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+            {% include "alerts/partials/tab_observables.html" %}
         </div>
     </div>
 </div>
 
-<!-- Após a seção de timeline, adicionar a seção de comentários -->
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0"><i class="fas fa-comments me-2"></i> Comentários</h5>
-    </div>
-    <div class="card-body">
-        {% if alert.comments.all %}
-            <div class="comment-list mb-4">
-                {% for comment in alert.comments.all %}
-                    <div class="comment-item d-flex mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
-                        <div class="me-3">
-                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                <i class="fas fa-user"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div>
-                                    <strong>{{ comment.user.get_full_name|default:comment.user.username }}</strong>
-                                    <span class="text-muted ms-2"><small>{{ comment.created_at|date:"d/m/Y H:i" }}</small></span>
-                                </div>
-                            </div>
-                            <div class="comment-content">
-                                {{ comment.content|linebreaks }}
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="text-muted">Nenhum comentário ainda. Seja o primeiro a comentar!</p>
-        {% endif %}
+{% include "alerts/partials/comments.html" %}
 
-        <div class="add-comment mt-3">
-            <h6 class="mb-3"><i class="fas fa-plus-circle me-2"></i> Adicionar Comentário</h6>
-            <form method="post" action="{% url 'alerts:add_alert_comment' alert.id %}">
-                {% csrf_token %}
-                <div class="form-group mb-3">
-                    <textarea name="content" class="form-control" rows="3" placeholder="Digite seu comentário..."></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-paper-plane me-2"></i> Enviar Comentário
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
-<!-- Fim da seção de comentários -->
+{% include "alerts/partials/related_alerts.html" %}
 
-<!-- Seção de Alertas Relacionados -->
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="fas fa-link me-2"></i> Alertas Relacionados</h5>
-        <a href="{% url 'alerts:related_alerts' alert.id %}" class="btn btn-sm btn-light">
-            <i class="fas fa-cog me-1"></i> Gerenciar
-        </a>
-    </div>
-    <div class="card-body">
-        {% if alert.related_alerts.exists %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Título</th>
-                            <th>Severidade</th>
-                            <th>Status</th>
-                            <th>Data</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for related in alert.related_alerts.all %}
-                            <tr>
-                                <td>#{{ related.id }}</td>
-                                <td>{{ related.title }}</td>
-                                <td>
-                                    <span class="badge {% if related.severity == 'critical' %}bg-danger{% elif related.severity == 'high' %}bg-warning text-dark{% elif related.severity == 'medium' %}bg-info text-dark{% else %}bg-success{% endif %}">
-                                        {{ related.get_severity_display }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge {% if related.status == 'new' %}bg-danger{% elif related.status == 'acknowledged' %}bg-warning text-dark{% elif related.status == 'in_progress' %}bg-info text-dark{% elif related.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
-                                        {{ related.get_status_display }}
-                                    </span>
-                                </td>
-                                <td>{{ related.created_at|date:"d/m/Y" }}</td>
-                                <td>
-                                    <a href="{% url 'alerts:alert_detail' related.id %}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <p class="text-muted">Nenhum alerta relacionado encontrado.</p>
-        {% endif %}
-    </div>
-</div>
-<!-- Fim da seção de Alertas Relacionados -->
-
-<!-- Campos Personalizados -->
-{% if alert.custom_values.exists %}
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-info text-white">
-        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i> Campos Personalizados</h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            {% for custom_value in alert.custom_values.all %}
-                <div class="col-md-6 mb-3">
-                    <p class="text-muted mb-1">
-                        <i class="fas fa-angle-right me-1"></i> {{ custom_value.field.label }}
-                    </p>
-                    <p class="mb-0">
-                        {% if custom_value.field.field_type == 'url' %}
-                            <a href="{{ custom_value.value }}" target="_blank" class="d-inline-flex align-items-center">
-                                {{ custom_value.value }}
-                                <i class="fas fa-external-link-alt ms-1"></i>
-                            </a>
-                        {% elif custom_value.field.field_type == 'boolean' %}
-                            {% if custom_value.value == '1' %}
-                                <span class="badge bg-success"><i class="fas fa-check me-1"></i> Sim</span>
-                            {% else %}
-                                <span class="badge bg-secondary"><i class="fas fa-times me-1"></i> Não</span>
-                            {% endif %}
-                        {% else %}
-                            {{ custom_value.value|default:"<span class='text-muted'>Não informado</span>" }}
-                        {% endif %}
-                    </p>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-{% endif %}
+{% include "alerts/partials/custom_fields.html" %}
 {% endblock %} 

@@ -1,0 +1,213 @@
+<!-- Aba de Detalhes -->
+<div class="tab-pane fade show active" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
+    <div class="row">
+        <div class="col-lg-12 mb-4">
+            <h5 class="mb-3 fw-bold"><i class="fas fa-align-left me-2 text-primary"></i> Descrição</h5>
+            <div class="card">
+                <div class="card-body">
+                    <p class="mb-0 lead">{{ alert.description|linebreaksbr }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <h5 class="mb-3 fw-bold"><i class="fas fa-file-alt me-2 text-primary"></i> Informações</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <tbody>
+                        <tr>
+                            <th style="width: 35%">Organização</th>
+                            <td>{{ alert.organization.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Título</th>
+                            <td>{{ alert.title }}</td>
+                        </tr>
+                        <tr>
+                            <th>Severidade</th>
+                            <td>
+                                <span class="badge {% if alert.severity == 'critical' %}bg-danger{% elif alert.severity == 'high' %}bg-warning text-dark{% elif alert.severity == 'medium' %}bg-info text-dark{% else %}bg-success{% endif %}">
+                                    {% if alert.severity == 'critical' %}
+                                        Crítico
+                                    {% elif alert.severity == 'high' %}
+                                        Alto
+                                    {% elif alert.severity == 'medium' %}
+                                        Médio
+                                    {% else %}
+                                        Baixo
+                                    {% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Status</th>
+                            <td>
+                                <span class="badge {% if alert.status == 'new' %}bg-danger{% elif alert.status == 'acknowledged' %}bg-warning text-dark{% elif alert.status == 'in_progress' %}bg-info text-dark{% elif alert.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {% if alert.status == 'new' %}
+                                        Novo
+                                    {% elif alert.status == 'acknowledged' %}
+                                        Reconhecido
+                                    {% elif alert.status == 'in_progress' %}
+                                        Em Progresso
+                                    {% elif alert.status == 'resolved' %}
+                                        Resolvido
+                                    {% else %}
+                                        Fechado
+                                    {% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Categoria de Ameaça</th>
+                            <td>
+                                {% if alert.threat_category %}
+                                    <span class="badge bg-dark">
+                                        <i class="fas fa-{{ alert.threat_category.icon_class }} me-1"></i>
+                                        {{ alert.threat_category.get_name_display }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">Não definida</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>TLP</th>
+                            <td>
+                                <span class="badge {% if alert.tlp == 'red' %}bg-danger{% elif alert.tlp == 'amber' %}bg-warning text-dark{% elif alert.tlp == 'green' %}bg-success{% else %}bg-light text-dark border{% endif %}">
+                                    TLP:{% if alert.tlp == 'red' %}RED{% elif alert.tlp == 'amber' %}AMBER{% elif alert.tlp == 'green' %}GREEN{% else %}WHITE{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>PAP</th>
+                            <td>
+                                <span class="badge {% if alert.pap == 'red' %}bg-danger{% elif alert.pap == 'amber' %}bg-warning text-dark{% elif alert.pap == 'green' %}bg-success{% else %}bg-light text-dark border{% endif %}">
+                                    PAP:{% if alert.pap == 'red' %}RED{% elif alert.pap == 'amber' %}AMBER{% elif alert.pap == 'green' %}GREEN{% else %}WHITE{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <h5 class="mb-3 fw-bold"><i class="fas fa-tags me-2 text-primary"></i> Tags</h5>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        {% for tag in alert.tags.all %}
+                            <span class="badge bg-{{ tag.color }} mb-1">{{ tag.name }}</span>
+                        {% empty %}
+                            <span class="text-muted">Nenhuma tag adicionada</span>
+                        {% endfor %}
+                    </div>
+                    <div class="d-flex gap-1 mt-2">
+                        <a href="{% url 'alerts:alert_update' alert.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit me-1"></i> Editar Tags
+                        </a>
+                        <a href="{% url 'core:tag_create' %}?alert_id={{ alert.id }}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-plus-circle me-1"></i> Nova Tag
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <h5 class="mb-3 fw-bold"><i class="fas fa-clock me-2 text-primary"></i> Datas</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <tbody>
+                        <tr>
+                            <th style="width: 35%">Data de Criação</th>
+                            <td>{{ alert.created_at|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Última Atualização</th>
+                            <td>{{ alert.updated_at|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Atribuído a</th>
+                            <td>
+                                {% if alert.assigned_to %}
+                                    {{ alert.assigned_to.get_full_name|default:alert.assigned_to.username }}
+                                {% else %}
+                                    <span class="text-muted">Não atribuído</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MITRE ATT&CK -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-shield-virus me-2 text-primary"></i> MITRE ATT&CK</h5>
+            <a href="{% url 'core:add_alert_mitre_attack' alert.id %}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus-circle me-1"></i> Adicionar
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                {% if alert.mitre_tactics.exists or alert.mitre_techniques.exists or alert.mitre_subtechniques.exists %}
+                    <h6 class="fw-bold small text-uppercase mb-3">Táticas:</h6>
+                    <div class="mb-4">
+                        {% for tactic in alert.mitre_tactics.all %}
+                        <span class="badge bg-primary mb-2 me-1 mitre-badge py-2" 
+                              data-bs-toggle="popover" 
+                              data-bs-trigger="click"
+                              data-bs-placement="top"
+                              data-mitre-type="tactic"
+                              data-mitre-id="{{ tactic.id }}"
+                              role="button">
+                            {{ tactic.tactic_id }}: {{ tactic.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+
+                    <h6 class="fw-bold small text-uppercase mb-3">Técnicas:</h6>
+                    <div class="mb-4">
+                        {% for technique in alert.mitre_techniques.all %}
+                        <span class="badge bg-success mb-2 me-1 mitre-badge py-2" 
+                              data-bs-toggle="popover"
+                              data-bs-trigger="click"
+                              data-bs-placement="top"
+                              data-mitre-type="technique"
+                              data-mitre-id="{{ technique.id }}"
+                              role="button">
+                            {{ technique.technique_id }}: {{ technique.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+
+                    <h6 class="fw-bold small text-uppercase mb-3">Sub-técnicas:</h6>
+                    <div class="mb-3">
+                        {% for subtechnique in alert.mitre_subtechniques.all %}
+                        <span class="badge bg-info text-dark mb-2 me-1 mitre-badge py-2" 
+                              data-bs-toggle="popover"
+                              data-bs-trigger="click"
+                              data-bs-placement="top"
+                              data-mitre-type="subtechnique"
+                              data-mitre-id="{{ subtechnique.id }}"
+                              role="button">
+                            {{ subtechnique.sub_technique_id }}: {{ subtechnique.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-3">Nenhum elemento MITRE ATT&CK adicionado a este alerta.</p>
+                        <a href="{% url 'core:add_alert_mitre_attack' alert.id %}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-1"></i> Adicionar Classificação ATT&CK
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div> 

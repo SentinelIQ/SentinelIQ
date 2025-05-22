@@ -1,0 +1,48 @@
+<!-- Comentários -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-comments me-2"></i> Comentários</h5>
+        <span class="badge bg-light text-dark">{{ alert.comments.all|length }}</span>
+    </div>
+    <div class="card-body">
+        {% if alert.comments.all %}
+            <div class="comment-list mb-4">
+                {% for comment in alert.comments.all %}
+                    <div class="comment-item d-flex mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}" style="border-color: var(--border-color);">
+                        <div class="me-3">
+                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                {{ comment.user.username|first|upper }}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <strong>{{ comment.user.get_full_name|default:comment.user.username }}</strong>
+                                    <span class="text-muted ms-2"><small>{{ comment.created_at|date:"d/m/Y H:i" }}</small></span>
+                                </div>
+                            </div>
+                            <div class="comment-content">
+                                {{ comment.content|linebreaks }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">Nenhum comentário ainda. Seja o primeiro a comentar!</p>
+        {% endif %}
+
+        <div class="add-comment mt-4">
+            <h6 class="mb-3 fw-bold"><i class="fas fa-plus-circle me-2"></i> Adicionar Comentário</h6>
+            <form method="post" action="{% url 'alerts:add_alert_comment' alert.id %}">
+                {% csrf_token %}
+                <div class="form-group mb-3">
+                    <textarea name="content" class="form-control" rows="3" placeholder="Digite seu comentário..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-2"></i> Enviar Comentário
+                </button>
+            </form>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,61 @@
+<!-- MITRE ATT&CK Section -->
+<div class="card shadow-sm mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <p class="text-muted mb-0"><i class="fas fa-shield-virus me-1"></i> MITRE ATT&CK</p>
+        <a href="{% url 'core:add_case_mitre_attack' case.id %}" class="btn btn-sm btn-light">
+            <i class="fas fa-plus-circle"></i> Adicionar
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            {% if case.mitre_tactics.exists or case.mitre_techniques.exists or case.mitre_subtechniques.exists %}
+                <h6 class="fw-bold small text-muted mb-2">Táticas:</h6>
+                <div class="mb-3">
+                    {% for tactic in case.mitre_tactics.all %}
+                    <span class="badge bg-primary mb-1 me-1 mitre-badge" 
+                          data-bs-toggle="popover" 
+                          data-bs-trigger="click"
+                          data-bs-placement="top"
+                          data-mitre-type="tactic"
+                          data-mitre-id="{{ tactic.id }}"
+                          role="button">
+                        {{ tactic.tactic_id }}: {{ tactic.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+
+                <h6 class="fw-bold small text-muted mb-2">Técnicas:</h6>
+                <div class="mb-3">
+                    {% for technique in case.mitre_techniques.all %}
+                    <span class="badge bg-success mb-1 me-1 mitre-badge" 
+                          data-bs-toggle="popover"
+                          data-bs-trigger="click"
+                          data-bs-placement="top"
+                          data-mitre-type="technique"
+                          data-mitre-id="{{ technique.id }}"
+                          role="button">
+                        {{ technique.technique_id }}: {{ technique.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+
+                <h6 class="fw-bold small text-muted mb-2">Sub-técnicas:</h6>
+                <div class="mb-3">
+                    {% for subtechnique in case.mitre_subtechniques.all %}
+                    <span class="badge bg-info text-dark mb-1 me-1 mitre-badge" 
+                          data-bs-toggle="popover"
+                          data-bs-trigger="click"
+                          data-bs-placement="top"
+                          data-mitre-type="subtechnique"
+                          data-mitre-id="{{ subtechnique.id }}"
+                          role="button">
+                        {{ subtechnique.sub_technique_id }}: {{ subtechnique.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <span class="text-muted">Nenhum elemento MITRE ATT&CK adicionado</span>
+            {% endif %}
+        </div>
+    </div>
+</div> 

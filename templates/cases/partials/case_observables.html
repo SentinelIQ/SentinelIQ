@@ -1,0 +1,153 @@
+<!-- Observables Section -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between">
+        <h5 class="mb-0"><i class="fas fa-eye me-2"></i> Observables (IOCs)</h5>
+        <div>
+            <form method="post" action="{% url 'vision:enrich_case' case.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-light me-2" title="Enriquecer com dados de inteligência">
+                    <i class="fas fa-database me-1"></i> Enriquecer com TI
+                </button>
+            </form>
+            <a href="{% url 'core:add_case_observable' case.id %}" class="btn btn-sm btn-light">
+                <i class="fas fa-plus-circle me-1"></i> Adicionar
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if case.observables.all %}
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-bug me-1"></i></th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                            <th>Confiança</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for observable in case.observables.all %}
+                            <tr>
+                                <td>
+                                    <span class="badge {% if observable.is_malicious %}bg-danger{% else %}bg-success{% endif %}" 
+                                          data-bs-toggle="tooltip" 
+                                          title="{% if observable.is_malicious %}Malicioso{% else %}Não Malicioso{% endif %}">
+                                        <i class="fas {% if observable.is_malicious %}fa-bug{% else %}fa-check{% endif %}"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ observable.get_type_display }}</span>
+                                </td>
+                                <td>
+                                    <code>{{ observable.value }}</code>
+                                </td>
+                                <td>
+                                    {% if observable.confidence == 'high' %}
+                                        <span class="badge bg-success">Alta</span>
+                                    {% elif observable.confidence == 'medium' %}
+                                        <span class="badge bg-info text-dark">Média</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Baixa</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'core:observable_detail' observable.id %}" class="btn btn-info" data-bs-toggle="tooltip" title="Visualizar">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'core:observable_update' observable.id %}" class="btn btn-warning" data-bs-toggle="tooltip" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" action="{% url 'core:remove_case_observable' case.id observable.id %}" class="d-inline" 
+                                              onsubmit="return confirm('Tem certeza que deseja remover este observable?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger" data-bs-toggle="tooltip" title="Remover">
+                                                <i class="fas fa-unlink"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-3">
+                <i class="fas fa-search text-muted fa-2x mb-2"></i>
+                <p class="mb-0 text-muted">Nenhum observable adicionado a este caso.</p>
+                <a href="{% url 'core:add_case_observable' case.id %}" class="btn btn-primary btn-sm mt-3">
+                    <i class="fas fa-plus-circle me-1"></i> Adicionar Observable
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- MISP Events Timeline Section -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-link me-2"></i> MISP Events Timeline</h5>
+    </div>
+    <div class="card-body">
+        <div id="misp-events-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Event ID</th>
+                            <th>Date</th>
+                            <th>Info</th>
+                            <th>Tags</th>
+                            <th>URL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in case.timeline_events.all %}
+                            {% if event.event_type == 'threat_intel_urls' and event.metadata.misp_event_urls %}
+                                {% for event_url in event.metadata.misp_event_urls %}
+                                    <tr>
+                                        <td>{{ event_url.event_id|default:"N/A" }}</td>
+                                        <td>{{ event.created_at|date:"Y-m-d" }}</td>
+                                        <td>{{ event_url.description|default:event_url.feed }}</td>
+                                        <td>
+                                            {% if event_url.tags %}
+                                                <span class="badge bg-secondary">{{ event_url.tags }}</span>
+                                            {% elif event_url.tlp %}
+                                                <span class="badge bg-secondary">tlp:{{ event_url.tlp|default:"white" }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ event_url.url }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-external-link-alt me-1"></i> 
+                                                Ver evento
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Este script vai executar no lado do cliente para verificar se não existem eventos MISP -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const container = document.getElementById('misp-events-container');
+                const tableRows = container.querySelectorAll('tbody tr');
+                if (tableRows.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-3">
+                            <i class="fas fa-search text-muted fa-2x mb-2"></i>
+                            <p class="mb-0 text-muted">Nenhum evento MISP encontrado para os observables. Tente enriquecer o caso com dados de inteligência.</p>
+                        </div>
+                    `;
+                }
+            });
+        </script>
+    </div>
+</div> 

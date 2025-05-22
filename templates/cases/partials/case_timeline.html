@@ -1,0 +1,76 @@
+<!-- Timeline Section -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-history me-2"></i> Timeline do Caso</h5>
+        <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#addEventModal">
+            <i class="fas fa-plus-circle me-1"></i> Adicionar Evento
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="timeline">
+            {% if timeline_events %}
+                {% for event in timeline_events %}
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="fas {{ event.get_icon_class }}"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="timeline-title">{{ event.title }}</h6>
+                                <span class="timeline-date">
+                                    <i class="fas fa-clock me-1"></i> {{ event.created_at|date:"d/m/Y H:i" }}
+                                </span>
+                            </div>
+                            {% if event.user %}
+                                <div class="small text-muted">
+                                    <i class="fas fa-user me-1"></i> {{ event.user.username }}
+                                </div>
+                            {% endif %}
+                            {% if event.description %}
+                                <div class="timeline-description">
+                                    {{ event.description }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                    <p class="mb-0 text-muted">Nenhum evento na timeline ainda.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Adicionar Evento -->
+<div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="addEventModalLabel"><i class="fas fa-plus-circle me-2"></i> Adicionar Evento na Timeline</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'cases:add_case_event' case.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="{{ event_form.title.id_for_label }}" class="form-label">Título do Evento</label>
+                        {{ event_form.title }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ event_form.description.id_for_label }}" class="form-label">Descrição (opcional)</label>
+                        {{ event_form.description }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-1"></i> Adicionar Evento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 
